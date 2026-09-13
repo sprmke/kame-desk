@@ -1,0 +1,22 @@
+{
+  "name": "@doctordesk/api",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8100",
+    "worker": "uv run python -m app.workers.main",
+    "lint": "uv run ruff check app tests",
+    "lint:fix": "uv run ruff check --fix app tests",
+    "format": "uv run ruff format app tests",
+    "format:check": "uv run ruff format --check app tests",
+    "type-check": "echo 'type-check: skipped until mypy added'",
+    "build": "echo 'api build: no compile step'",
+    "test": "uv run pytest",
+    "migrate": "uv run alembic upgrade head",
+    "migrate:new": "uv run alembic revision --autogenerate -m",
+    "migrate:down": "uv run alembic downgrade -1",
+    "seed": "uv run python -m app.seed",
+    "seed:force": "uv run python -m app.seed -- --force",
+    "openapi:export": "uv run python -m app.openapi_export"
+  }
+}
