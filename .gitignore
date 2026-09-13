@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+**/__pycache__/
+**/*.pyc
+.venv/
+apps/api/.venv/
+
+# Build output
+dist/
+.output/
+.turbo/
+apps/web/.vinxi/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/tasks.json
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Local DB backups (scripts/deploy/backup-db.sh)
+.backups/
+
+# Deploy targets (scripts/deploy/.env.example is committed)
+scripts/deploy/.env
+scripts/deploy/.env.*
+!scripts/deploy/.env.example
+
+# Testing / coverage
+coverage/
+playwright-report/
+test-results/
+.playwright-cli/
+.playwright-mcp/
+
+# Design-audit screenshots (may contain seed patient data)
+.audit-screenshots/
+
+# Local backups (never commit patient data)
+backups/*
+!backups/README.md
+!backups/.gitkeep
+
+# Cursor / Claude / OpenCode local artifacts
+.cursor/environment.json
+.claude/settings.local.json
+.fallow/
+.superpowers/
+.opencode/node_modules/
+
+# Alembic — never gitignore migrations themselves
+!apps/api/migrations/versions/*.py

@@ -1,0 +1,72 @@
+{
+  "name": "doctordesk",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "setup:ai-tooling": "bash scripts/dev/setup-ai-tooling.sh",
+    "check:ai-tooling-sync": "bash scripts/dev/check-ai-tooling-sync.sh",
+    "dev": "./dev.sh",
+    "dev:free-ports": "bash scripts/dev/free-local-ports.sh",
+    "dev:web": "pnpm --filter @doctordesk/web dev",
+    "dev:api": "pnpm --filter @doctordesk/api dev",
+    "dev:worker": "pnpm --filter @doctordesk/api worker",
+    "dev:docker": "docker compose up -d postgres redis minio mailhog",
+    "dev:docker:down": "docker compose down",
+    "dev:docker:reset": "docker compose down -v && docker compose up -d postgres redis minio mailhog",
+    "build": "turbo run build",
+    "build:web": "pnpm --filter @doctordesk/web build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json,mdc,css}\" && pnpm --filter @doctordesk/api format",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,json,mdc,css}\" && pnpm --filter @doctordesk/api format:check",
+    "check:filenames": "bash scripts/dev/check-filename-conventions.sh",
+    "check:design-slop": "bash scripts/dev/check-design-slop.sh",
+    "capture:design-screenshots": "bash scripts/dev/capture-design-screenshots.sh",
+    "ci:quality": "bash scripts/dev/ci-quality-gate.sh",
+    "test": "turbo run test",
+    "test:web": "pnpm --filter @doctordesk/web test",
+    "test:api": "pnpm --filter @doctordesk/api test",
+    "test:e2e": "pnpm --filter @doctordesk/web test:e2e",
+    "db:generate-client": "pnpm --filter @doctordesk/api openapi:export && pnpm --filter @doctordesk/api-client generate",
+    "db:migrate": "pnpm --filter @doctordesk/api migrate",
+    "db:migrate:new": "pnpm --filter @doctordesk/api migrate:new",
+    "db:downgrade": "pnpm --filter @doctordesk/api migrate:down",
+    "db:seed": "pnpm --filter @doctordesk/api seed",
+    "db:seed:force": "pnpm --filter @doctordesk/api seed:force",
+    "db:reset:local": "bash scripts/dev/db-reset-local.sh",
+    "deploy:api:dev": "bash scripts/deploy/deploy-api.sh dev",
+    "deploy:api:prod": "bash scripts/deploy/deploy-api.sh prod",
+    "deploy:web:dev": "bash scripts/deploy/deploy-web.sh dev",
+    "deploy:web:prod": "bash scripts/deploy/deploy-web.sh prod",
+    "migrate:prod": "bash scripts/deploy/migrate-remote.sh prod",
+    "migrate:dev": "bash scripts/deploy/migrate-remote.sh dev",
+    "backup:db:dev": "bash scripts/deploy/backup-db.sh dev",
+    "backup:db:prod": "bash scripts/deploy/backup-db.sh prod",
+    "rollback:db:dev": "bash scripts/deploy/rollback-db.sh dev",
+    "rollback:db:prod": "bash scripts/deploy/rollback-db.sh prod",
+    "env:status": "bash scripts/dev/env-status.sh"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "turbo": "^2.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "*.{md,json,mdc,css}": [
+      "prettier --write"
+    ],
+    "apps/api/**/*.py": [
+      "bash -c 'cd apps/api && ruff format && ruff check --fix'"
+    ]
+  }
+}
