@@ -1,0 +1,59 @@
+---
+description: DoctorDesk agent context — lean stack, doc index, where-to-edit pointers
+alwaysApply: true
+---
+
+# DoctorDesk — agent context
+
+## Read first (task-scoped)
+
+1. `docs/README.md` → **`docs/mvp.md`** (authoritative PRD — what to build) and **`docs/tech-stack.md`** (authoritative — how to build it)
+2. **`docs/phases/README.md`** — the build plan; find and read the current phase file before starting work
+3. `docs/architecture/` — `monorepo-structure.md`, `data-model.md`, `api-conventions.md`, `ai-clinic-assistant.md`, `deployment.md`, `security-compliance.md`
+4. Appointment/visit status, scheduling → read `.cursor/rules/appointment-workflow.mdc` when relevant (glob-scoped, not always-on)
+5. AI Clinic Assistant tools/tiers → read `.cursor/rules/ai-assistant-safety.mdc` + `docs/architecture/ai-clinic-assistant.md` before adding/changing a tool
+6. Per-page behavior → `docs/guides/routes/README.md` (update when changing a page)
+
+## Stack (authoritative — see `docs/tech-stack.md` for the full rationale)
+
+- **Monorepo:** pnpm workspaces + Turborepo (`apps/web`, `apps/api`, `packages/api-client`)
+- **Frontend (`apps/web`):** React 19 + TanStack Start + Vite + TypeScript + TanStack Router/Query/Table + RHF + Zod + Tailwind + shadcn/ui
+- **Backend (`apps/api`):** FastAPI (Python) — **owns all business logic**. SQLAlchemy 2 (async) + Alembic. No Node API, no tRPC, no Next.js, no Drizzle.
+- **DB:** PostgreSQL (Neon) + pgvector. Double-booking prevented by a `btree_gist` exclusion constraint, not app-level checks alone.
+- **Jobs/cache:** Redis + ARQ, on the same host as the API.
+- **Realtime:** FastAPI WebSockets (live waiting-room queue); degrades to polling if the socket drops.
+- **Files:** Cloudflare R2, served via short-lived presigned URLs — never public.
+- **Auth:** JWT access + refresh tokens issued by FastAPI. Roles: `owner`, `admin`, `doctor`, `reception` — clinic-scoped.
+
+Stale if a skill mentions Supabase, Deno edge functions, tRPC, Drizzle, or Bun-as-package-manager for **this** repo — those belong to the sibling `kame-homes` project, not here.
+
+## Tooling index
+
+- Rules/skills: `.cursor/rules/README.md`
+- Claude Code: `.claude/README.md` + root `CLAUDE.md`
+- OpenCode: `.opencode/README.md` + root `opencode.json`
+- AI session hygiene / model routing: `.cursor/rules/ai-usage.mdc`
+- Local stack: `pnpm install` → `pnpm run dev:docker` → `pnpm run dev`
+- Once after clone: `pnpm run setup:ai-tooling`
+
+## Where to edit (pointers — fill in as each phase lands real paths)
+
+| Concern | Path |
+| --- | --- |
+| Patient/appointment/visit API | `apps/api/app/routers/`, `apps/api/app/services/` |
+| SOAP / clinical records | `apps/api/app/services/soap_service.py` (versioned writes, never in-place update) |
+| AI Clinic Assistant | `apps/api/app/ai/` (tool catalog, tier classifier, safety checks) + `apps/web/src/features/assistant/` |
+| DB schema | `apps/api/app/models/` + `apps/api/migrations/versions/` |
+| Web feature UI | `apps/web/src/features/{module}/{components,hooks,lib,pages}/` |
+| Web routes | `apps/web/src/routes/` (thin — compose features) |
+
+## Conventions (short — full version in `CLAUDE.md`)
+
+- Dates/times: patient-facing = Asia/Manila; API dates ISO 8601, DB timestamps UTC.
+- Secrets: `apps/api/.env` (gitignored) — never commit or log tokens/PHI/PII.
+- PHI safety: see `.cursor/rules/phi-data-safety.mdc` (always-on).
+- Prod deploy/migration: blocked unless user says **`deskwave`** (`.cursor/rules/no-prod-deploy.mdc`).
+
+## Docs sync
+
+Behavior changes → update matching docs in the same change (`.cursor/rules/documentation-maintenance.mdc`). Per-route → `docs/guides/routes/` (`route-guides.mdc`). Phase progress → `docs/phases/README.md`.

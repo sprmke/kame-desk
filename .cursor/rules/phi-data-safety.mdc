@@ -1,0 +1,29 @@
+---
+description: PHI handling, logging rules, Sentry scrubbing, AI prompt minimization
+alwaysApply: true
+---
+
+# PHI / PII data safety
+
+DoctorDesk stores **protected health information** (patient names, contact, clinical notes, Rx, billing tied to care).
+
+## Never
+
+- Log patient content in plaintext (SOAP text, diagnoses, phone numbers in debug output).
+- Send PHI to Sentry/error-tracking payloads, analytics, or LLM prompts beyond what a specific tool call strictly needs.
+- Paste real patient data into agent chat, subagent tasks, or MCP calls — use seed/synthetic data locally.
+- Cache PHI in `localStorage` except short-lived access tokens (prefer httpOnly cookies before prod — see Phase 19).
+
+## Logging
+
+- Structured logs: IDs, action keys, outcome — not chart content.
+- `activity_log.summary` is human-readable but must not duplicate full clinical notes.
+
+## AI
+
+- Tier 2 confirm for all clinical writes and patient messages (`ai-assistant-safety.mdc`).
+- Chart search tools return grounded excerpts with version IDs — never invent clinical facts.
+
+## Files
+
+- R2 objects are private; serve via short-lived presigned URLs only.

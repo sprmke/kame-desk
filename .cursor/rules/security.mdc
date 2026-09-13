@@ -1,0 +1,22 @@
+---
+description: Security invariants pointer — PHI, AI assistant, RBAC
+globs:
+  - apps/api/app/core/**
+  - apps/api/app/routers/**
+---
+
+# Security
+
+Consolidated pointers — read the linked rules/skills for detail.
+
+| Topic | Rule / doc |
+| ----- | ---------- |
+| PHI in logs, Sentry, AI | `phi-data-safety.mdc` |
+| AI assistant tiers, confirm cards | `ai-assistant-safety.mdc`, `docs/architecture/ai-clinic-assistant.md` |
+| Clinic RBAC | `docs/mvp.md` §6.11, `fastapi-jwt-auth` skill |
+| JWT auth | `app/core/security.py` — access + refresh, membership re-check per request |
+| Clinic scoping | Never trust client `clinic_id`; scope via `X-Clinic-Id` + membership row |
+| Prod deploy guard | `no-prod-deploy.mdc` (unlock: **deskwave**) |
+| Audit trail | `audit-logging` skill — `activity_log` on mutations |
+
+Inactive `clinic_memberships` must fail auth even if JWT is unexpired.

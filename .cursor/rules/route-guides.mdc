@@ -1,0 +1,32 @@
+---
+description: Per-route behavior guides must stay in sync with implemented pages
+alwaysApply: true
+---
+
+# Route guides maintenance
+
+Whenever you **implement or materially change** a page, section, or feature in `apps/web`, update the matching guide under **`docs/guides/routes/`** in the **same change** — not as a follow-up.
+
+## Which file to update
+
+Mirror the app URL (omit dynamic params), rooted at `docs/guides/routes/`. Authoritative index: **`docs/guides/routes/README.md`** — do not maintain a second route→file table here.
+
+Examples:
+
+| Route pattern | Guide location |
+| --- | --- |
+| `/dashboard/patients/...` | `docs/guides/routes/dashboard/patients/...` |
+| `/dashboard/appointments/...` | `docs/guides/routes/dashboard/appointments/...` |
+| `/dashboard/patients/:id/visits/:visitId` | `docs/guides/routes/dashboard/patients/detail.md` (document dynamic params inline) |
+| `/book/:clinicSlug` (public self-service booking) | `docs/guides/routes/book.md` |
+| `/settings/...` | `docs/guides/routes/settings/...` |
+
+## What to document
+
+Per page/section: **behavior**, **save paths** (UI action → API endpoint → DB effect), **validation**, **RBAC** (which roles can view/edit), **AI assistant parity** (is there an equivalent assistant tool? if not, why not), **edge cases**, **implementation map** (web + API paths), and **Host-facing knowledge** (plain-language summary + common front-desk/doctor Q&A — no code, no DB column names, no internal endpoint names; written so the AI Clinic Assistant or a support person can quote it directly).
+
+Update the **Progress overview** table when section status changes. Mark guide **Status** from `Pending` → `Documented` when substantive. Template: `docs/guides/_template.md`.
+
+## When guides need no change
+
+Typos, internal renames with no behavior change, or pure refactors that don't alter UX/API/validation.

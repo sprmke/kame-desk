@@ -1,0 +1,32 @@
+---
+description: AI Clinic Assistant tiered risk, RBAC re-check, clinical-write and external-send escalation
+globs:
+  - apps/api/app/ai/**
+  - apps/web/src/features/assistant/**
+---
+
+# AI Clinic Assistant safety
+
+Full spec: `docs/mvp.md` §9, `docs/architecture/ai-clinic-assistant.md`. Skill: `.agent/skills/ai-clinic-assistant/SKILL.md`.
+
+## Three-tier model (server-computed, never model-decided)
+
+| Tier | Meaning | Examples |
+| ---- | ------- | -------- |
+| **0 — read** | RBAC pass only; no writes | Patient lookup, today's appointments, balance check |
+| **1 — auto** | Idempotent, low blast radius; visible "done" card | Mark thread read, benign status forward with no clinical/financial impact |
+| **2 — confirm** | Proposal only until user taps Confirm | Cancel appointment, Rx, invoice line, patient message, SOAP edit, clinic settings |
+
+## Always Tier 2 (override classifier)
+
+- **Clinical writes**: SOAP, prescriptions, diagnoses — no exceptions.
+- **External send**: any real message to a patient (reminder, summary, reschedule notice). Confirm button says **Send**, not generic Confirm.
+- **Bulk**: 2+ writes in one turn → all Tier 2.
+- **Cross-scope**: patient/appointment outside pinned context → Tier 2.
+
+## Per-tool execution
+
+1. Re-verify JWT + `clinic_memberships` role on every tool call — never trust model-supplied user or IDs.
+2. Re-validate DB state immediately before Tier 1 writes; mismatch → hard fail, no write.
+3. Log every executed write to `activity_log` with `actor_type: ai_assistant`.
+4. Never build: silent patient sends, unconfirmed clinical writes, client-side tier override, PHI in tool debug logs.

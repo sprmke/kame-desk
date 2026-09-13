@@ -23,8 +23,8 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "type-check": "turbo run type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json,mdc,css}\" && pnpm --filter @doctordesk/api format",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,json,mdc,css}\" && pnpm --filter @doctordesk/api format:check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json,css}\" && pnpm --filter @doctordesk/api format",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,json,css}\" && pnpm --filter @doctordesk/api format:check",
     "check:filenames": "bash scripts/dev/check-filename-conventions.sh",
     "check:design-slop": "bash scripts/dev/check-design-slop.sh",
     "capture:design-screenshots": "bash scripts/dev/capture-design-screenshots.sh",
@@ -62,7 +62,7 @@
     "*.{ts,tsx,js,jsx}": [
       "prettier --write"
     ],
-    "*.{md,json,mdc,css}": [
+    "*.{md,json,css}": [
       "prettier --write"
     ],
     "apps/api/**/*.py": [

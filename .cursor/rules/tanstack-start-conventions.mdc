@@ -1,0 +1,35 @@
+---
+description: TanStack Start file routes, Query vs loader split, no server-side business logic
+globs:
+  - apps/web/**
+---
+
+# TanStack Start conventions
+
+## Routes (`apps/web/src/routes/`)
+
+- File-based routes only — thin composition layers.
+- `__root.tsx` — shell, providers, auth guard outlet.
+- Dynamic segments: `dashboard.patients.$patientId.tsx` (Router convention).
+- **No business logic** in loaders or server functions — call FastAPI via `packages/api-client` or `src/lib/apiClient.ts`.
+
+## Data fetching
+
+- **TanStack Query** for all server state (lists, detail, mutations).
+- Loaders only for redirect/guard decisions that need zero client waterfall (e.g. auth cookie check).
+- Invalidate queries after mutations; WebSocket events also invalidate relevant keys.
+
+## Features (`apps/web/src/features/{module}/`)
+
+```
+components/  hooks/  lib/  pages/
+```
+
+- RHF + Zod in `lib/` schemas; forms in `components/`.
+- `usePageTitle` for document titles (when page titles rule lands).
+- Path alias `@/` → `src/`.
+
+## UI
+
+- shadcn/ui in `src/components/ui/` — not feature-specific.
+- Mobile/tablet: 375–1024px+, 44×44px touch targets (front desk tablets).

@@ -1,0 +1,202 @@
+---
+description: Pass/fail anti-slop assertions for DoctorDesk UI. Slop is the absence of decisions.
+globs:
+  - apps/web/src/**/*.tsx
+  - apps/web/src/**/*.ts
+  - apps/web/src/styles.css
+alwaysApply: false
+---
+
+# Anti-slop design
+
+Canonical procedure: `.agent/skills/design-review/SKILL.md`. Token/surface spec: `docs/architecture/design-language.md`. Principles: `DESIGN.md`.
+
+Every rule is pass/fail. "Make it clean" is not a rule.
+
+## Governing principle
+
+Slop is the absence of decisions. Test: can someone name the decision behind this element, and why the alternative was rejected? If not, it is slop.
+
+You cannot fix slop by adopting a different look. Banning indigo and shipping sage-on-cream is still a default.
+
+## Token rules (T)
+
+| # | Pass when |
+| - | --------- |
+| T1 | No color is traceable to a public template, Tailwind's default palette, or shadcn's default theme. |
+| T2 | Brand ramp is OKLCH: monotonic lightness, chroma hump at 400–600, near-constant hue. Gamut-map by chroma reduction. |
+| T3 | Brand color in at most two roles per screen. |
+| T4 | Neutrals derive from brand hue at ultra-low chroma (~0.004–0.012). Pure gray is a template default. |
+| T5 | Surface elevation scale with a measurable luminance step between adjacent levels, both themes. |
+| T6 | Dark surfaces are opaque tokens per elevation, never `rgba(255,255,255,0.03)` over the page. Raised levels pair with a shadow token. |
+| T7 | Type scale authored: size, line-height, weight, letter-spacing per step. |
+| T8 | Large text (≥24px) has negative letter-spacing; small uppercase labels have positive. |
+| T9 | Numbers that align in a column, change over time, or represent money use `lining-nums tabular-nums`. Add `slashed-zero` on financial surfaces. |
+| T10 | Shadow scale: one light direction, tinted with the app's neutral hue. |
+| T11 | No hardcoded hex or `rgb()` outside `apps/web/src/styles.css`. |
+| T12 | Nested radii optically corrected: inner radius never equals parent when padding separates them. |
+| T13 | Every fg/bg pair passes WCAG 2.2 AA in both themes. |
+| T14 | Neutral ramp is one temperature. Warm-gray and cool-gray never coexist. |
+| T15 | Borders, shadows, and muted text are tinted toward the surface hue. |
+| T16 | No font weight below 400. |
+| T17 | At most three text colors and two weights carry hierarchy on one screen. |
+| T18 | No grey text on a colored background. |
+| T19 | No gradient text, colored glow, or 3–4px accent stripe on a card edge. |
+| T20 | Shadows offset vertically (overhead light): soft ambient + tighter contact. |
+| T21 | 3:1 contrast only for text ≥24px regular / 18.66px bold. |
+| T22 | Tabular numerals are not applied to running prose. |
+| T23 | Type ratio ≤ 1.25. 14px minimum for readable desktop text; 13px metadata only; inputs never below 16px. |
+| T24 | Theme generated from a small number of source variables, not a long hand list. |
+| T25 | `font-optical-sizing: auto` where the face exposes `opsz`. |
+| T26 | Z-index tokens only (base 0, sticky 100, dropdown 1000, sticky header 1050, overlay 1100, modal 1200, popover 1300, toast 1400, tooltip 1500). No ad-hoc `9999`. |
+
+## Layout and hierarchy (H)
+
+| # | Pass when |
+| - | --------- |
+| H1 | Exactly one dominant element (3-second squint). |
+| H2 | No three-or-more identical-weight containers unless they are genuine peers. |
+| H3 | Chrome (border, shadow, background) is opt-in. |
+| H4 | Spacing encodes relationship: within-group &lt; between-group &lt; between-section. |
+| H5 | Hierarchy by size, weight, position before color. Survives grayscale. |
+| H6 | Section titles are not wrapped in bordered boxes. |
+| H7 | No divider directly under a title already separated by whitespace. |
+| H8 | Dense data = compact; forms/confirms = comfortable. |
+| H9 | List chrome scales with content. A short list does not ship pagination chrome. |
+| H10 | No view/filter/toolbar control without a named user who needs it. |
+| H11 | Few shared vertical edges. New left edges are intentional. |
+| H12 | Escalation ladder: spacing → divider → borderless section → card. Stop at the first that works. |
+| H13 | No card inside a card. No stack of full-width cards as page structure. |
+| H14 | Record lists are rows (table/list + dividers), never a grid of cards. |
+| H15 | Density modes with explicit row heights (~32 / 40 / 48px), per surface and breakpoint. |
+| H16 | One wrapper owns each scroll axis. No page-level horizontal scroll. Sticky scoped to its wrapper. |
+| H17 | Truncating text has `min-width: 0` on every flex ancestor. |
+| H18 | Patient names, patient numbers, errors, page titles, and button labels never truncate. Other truncation has a focus-reachable full value. |
+| H19 | Frozen table columns use a solid token background + inset shadow divider, never alpha. |
+| H20 | Clinical progressive disclosure is visible and names what is hidden. |
+| H21 | One layout primitive repeats enough to be the product's signature. |
+| H22 | At most five visible primary actions in a region; more than seven controls triggers overflow. |
+| H23 | Header / Content / Pane / Sidebar / Footer are not conflated. |
+| H24 | Line clamp declares all required properties; clamped element has no padding. |
+| H25 | `Badge` only for counts and enumerated states. Status uses a status indicator. |
+| H26 | Tables: ARIA grid keyboard contract. |
+| H27 | Destructive confirms focus the safe action, `role="alertdialog"`, never inside a toast. |
+| H28 | Toasts ~5000ms, pause on hover/focus, dismiss on ~50px swipe. |
+
+## Banned patterns (B) — hard fail
+
+| # | Banned |
+| - | ------ |
+| B1 | KPI/stat card with a pastel-tinted icon chip. |
+| B2 | Row of 3–4 even metric cards on an **operational** screen (Today may not; Insights may). |
+| B3 | Literal-object metaphor icon (armchair = waiting, stethoscope = medical). |
+| B4 | Robot or sparkles glyph for AI. |
+| B5 | Currency symbol as decoration next to a formatted amount. |
+| B6 | Generic glyph in a brand-colored rounded square as the product logo. |
+| B7 | Page description that restates the title or nav label. |
+| B8 | Centered `max-w-sm` bordered box as an auth screen. |
+| B9 | Gradients, glassmorphism, confetti, glow, animated backgrounds. |
+| B10 | Bento grid where content is not mixed importance. |
+| B11 | Emoji in operational, clinical, or billing UI. |
+| B12 | Every status as the same pastel pill, distinguished only by hue. |
+| B13 | Placeholder text that duplicates the field label. |
+| B14 | `.slice(0, N)` with no indication that more items exist. |
+| B15 | Action/row that navigates to a list instead of the named record. |
+| B16 | "Learn more", "Read more", "Get started", or "Explore" in the authenticated product. |
+| B17 | Identical structural markup for items that mean different things. |
+| B18 | Icon added only to fill horizontal space. |
+
+## Icon rules (I)
+
+| # | Pass when |
+| - | --------- |
+| I0a | Nav/chrome: no decorative icons. No icon where the label is unambiguous. |
+| I0b | Clinical surfaces may be dense if each icon has one documented meaning and a reachable legend. |
+| I1 | One icon set, stroke/size/color set explicitly (not Lucide defaults). |
+| I2 | Icon size from adjacent cap-height. |
+| I3 | Decorative icons `aria-hidden`; icon-only controls have `aria-label`. |
+| I4 | Optical centering, not mathematical. |
+| I5 | Product mark and assistant mark are custom SVGs, not set glyphs. |
+| I6 | If adjacent text already names the thing, remove the icon. |
+| I7 | One concept ↔ one icon across the app. |
+| I8 | Icons beside labels are lower-contrast than the label. |
+| I9 | No emoji as a UI icon. |
+
+Banned Lucide names until replaced: `Stethoscope`, `Armchair`, `Bot`, `Sparkles`, `CalendarClock`.
+
+## Data and domain (D)
+
+| # | Pass when |
+| - | --------- |
+| D1 | Lists show the fields needed for the decision that list exists for. |
+| D2 | Queue/wait screens show elapsed time, live. |
+| D3 | Person identity is disambiguated (same-name collision). |
+| D4 | Safety-critical data is impossible to miss where it matters. |
+| D5 | Status on ≥2 channels; `aria-label="Status: …"`; urgent `role="alert"`. |
+| D5a | Categorical palette excludes red. Red is status only. |
+| D5b | Red/green never the sole clinical-status differentiator. |
+| D5c | Status *transition* includes shape or motion, not hue alone. |
+| D5d | Each status has a documented threshold; same term everywhere. |
+| D6 | Empty, single-item, loading, error, permission-denied are per surface. |
+| D7 | Same quantity formatted identically everywhere. |
+| D8 | Skeleton matches loaded markup (no layout shift). |
+| D9 | Loading thresholds: nothing &lt;1s; skeleton 1–10s; determinate &gt;10s. Background refresh never blanks. |
+| D10 | Three empty states where they apply: first-run, filtered-to-nothing, zero-as-a-win. |
+| D11 | Load failure states the cause and an action. |
+| D12 | Clinical abbreviations preferred on dense surfaces. |
+| D13 | Dates/times/currency/numbers via `Intl.*`. No `01/02/2026`. |
+| D14 | No dead ends. |
+| D15 | Lists that can exceed ~50 rows are virtualized. |
+| D16 | Submit stays enabled until the request starts; loading button keeps its label; first invalid field focused; unsaved-navigation warn; paste never blocked. |
+
+## Copy (C)
+
+Extends `human-copy.mdc` and `ui-minimal-copy.mdc`.
+
+| # | Pass when |
+| - | --------- |
+| C1 | Removing the string would make the screen harder to use. Else delete. |
+| C2 | No em dash. No "This lets you…", "Simply", "Easily", "Just". |
+| C3 | No adjective a competitor could also claim. |
+| C4 | Error copy: what happened + next step. |
+| C5 | Button labels are specific verbs. Not "Submit"/"OK"/"Continue" when a specific verb exists. |
+| C6 | Clinic vocabulary, not database vocabulary. |
+| C7 | Ellipsis character `…`, never `...`. |
+| C8 | Non-breaking spaces for units/names/figures that must not wrap. |
+| C9 | Patient numbers, record IDs, drug names: `translate="no"`. |
+
+## Motion and feel (M)
+
+Frequency first: 100+/day = no animation; tens/day = near-zero; occasional = standard; rare = delight budget. Durations: press 100–160ms, tooltips 125–200ms, dropdowns 150–250ms, modals/sheets 200–500ms. Hard ceiling **300ms**.
+
+| # | Pass when |
+| - | --------- |
+| M1 | Route-change animation ≤180ms or absent. Current 300ms translate+fade fails. |
+| M1b | No animation on command palette, shortcuts, or other 100+/day actions. |
+| M1c | No UI animation &gt;300ms without a written reason. |
+| M1d | No `ease-in` on UI. No `transition: all`. |
+| M1e | Only `transform` and `opacity`. Full `transform` string, not Framer `x`/`y`/`scale` shorthands. |
+| M1f | Popovers scale from `var(--transform-origin)` at 0.9–0.97, never `scale(0)`. |
+| M1g | Rapidly re-triggered elements: interruptible transitions, not keyframes. |
+| M1h | Hover motion behind `@media (hover: hover) and (pointer: fine)`. |
+| M2 | Motion explains causality. Decorative motion is removed. |
+| M3 | Entrance from the trigger's position. |
+| M4 | No animation delays input. |
+| M5 | `prefers-reduced-motion` path (gentler variant preferred over none). |
+| M6 | No affordance revealed only on hover. Touch equivalent required. |
+| M7 | Targets ≥44×44px touch / ≥24×24px desktop, or WCAG 2.5.8 spacing. `touch-action: manipulation`. |
+| M8 | Scroll position restored on back. |
+| M9 | Sheets: drag physics, sensible dismiss, `visualViewport` for keyboard. |
+| M10 | Every gesture has tap + keyboard equivalent. |
+| M11 | Gestures trigger on release. |
+| M12 | URL reflects filters/tabs/pagination/expanded panels. |
+| M13 | `overscroll-behavior: contain` on modals/sheets. No text selection during drag. |
+| M14 | View Transitions are progressive enhancement. `navigator.vibrate` is never load-bearing. |
+
+## Ship criteria
+
+A screen ships with **zero B-class** and **no unresolved H-class** violations. When split, the cost of the fix decides.
+
+Remedial order: delete → reduce → change token → change component → restructure → rebuild.
+
+Deterministic sweep: `pnpm run check:design-slop`. Anything a script can decide is not left to judgment.

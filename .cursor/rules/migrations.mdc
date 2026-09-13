@@ -1,0 +1,30 @@
+---
+description: Alembic-only migrations, never edit shipped versions, autogenerate review
+globs:
+  - apps/api/migrations/**
+---
+
+# Alembic migrations
+
+## Rules
+
+1. **Alembic only** — no raw SQL migration files outside `apps/api/migrations/versions/`.
+2. **Never edit a shipped migration** — files already in git history are immutable. Add a new revision.
+3. Hook enforcement: `guard-shipped-migrations.sh` blocks edits to existing files under `versions/`.
+
+## Workflow
+
+```bash
+pnpm run db:migrate:new   # autogenerate — always review diff
+pnpm run db:migrate       # local upgrade head
+```
+
+## Autogenerate review checklist
+
+- [ ] `clinic_id` on every clinic-scoped table
+- [ ] Indexes on FK columns used in list queries
+- [ ] `btree_gist` extension before exclusion constraints
+- [ ] No accidental drops of prod columns without explicit plan
+- [ ] Downgrade path sane (or document one-way migration)
+
+Skill: `.agent/skills/alembic-migrations/SKILL.md`, `.agent/skills/fix-migration-issues/SKILL.md`.

@@ -1,0 +1,53 @@
+---
+description: Appointment + visit status machines, transitions, side effects, exclusion constraint
+globs:
+  - apps/api/app/services/**/appointment*
+  - apps/api/app/services/**/visit*
+  - apps/api/app/routers/**/appointment*
+  - apps/api/app/routers/**/visit*
+  - apps/web/src/features/appointments/**
+  - apps/web/src/features/waiting-room/**
+---
+
+# Appointment & visit workflow
+
+DoctorDesk has **two separate lifecycles** — never conflate them into one flat status enum.
+
+## Appointment status (pre-visit)
+
+`Scheduled` → `Confirmed` → `Cancelled` | `No Show` | `Rescheduled`
+
+## Visit status (day-of, after arrival)
+
+`Arrived` → `In Consultation` → `Completed`
+
+## Interaction between lifecycles
+
+- Terminal **appointment** status (`Cancelled`, `No Show`, `Rescheduled`) removes the row from the active waiting-room queue and blocks further visit transitions.
+- Cancelling an appointment after `Arrived` does not preserve visit status in the queue; the appointment drops out once appointment status is terminal.
+- Visit status only moves forward; idempotent re-post of the current visit status is a no-op (no duplicate event).
+
+Canonical spec: `docs/mvp.md` §6.4. Full skill: `.agent/skills/appointment-workflow/SKILL.md`.
+
+## Invariants
+
+1. **All transitions go through one service function** per lifecycle (`appointment_service.transition_status`, `visit_service.transition_status`). Never duplicate side effects (reminders, calendar sync, WebSocket broadcast, `activity_log`) in a route handler or AI tool.
+2. **Double-booking prevention** is a Postgres `btree_gist` exclusion constraint per doctor/room — not app-level checks alone. See `.agent/skills/alembic-migrations/SKILL.md`.
+3. **RBAC**: reception can move appointment status; only `doctor`/`owner`/`admin` complete visits and write SOAP. Re-check membership per request.
+4. **Audit**: every status mutation emits `activity_log` (actor from JWT, never model-asserted).
+5. **Staff alerts** (Phase 40): visit transitions emit in-app notifications via `visit_service` → `notify_visit_status`; appointment public booking / patient cancel-reschedule emit from `appointment_service` / `reminder_service`. See `.cursor/rules/in-app-notifications.mdc`.
+
+## Recurring series (Phase 6)
+
+- `appointment_series` holds the RRULE + metadata; occurrences are materialized as `appointments` rows with `series_id` + `series_occurrence_index` (unique per series).
+- Expansion runs synchronously on create (next 90 days from `series_start`) and can be re-run idempotently via ARQ `expand_recurring_series_job`.
+- Conflicts (exclusion constraint or working hours) are returned in the expansion response; never silently skipped.
+- **Scope semantics** (`scope` query param on PATCH/DELETE):
+  - `this`: single occurrence only
+  - `following`: all non-terminal occurrences with `series_occurrence_index >=` current
+  - `all`: all non-terminal occurrences in the series
+- Series rows are not split on `following` edits in Phase 6; scope applies to existing appointment rows only.
+
+## WebSocket events
+
+After appointment/visit writes, broadcast `appointment.*` / `visit.*` events on `/ws/clinic/{clinic_id}` for the waiting-room queue. Degrade to polling if socket drops (`docs/mvp.md` §10).

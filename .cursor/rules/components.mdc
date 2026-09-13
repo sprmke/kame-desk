@@ -1,0 +1,46 @@
+---
+description: React primitives — shadcn/ui first, cva + data-slot, loading/empty/error, motion tokens
+globs:
+  - apps/web/src/**/*.tsx
+alwaysApply: false
+---
+
+# Components
+
+## Primitives first
+
+Reuse `apps/web/src/components/ui/*` before a native `<select>`, `<input type="checkbox">`, or a one-off styled `<div>`. New primitives follow the existing `cva` variant + `data-slot` + `cn()` convention.
+
+## Pointer contract
+
+Interactive primitives and navigable rows must show `cursor-pointer` (disabled: `cursor-not-allowed`). Never put `cursor-default` on menu items, select options, or tappable rows. Base rules live in `apps/web/src/styles.css`; extend with `Card interactive`, `.native-press`, or explicit `cursor-pointer` on custom click targets.
+
+## Structure
+
+Named exports. Theme tokens (`bg-background`, `text-foreground`, `border-border`, `bg-card`). Feature UI lives in `apps/web/src/features/{module}/`. Shared across features → `apps/web/src/components/`.
+
+## Surfaces (escalation ladder)
+
+Chrome is opt-in. Climb this list and stop at the first level that works: spacing/gap → divider → section with no border → card. Do not start a page with `Card`. No card inside a card. Record lists (patients, appointments, invoices, queue) are rows, not a card grid. Waiting-room Kanban is the reference. Spec: `docs/architecture/design-language.md`. Pass/fail: `anti-slop-design.mdc`.
+
+## Async UI
+
+Every list/detail that loads server state handles **loading**, **error**, and **empty**:
+
+- Loading: a skeleton that mirrors the real markup (`apps/web/src/components/skeletons/PageSkeletons.tsx`). Comment `// Mirrors <RealComponent>'s markup` when adding a new one.
+- Error: `ErrorState` / `InlineError`.
+- Empty: `EmptyState` (icon + short heading, optional CTA). No essay copy.
+
+## Motion
+
+New interactive elements use tokens from `apps/web/src/lib/motion.ts` (`DURATION_MICRO_*`, `DURATION_TRANSITION_*`, `SLIDING_PILL_SPRING`). Always include `motion-reduce:` / `useReducedMotion()`. See `motion.mdc`.
+
+## Don'ts
+
+- Default exports for shared components
+- Hardcoded `bg-white` / `text-black` without a dark variant
+- Icon-only buttons without `aria-label`
+- Centered `Dialog` on mobile for operational flows (use `ResponsiveModal`)
+- Gradients, confetti, playful micro-illustrations
+- `Stethoscope`, `Armchair`, `Bot`, `Sparkles`, `CalendarClock` as UI icons
+- Pastel-tinted KPI icon chips (`StatCard` on operational screens)

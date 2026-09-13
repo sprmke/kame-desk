@@ -1,0 +1,44 @@
+---
+description: AI usage — session hygiene, model routing, subagent discipline
+alwaysApply: true
+---
+
+# AI usage — session hygiene
+
+## Sessions
+
+- **One task ≈ one chat.** New phase, feature, bug, or doc pass → new session (`/clear`).
+- Do **not** continue multi-day threads. Long context (>150k) is expensive even when cached.
+- Prefer `/compact` mid-task only if you must stay in-thread; prefer `/clear` when switching goals.
+
+## Models (default)
+
+| Work | Prefer |
+| --- | --- |
+| Implementation, CRUD, UI polish, docs | Default agent model (Composer/Sonnet) |
+| Hard architecture, AI-assistant safety design, migration design | Sonnet + thinking (sparingly) |
+| Opus / high-thinking / Max Mode | Rare — explicit hard judgment only (e.g. tiered-risk classifier design) |
+| Subagents: verify / test-runner | Cheapest capable model (`fast`/`haiku`) |
+
+Do **not** use high-thinking or Opus for CRUD boilerplate, copy tweaks, or mechanical refactors.
+
+## Subagents
+
+- Default: **no subagents.** One agent + targeted search/read.
+- Spawn `debugger` / `security-auditor` / `test-runner` / `verifier` only when the task matches their purpose (see `.cursor/agents/`).
+- Never chain explore → plan → execute unless the task is genuinely large and ambiguous (use Plan mode instead — `.cursor/rules/plan-mode.mdc`).
+
+## MCP
+
+- `context7` for current library docs (FastAPI, SQLAlchemy, TanStack, Alembic — APIs change).
+- `markitdown` for PDF/Office attachments (lab results, HMO letters) — see `.cursor/rules/markitdown-mcp.mdc`.
+- `postgres` (local dev DB only) for schema/data inspection — never point it at a hosted `DATABASE_URL`.
+- `playwright` for E2E-adjacent exploratory browser sessions; prefer direct code reading for pure logic questions.
+
+## PHI in context
+
+Never paste real patient data into a prompt, subagent task, or MCP call beyond what a specific tool call strictly needs. Use synthetic/seed data for exploration — see `.cursor/rules/phi-data-safety.mdc`.
+
+## Account routing (humans)
+
+Route day-to-day implementation through your default Included/Composer quota; reserve Claude Pro / high-thinking sessions for genuinely hard judgment calls (AI-assistant tier classification, migration design, security review) — not parallel "explore everything" sessions on the same task.

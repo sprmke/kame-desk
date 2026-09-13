@@ -1,0 +1,14 @@
+---
+description: Mutating changes must emit activity_log or document N/A
+alwaysApply: true
+---
+
+# Activity / audit logging
+
+Any change that mutates clinic/patient/appointment/clinical/billing state must **emit an `activity_log` row** or write **`activity-log: N/A — <why>`** in the same change.
+
+- Emit from the **service layer** after a successful write — never in `except`, never blocking the mutation on log failure.
+- Actor: `user` | `ai_assistant` | `system` from real JWT/context, never model-asserted.
+- Bulk ops: one summary row with `metadata.count`.
+
+Skill: `.agent/skills/audit-logging/SKILL.md`. Table created Phase 1 (`activity_log`).

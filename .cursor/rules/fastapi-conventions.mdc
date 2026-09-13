@@ -1,0 +1,37 @@
+---
+description: FastAPI router/service/schema layering, async SQLAlchemy, RBAC dependencies
+globs:
+  - apps/api/**
+---
+
+# FastAPI conventions
+
+## Layering (non-negotiable)
+
+`routers/` → `services/` → `models/`. Routers parse HTTP, call one service function, return a Pydantic schema. **No DB access in routers.**
+
+Services own all business logic. ARQ workers and AI tools call the same service functions — never duplicate logic.
+
+## Schemas (Pydantic v2)
+
+- `PatientCreate`, `PatientRead`, `PatientUpdate` — suffix by intent.
+- Response models exclude secrets (`hashed_password`, raw tokens).
+- OpenAPI is the source for `packages/api-client` — regenerate after API changes.
+
+## Dependencies (`app/core/security.py`)
+
+- `get_current_user` — JWT access token → `User`.
+- `get_active_clinic_membership` — resolves clinic from `X-Clinic-Id` header (never trust body `clinic_id` alone).
+- `require_clinic_role("doctor", "owner", ...)` — factory for RBAC.
+
+## DB sessions
+
+- Async SQLAlchemy 2 session via `Depends(get_db)`.
+- Services receive `AsyncSession`; commit in service layer after successful write.
+- Use `select()` + `await session.execute()`, not legacy `session.query()`.
+
+## Errors
+
+- `HTTPException` with stable `detail` strings for client display.
+- 401 unauthenticated, 403 forbidden (RBAC), 404 not found, 409 conflict (e.g. double-book).
+- Never leak stack traces or PHI in error payloads.

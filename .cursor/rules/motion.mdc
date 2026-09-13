@@ -1,0 +1,30 @@
+---
+description: Motion budget for DoctorDesk UI — clinical, reduced-motion-safe, no hospitality effects
+globs:
+  - apps/web/src/**
+alwaysApply: false
+---
+
+# Motion
+
+Canonical tokens: `apps/web/src/lib/motion.ts` and `DESIGN.md`.
+
+## Tiers
+
+Frequency decides whether to animate at all (anti-slop M-rules): 100+/day = none; tens/day = near-zero; occasional = standard; rare = delight budget. Hard ceiling **300ms**. Route changes ≤180ms or absent.
+
+| Tier | Duration | Easing | Use |
+| ---- | -------- | ------ | --- |
+| Micro | 100–160ms (`DURATION_MICRO_*`, currently 150ms) | `ease-theme` `cubic-bezier(0.4,0,0.2,1)` | Hover, press, focus, color/border. Hover motion only behind `(hover: hover) and (pointer: fine)`. |
+| Transition | 150–250ms dropdowns; 200–300ms sheets/dialogs (`DURATION_TRANSITION_*`, currently 280ms, retune in Phase 47) | Spring (`SLIDING_PILL_SPRING`) or `ease-out-quart` | Tab pill, sheet/dialog, list enter |
+| Page | ≤180ms or none (`DURATION_PAGE_*` is still 300ms in code; that fails M1) | `ease-out-quart`, transform+opacity only | Dashboard sub-route entrance |
+
+Only `transform` and `opacity`. No `ease-in`. No `transition: all`. `framer-motion` is allowed for the pill, list stagger, and page transition only. Do not sprinkle it on every hover. Full `transform` string; do not use Framer `x`/`y`/`scale` shorthands.
+
+## Reduced motion
+
+Every new animated class/component needs `motion-reduce:transition-none` / `motion-reduce:animate-none` or `useReducedMotion()` with a static fallback (see `SlidingActivePill`).
+
+## Out of bounds
+
+No gradients, confetti, bounce/float loops, or marketing cross-fades. Clinical, calm, trustworthy.

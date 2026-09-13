@@ -1,0 +1,59 @@
+---
+description: Mobile and tablet responsive requirements for clinic staff UI
+globs:
+  - apps/web/src/**
+---
+
+# Mobile / tablet responsive
+
+Front desk often runs on a shared tablet (375–1024px+). Native-feeling here means operational, not hospitality-styled.
+
+Skill: `.agent/skills/mobile-responsive/SKILL.md` (invoke explicitly on Claude Code).
+
+## Breakpoints (Tailwind min-width)
+
+| Prefix | Min width | Shell |
+| ------ | --------- | ----- |
+| _(none)_ | 0 | Phone. Bottom tab bar. Sheets. |
+| `sm:` | 640px | Large phone |
+| `md:` | 768px | Tablet portrait. Landscape calendar/waiting room still required. |
+| `lg:` | 1024px | Desktop sidebar. Centered dialogs. |
+
+Write mobile styles first. Never `max-w-` breakpoints.
+
+## Shell
+
+- **<lg:** `BottomTabBar` is primary nav: Calendar, Waiting, Patients, More. No hamburger drawer. `DashboardShell` `<main>` uses `bottomTabBarOffsetClassName()`.
+- **lg+:** `AppSidebar` only. Hide the tab bar (`lg:hidden`).
+- Assistant FAB sits above the tab bar on phone (`aboveBottomTabBarClassName()`).
+
+## Touch
+
+Minimum **44×44px** for interactive controls (WCAG 2.5.5 / iOS HIG). Desktop minimum 24×24px or WCAG 2.5.8 spacing. Icon-only controls need `aria-label`. Expand the hit area beyond the visual bounds when the visual is smaller. Set `touch-action: manipulation`. No affordance revealed only on hover (M6): every hover control needs a touch equivalent.
+
+## Modals
+
+Never a centered desktop `Dialog` on a phone/tablet for operational flows (walk-in, reschedule, cancel/no-show, payment, series scope, command palette). Use `ResponsiveModal` (`apps/web/src/components/ui/responsive-modal.tsx`): bottom `Sheet` below `lg`, `Dialog` at `lg+`. Exceptions: `AlertDialog` (OS-style destructive confirm) and full-screen media.
+
+Bottom sheets: drag handle, `max-h-[92dvh]`, `pb-[max(1rem,env(safe-area-inset-bottom))]`.
+
+## Safe area
+
+`viewport-fit=cover` is set in `__root.tsx`. Any chrome that touches a screen edge needs `env(safe-area-inset-*)`. Header top, sheet/tab bar bottom.
+
+## Press + swipe
+
+- Tappable cards/rows: `.native-press`.
+- Waiting-room cards and appointment rows on `<lg`: `SwipeRevealRow` (swipe-to-reveal, second tap executes). Never swipe-to-execute. Skip swipe when `prefers-reduced-motion`.
+- No pull-to-refresh. Waiting room is WebSocket-backed.
+
+## Copy + tone
+
+Operational density. No extra labels (`ui-minimal-copy.mdc`). No gradients, confetti, or hospitality chrome.
+
+## Before shipping
+
+- [ ] 375px and 768px, no accidental horizontal page scroll
+- [ ] Tap targets ≥ 44×44px
+- [ ] Calendar / waiting room usable in tablet landscape
+- [ ] `prefers-reduced-motion` path on new animation

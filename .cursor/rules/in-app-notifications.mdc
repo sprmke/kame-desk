@@ -1,0 +1,25 @@
+---
+description: Staff in-app Notification Center — bell, toasts, Redis WS fan-out, emit catalog
+globs:
+  - apps/api/app/services/notification_service.py
+  - apps/api/app/routers/notifications.py
+  - apps/api/app/models/notification.py
+  - apps/web/src/features/notifications/**
+---
+
+# In-app staff notifications
+
+Distinct from `/dashboard/settings/notifications` (patient reminder prefs).
+
+## Rules
+
+- Always insert via `create_notification` / emit helpers in `notification_service.py`. Never raw SQL at call sites.
+- Non-fatal: notification failure must not fail the booking/visit/billing write.
+- Dedupe: partial unique `(clinic_id, type, dedupe_key)`. Coalesce only for `messaging.inbound`.
+- Per-user read: `notification_reads`; no shared `read_at` on `notifications`.
+- Realtime: publish Redis → `/ws/clinic/{id}` as `notification.created` / `notification.updated`.
+- PHI: titles/bodies use patient display names only; no SOAP, Rx, phone, or transcript text.
+- Suppress toast when `actor_user_id ===` current user; still persist for others.
+- Do not emit from AI assistant layer if the underlying service already emits.
+
+Skill: `.agent/skills/in-app-notifications/SKILL.md`
