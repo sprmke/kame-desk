@@ -1,0 +1,161 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dev: free ports",
+      "type": "shell",
+      "command": "pnpm run dev:free-ports",
+      "detail": "Stop stale listeners on :3100 (web) and :8100 (api)",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "Dev: full stack",
+      "dependsOn": ["Dev: free ports", "Dev: full stack (serve)"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: full stack (serve)",
+      "type": "shell",
+      "command": "pnpm run dev",
+      "detail": "Web http://localhost:3100 · API http://localhost:8100/docs",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "problemMatcher": {
+        "owner": "doctordesk",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "(Local:\\s+http://localhost:3100/|Uvicorn running on)"
+        }
+      }
+    },
+    {
+      "label": "Dev: web only",
+      "dependsOn": ["Dev: free ports", "Dev: web only (serve)"],
+      "dependsOrder": "sequence",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: web only (serve)",
+      "type": "shell",
+      "command": "pnpm run dev:web",
+      "detail": "http://localhost:3100",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "doctordesk-web",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Local:\\s+http://localhost:3100/"
+        }
+      }
+    },
+    {
+      "label": "Dev: api only",
+      "dependsOn": ["Dev: free ports", "Dev: api only (serve)"],
+      "dependsOrder": "sequence",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: api only (serve)",
+      "type": "shell",
+      "command": "pnpm run dev:api",
+      "detail": "http://localhost:8100/docs",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "doctordesk-api",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Uvicorn running on"
+        }
+      }
+    },
+    {
+      "label": "Dev: worker only",
+      "type": "shell",
+      "command": "pnpm run dev:worker",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Open: web app",
+      "type": "shell",
+      "command": "open http://localhost:3100",
+      "detail": "DoctorDesk dashboard (local dev)",
+      "group": "none"
+    },
+    {
+      "label": "Open: API docs",
+      "type": "shell",
+      "command": "open http://localhost:8100/docs",
+      "detail": "FastAPI Swagger UI",
+      "group": "none"
+    },
+    {
+      "label": "Docker: up",
+      "type": "shell",
+      "command": "pnpm run dev:docker",
+      "group": "none"
+    },
+    {
+      "label": "Docker: down",
+      "type": "shell",
+      "command": "pnpm run dev:docker:down",
+      "group": "none"
+    },
+    {
+      "label": "DB: migrate",
+      "type": "shell",
+      "command": "pnpm run db:migrate",
+      "group": "none"
+    },
+    {
+      "label": "DB: reset local",
+      "type": "shell",
+      "command": "pnpm run db:reset:local",
+      "group": "none"
+    },
+    {
+      "label": "Quality: ci gate",
+      "type": "shell",
+      "command": "pnpm run ci:quality",
+      "group": "test"
+    }
+  ]
+}

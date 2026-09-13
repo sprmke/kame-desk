@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: doctordesk
+          POSTGRES_PASSWORD: doctordesk_local_only
+          POSTGRES_DB: doctordesk
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U doctordesk"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://doctordesk:doctordesk_local_only@127.0.0.1:5432/doctordesk
+      DOCTORDESK_TESTING: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v4
+      - run: pnpm install
+      - run: uv sync --all-extras
+        working-directory: apps/api
+      - run: pnpm run ci:quality
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: doctordesk
+          POSTGRES_PASSWORD: doctordesk_local_only
+          POSTGRES_DB: doctordesk
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U doctordesk"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://doctordesk:doctordesk_local_only@127.0.0.1:5432/doctordesk
+      REDIS_URL: redis://127.0.0.1:6379/0
+      DOCTORDESK_TESTING: "1"
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v4
+      - run: pnpm install
+      - run: uv sync --all-extras
+        working-directory: apps/api
+      - run: bash scripts/ci/e2e.sh
