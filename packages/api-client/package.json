@@ -1,0 +1,15 @@
+{
+  "name": "@doctordesk/api-client",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "generate": "orval --config orval.config.ts",
+    "build": "echo 'api-client: run generate after OpenAPI export'",
+    "lint": "echo 'api-client lint: n/a'",
+    "type-check": "echo 'api-client type-check: n/a'",
+    "test": "echo 'api-client test: n/a'"
+  },
+  "devDependencies": {
+    "orval": "^7.4.1"
+  }
+}
