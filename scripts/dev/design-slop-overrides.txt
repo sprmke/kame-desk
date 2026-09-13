@@ -1,0 +1,6 @@
+# file	rule	reason
+# Exempt a whole file+rule from the ratchet. Require a written reason.
+# Example:
+# apps/web/src/features/assistant/components/AssistantPanel.tsx	B4	Custom assistant mark ships in Phase 45
+apps/web/src/components/StatCard.tsx	B1	Dashboard home metric tiles; operational morning board needs labeled counts
+apps/web/src/features/dashboard/components/DashboardKpiRow.tsx	B1	Dashboard home metric tiles; operational morning board needs labeled counts

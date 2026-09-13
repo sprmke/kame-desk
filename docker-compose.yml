@@ -1,0 +1,72 @@
+name: doctordesk
+
+# Local dev infra only. Never point these credentials at a real deploy.
+# Neon (prod/dev Postgres) and Cloudflare R2 are hosted; nothing here is
+# deployed — see docs/architecture/deployment.md.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: doctordesk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: doctordesk
+      POSTGRES_PASSWORD: doctordesk_local_only
+      POSTGRES_DB: doctordesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - doctordesk-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doctordesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: doctordesk-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - doctordesk-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Cloudflare R2 stand-in for local dev (S3-compatible API).
+  minio:
+    image: minio/minio:latest
+    container_name: doctordesk-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: doctordesk
+      MINIO_ROOT_PASSWORD: doctordesk_local_only
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # Console
+    volumes:
+      - doctordesk-minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Local email capture — never sends real email. Web UI at :8025.
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: doctordesk-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+volumes:
+  doctordesk-postgres-data:
+  doctordesk-redis-data:
+  doctordesk-minio-data:
