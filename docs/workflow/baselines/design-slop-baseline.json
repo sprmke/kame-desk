@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-09-13T14:25:24.016Z",
+  "total": 44,
+  "counts": {
+    "T11": 27,
+    "H3": 7,
+    "T9": 6,
+    "B7": 4
+  },
+  "note": "Ratchet: check:design-slop fails if any rule count increases. Re-run with --write-baseline after intentional reductions."
+}
