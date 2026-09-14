@@ -6,4 +6,9 @@ export const Route = createFileRoute("/")({
     if (shouldDeferAuthRedirect()) return;
     throw redirect({ to: isAuthenticated() ? "/dashboard" : "/login" });
   },
+  component: HomeRoute,
 });
+
+function HomeRoute() {
+  return null;
+}

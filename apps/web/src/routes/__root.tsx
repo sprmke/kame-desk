@@ -12,8 +12,10 @@ import { themeInitScript } from "@/lib/theme/preferences";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "@/styles.css?url";
 import { registerPwa } from "@/lib/pwa";
+import { NotFoundPage } from "@/components/layout/NotFoundPage";
 
 export const Route = createRootRoute({
+  notFoundComponent: NotFoundPage,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -38,6 +40,7 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
