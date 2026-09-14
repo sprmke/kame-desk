@@ -6,6 +6,8 @@
 
 `/` has no marketing page. Signed-in staff go to `/dashboard`. Everyone else goes to `/login`. `/pricing` remains the public plan page.
 
+Unmatched URLs (any path that is not a DoctorDesk route) render **Page not found** with a **Back to Today** link to `/`. That link then follows the same redirect as `/`. Nested unknown paths under `/dashboard` stay inside the dashboard shell.
+
 ## Save paths
 
 None. Redirect only.

@@ -6,6 +6,7 @@ Header convention shared by every dashboard route: one `<h1>`, then any tab bar,
 
 | Route                                              | Guide                                                                                  | Status     |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------- |
+| Unmatched URL (404)                                | [not-found.md](./not-found.md)                                                         | Documented |
 | `/login`                                           | [login.md](./login.md)                                                                 | Documented |
 | `/forgot-password`                                 | [forgot-password.md](./forgot-password.md)                                             | Documented |
 | `/reset-password`                                  | [reset-password.md](./reset-password.md)                                               | Documented |
