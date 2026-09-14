@@ -1,0 +1,618 @@
+{
+  "version": 1,
+  "sessions": {
+    "bd5b6a03-da69-4219-8ab8-c0f45121a247": {
+      "updatedAt": 1788979770228,
+      "files": {
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/__root.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cursorDenials": { "overused-font:31": 1 },
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/styles.css": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/nav-config.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/sidebar-context.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/AppSidebar.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/AppHeader.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/CommandPalette.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/assistant/components/AssistantLauncher.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/DashboardShell.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/dashboard/pages/DashboardOverviewPage.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.index.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.appointments.index.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.appointments.new.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.chart-search.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.settings.team.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.patients.index.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.patients.$patientId.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/dashboard.patients.$patientId.invoices.$invoiceId.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/auth/lib/schemas.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/auth/components/AuthLayout.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/auth/pages/LoginPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/auth/pages/RegisterPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/pages/InvitationAcceptPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/login.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/reminders.$token.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/pages/OnboardingPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/components/ClinicStep.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/components/DoctorStep.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/components/HoursStep.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/components/FeesStep.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/components/InviteStep.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/checkbox.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/patients/pages/PatientListPage.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/patients/pages/PatientNewPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/patients/pages/PatientDetailPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/appointments/components/SeriesScopeDialog.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/appointments/components/AppointmentRowActions.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/waiting-room/components/ConnectionIndicator.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/visit-summary/components/VisitSummaryPanel.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/waiting-room/components/WaitingRoomBoard.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/soap/components/SpecialtyFields.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/soap/components/SoapRecordingPanel.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/soap/pages/SoapNotePage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/billing/components/PaymentDialog.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/billing/pages/InvoiceDetailPage.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/billing/components/DashboardBillingWidgets.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/billing/pages/InvoiceNewPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/team/pages/TeamSettingsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/doctor/pages/DoctorProfilePage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/assistant/pages/AssistantSettingsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/reports/pages/ReportsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/recalls/pages/RecallsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/audit-log/pages/AuditLogPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/documents/pages/DocumentNewPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/booking/pages/PublicBookingPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/index.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/reminders/pages/PublicReminderPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/billing/lib/extractionDraft.test.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/appointments/calendar/lib/calendarEvents.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/appointments/calendar/pages/AppointmentCalendarPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/charts/AppointmentsTrendChart.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        }
+      }
+    },
+    "5fbc9ccc-c06d-4706-8c6b-0fd8882e82c8": {
+      "updatedAt": 1789004268537,
+      "files": {
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/lib/isoDate.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/hooks/useSlidingActivePill.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/calendar.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/date-picker.tsx": {
+          "editCount": 4,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/time-picker.tsx": {
+          "editCount": 4,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/progress.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/scroll-area.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/radio-group.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/alert-dialog.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/stepper.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/sliding-active-pill.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/sliding-tabs.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/upload-preview-action-bar.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/file-dropzone.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/button-group.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/badge.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/switch.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/sonner.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/tabs.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/checkbox.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/button.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/input.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/ui/textarea.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/styles.css": {
+          "editCount": 8,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/appointments/pages/AppointmentNewPage.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/patients/pages/PatientNewPage.tsx": {
+          "editCount": 6,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/soap/pages/SoapNotePage.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/booking/pages/PublicBookingPage.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/reports/pages/ReportsPage.tsx": {
+          "editCount": 5,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/audit-log/pages/AuditLogPage.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/pages/OnboardingPage.tsx": {
+          "editCount": 6,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/onboarding/components/HoursStep.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/doctor/pages/DoctorProfilePage.tsx": {
+          "editCount": 4,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/billing/pages/InvoiceNewPage.tsx": {
+          "editCount": 6,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/appointments/pages/AppointmentListPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/waiting-room/components/WaitingRoomBoard.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/e2e/helpers/onboarding.ts": {
+          "editCount": 1,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/lib/theme/preferences.ts": {
+          "editCount": 2,
+          "findings": []
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/theme/ThemeToggle.tsx": {
+          "editCount": 2,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/__root.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/AppHeader.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/AppSidebar.tsx": {
+          "editCount": 4,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/charts/AppointmentsTrendChart.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/routes/index.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/dashboard/pages/DashboardOverviewPage.tsx": {
+          "editCount": 3,
+          "findings": [],
+          "cleanAcked": true
+        }
+      }
+    },
+    "25d0a655-8f3b-4603-b649-ced2d1ca3709": {
+      "updatedAt": 1788981381965,
+      "files": {
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/DashboardShell.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/components/layout/PageHeader.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/dashboard/pages/DashboardOverviewPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/prescriptions/pages/PrescriptionNewPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/documents/pages/DocumentTemplatesPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/documents/pages/DocumentNewPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/audit-log/pages/AuditLogPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/recalls/pages/RecallsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/chart-search/pages/ChartSearchPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/reports/pages/ReportsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/assistant/pages/AssistantSettingsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/notifications/pages/NotificationsSettingsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/doctor/pages/DoctorProfilePage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        },
+        "/Users/michaelmanlulu/Projects/personal-projects/kame-desk/apps/web/src/features/settings/team/pages/TeamSettingsPage.tsx": {
+          "editCount": 1,
+          "findings": [],
+          "cleanAcked": true
+        }
+      }
+    }
+  }
+}
