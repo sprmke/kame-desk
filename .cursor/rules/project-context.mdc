@@ -27,6 +27,8 @@ alwaysApply: true
 
 Stale if a skill mentions Supabase, Deno edge functions, tRPC, Drizzle, or Bun-as-package-manager for **this** repo — those belong to the sibling `kame-homes` project, not here.
 
+**Clinic-facing MVP (v1.2):** one doctor + secretary. Do not add multi-doctor, rooms, waitlist, org/add-clinic, patient portal, or recall-campaign UI unless `docs/mvp.md` moves them out of §14. APIs for those modules stay.
+
 ## Tooling index
 
 - Rules/skills: `.cursor/rules/README.md`
