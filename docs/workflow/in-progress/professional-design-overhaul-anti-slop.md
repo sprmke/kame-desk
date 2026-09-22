@@ -31,3 +31,5 @@ Executing the professional design overhaul and anti-slop system per plan:
 ### Next: Phase 44
 
 Hierarchy and density: surface variants, kill card soup, density tokens, Lucide rules, replace banned icons in nav/chrome. Do not pick a brand hue here.
+
+**Scope lock (solo-clinic MVP):** only kept daily-loop screens. Skip rooms, organization, memberships, patient portal, recall hub, and per-doctor calendar columns.

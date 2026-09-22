@@ -1,6 +1,6 @@
 # Patient portal (`/patient-portal/:slug/*`)
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Public routes still exist so old links do not hard-crash; clinic staff nav does not link here. Phase 2.
 
 ## Behavior
 

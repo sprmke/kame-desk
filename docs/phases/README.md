@@ -1,6 +1,6 @@
 # DoctorDesk — build plan (phases)
 
-This is the **execution plan** for building DoctorDesk from an empty `apps/` tree to the production-ready MVP defined in [`../mvp.md`](../mvp.md). It sequences every module in that PRD, plus the AI Clinic Assistant (§9), into buildable, independently-shippable phases.
+This is the **execution plan** for building DoctorDesk from an empty `apps/` tree to the production-ready MVP defined in [`../mvp.md`](../mvp.md) (v1.2: **one doctor + secretary**). Phases 0–43 already shipped modules; extra surfaces (multi-doctor UI, portal, org switcher, and similar) stay in code but are **not clinic-facing** until Phase 2. Phases 44–47 redesign **kept** daily-loop screens only.
 
 **How to use this**
 
@@ -65,7 +65,7 @@ This is the **execution plan** for building DoctorDesk from an empty `apps/` tre
 | 46  | Screen redesign: Patients, Clinical, Billing, Documents, Insights, Settings, Assistant                   | Not started | 44         |
 | 47  | Native mobile feel + accessibility gates                                                                 | Not started | 45, 46     |
 
-Phases 20–32: [`docs/workflow/planned/ground-up-app-redesign-and-platform-admin.md`](../workflow/planned/ground-up-app-redesign-and-platform-admin.md). Phases 33–39: [`docs/workflow/planned/clinic-software-market-research-feature-gaps.md`](../workflow/planned/clinic-software-market-research-feature-gaps.md). Phases 40–41: [`docs/workflow/planned/in-app-notifications.md`](../workflow/planned/in-app-notifications.md), [`docs/workflow/planned/multi-clinic-organizations.md`](../workflow/planned/multi-clinic-organizations.md). Phases 42–47: [`docs/workflow/planned/professional-design-overhaul-anti-slop.md`](../workflow/planned/professional-design-overhaul-anti-slop.md) (tracker: [`docs/workflow/in-progress/professional-design-overhaul-anti-slop.md`](../workflow/in-progress/professional-design-overhaul-anti-slop.md)). Write a full phase file before coding each one. Phase files for 45–47 do not exist yet.
+Phases 20–32: [`docs/workflow/planned/ground-up-app-redesign-and-platform-admin.md`](../workflow/planned/ground-up-app-redesign-and-platform-admin.md). Phases 33–39: [`docs/workflow/planned/clinic-software-market-research-feature-gaps.md`](../workflow/planned/clinic-software-market-research-feature-gaps.md). Phases 40–41: [`docs/workflow/planned/in-app-notifications.md`](../workflow/planned/in-app-notifications.md), [`docs/workflow/planned/multi-clinic-organizations.md`](../workflow/planned/multi-clinic-organizations.md). Phases 42–47: [`docs/workflow/planned/professional-design-overhaul-anti-slop.md`](../workflow/planned/professional-design-overhaul-anti-slop.md) (tracker: [`docs/workflow/in-progress/professional-design-overhaul-anti-slop.md`](../workflow/in-progress/professional-design-overhaul-anti-slop.md)). Solo-clinic MVP reset: [`docs/workflow/planned/solo-clinic-mvp-scope.md`](../workflow/planned/solo-clinic-mvp-scope.md). Write a full phase file before coding each one. Phase files for 45–47 do not exist yet. **44–47 only redesign screens that remain clinic-facing in `mvp.md` v1.2.** Do not polish hidden Phase 2 surfaces (rooms, org, portal, recalls hub, memberships, patient booking chatbot).
 
 Status values: `Not started` → `In progress` → `Blocked (<reason>)` → `Done`. Update this table in the same commit that changes a phase's status.
 
@@ -75,7 +75,7 @@ These are not repeated in full in every phase file — read them once, they gove
 
 1. **Docs are the source of truth** — see `CLAUDE.md` § Docs are the source of truth. Every phase's "Docs to update" section is the minimum; if a phase touches something not listed there (a new env var, a new route), update the matching doc anyway.
 2. **RBAC is re-checked server-side on every endpoint** — never rely on the UI hiding a button. See `docs/architecture/security-compliance.md`.
-3. **Multi-doctor / clinic scoping from day one** — every table that isn't global carries `clinic_id`; every query is scoped through the authenticated user's clinic membership. Never trust a client-supplied `clinic_id`. See `docs/architecture/data-model.md`.
+3. **Clinic scoping from day one** — every table that isn't global carries `clinic_id`; every query is scoped through the authenticated user's clinic membership. Never trust a client-supplied `clinic_id`. See `docs/architecture/data-model.md`. **Clinic-facing MVP is one doctor.** `doctor_id` stays on appointments; per-doctor columns, extra-doctor invite, rooms, and waitlist are Phase 2 UI.
 4. **No business logic in `apps/web`** — TanStack Start owns UI only; FastAPI owns all business logic, including anything that looks like a "server function" shortcut.
 5. **AI output is always a draft a human confirms** — no phase ships an AI feature that writes clinical, financial, or patient-facing data without an explicit human confirm step. See `docs/architecture/ai-clinic-assistant.md`.
 6. **Alembic migrations are additive** — never edit a shipped migration under `apps/api/migrations/versions/`; add a new one.

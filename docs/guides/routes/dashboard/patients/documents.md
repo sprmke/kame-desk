@@ -34,4 +34,4 @@
 
 ## Host-facing knowledge
 
-From a patient chart, tap **Document**, choose a template, review the filled text, then **Issue**. Referral letters also ask who you are sending to, and keep status after issue. The PDF is saved to the patient's files automatically. Issue needs the doctor's PRC license and signature on file (same completeness bar as a prescription).
+From a patient chart, tap **Document**, choose a template, review the filled text, then **Issue**. Certificates and referral letters then sit on **Documents**. The PDF is also saved under **Records → Files**. Issue needs the doctor's PRC license and signature on file (same completeness bar as a prescription). Referral letters also ask who you are sending to, and keep status after issue.

@@ -10,6 +10,8 @@
 
 Replace card-as-page-structure with the container escalation ladder, an explicit density mode, and a status/icon language that can be scanned. Do not ratify a brand hue in this phase; tokens stay on the holding TailAdmin ramp until the Today visual pilot (Phase 45).
 
+**Scope lock (solo-clinic MVP):** only clinic-facing daily-loop screens. Do not polish rooms, org switcher, memberships, portal, recall hub, chart-search, or per-doctor calendar columns. Those are Phase 2.
+
 activity-log: N/A — presentation layer. No clinic/patient/appointment writes unless a list starts showing a field the API already returns.
 
 ## Tasks

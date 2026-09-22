@@ -58,5 +58,21 @@ class SpecialtyTemplateRead(BaseModel):
     description: str | None = None
 
 
+class PatientChartRead(BaseModel):
+    appointment_id: uuid.UUID
+    soap_note_id: uuid.UUID
+    version_number: int
+    visit_start: datetime
+    reason_for_visit: str | None = None
+    diagnosis_primary: str | None = None
+    signed_at: datetime | None = None
+    specialty_template_key: str | None = None
+
+
+class PatientChartListResponse(BaseModel):
+    items: list[PatientChartRead]
+    total: int
+
+
 class SoapDraftRequest(BaseModel):
     input_text: str = Field(min_length=1, max_length=2000)

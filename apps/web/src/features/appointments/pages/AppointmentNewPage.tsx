@@ -78,11 +78,6 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
     queryFn: () => api.listDoctors(clinicId),
   });
 
-  const { data: rooms } = useQuery({
-    queryKey: ["rooms", clinicId],
-    queryFn: () => api.listRooms(clinicId),
-  });
-
   const { data: fees } = useQuery({
     queryKey: ["service-fees", clinicId],
     queryFn: () => api.listServiceFees(clinicId),
@@ -93,6 +88,12 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
   const watchDate = form.watch("date");
   const watchTime = form.watch("time");
   const watchDuration = form.watch("duration_minutes");
+
+  useEffect(() => {
+    if (doctors?.length === 1 && !form.getValues("doctor_id")) {
+      form.setValue("doctor_id", doctors[0].id);
+    }
+  }, [doctors, form]);
 
   const doctorOptions = useMemo(
     () =>
@@ -172,7 +173,7 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
       return api.createAppointment({
         patient_id: values.patient_id,
         doctor_id: values.doctor_id,
-        room_id: values.room_id || undefined,
+        room_id: undefined,
         service_fee_id: values.service_fee_id || undefined,
         scheduled_start,
         scheduled_end,
@@ -235,20 +236,22 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
                   {form.formState.errors.patient_id?.message}
                 </FieldError>
               </Field>
-              <Field>
-                <FieldLabel htmlFor="doctor_id" label="Doctor" required />
-                <Combobox
-                  id="doctor_id"
-                  value={form.watch("doctor_id")}
-                  onValueChange={(value) => form.setValue("doctor_id", value)}
-                  options={doctorOptions}
-                  placeholder="Select doctor"
-                  searchPlaceholder="Search doctors"
-                />
-                <FieldError>
-                  {form.formState.errors.doctor_id?.message}
-                </FieldError>
-              </Field>
+              {(doctors?.length ?? 0) > 1 ? (
+                <Field>
+                  <FieldLabel htmlFor="doctor_id" label="Doctor" required />
+                  <Combobox
+                    id="doctor_id"
+                    value={form.watch("doctor_id")}
+                    onValueChange={(value) => form.setValue("doctor_id", value)}
+                    options={doctorOptions}
+                    placeholder="Select doctor"
+                    searchPlaceholder="Search doctors"
+                  />
+                  <FieldError>
+                    {form.formState.errors.doctor_id?.message}
+                  </FieldError>
+                </Field>
+              ) : null}
             </div>
 
             {(fees ?? []).length > 0 && (
@@ -275,36 +278,16 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
               </Field>
             )}
 
-            {(rooms ?? []).filter((r) => r.is_active).length > 0 && (
-              <Field>
-                <FieldLabel htmlFor="room_id" label="Room" />
-                <Select
-                  value={form.watch("room_id") || ""}
-                  onValueChange={(value) => form.setValue("room_id", value)}
-                >
-                  <SelectTrigger id="room_id" className="w-full">
-                    <SelectValue placeholder="Optional" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(rooms ?? [])
-                      .filter((r) => r.is_active)
-                      .map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          {r.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-
             <div className="grid gap-4 sm:grid-cols-3">
               <Field>
                 <FieldLabel htmlFor="date" label="Date" required />
                 <DatePicker
                   id="date"
-                  {...form.register("date")}
+                  name="date"
                   value={watchDate}
+                  onValueChange={(iso) =>
+                    form.setValue("date", iso, { shouldValidate: true })
+                  }
                 />
                 <FieldError>{form.formState.errors.date?.message}</FieldError>
               </Field>

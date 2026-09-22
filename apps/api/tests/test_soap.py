@@ -282,6 +282,59 @@ async def test_reception_can_read_when_clinic_opts_in(client: AsyncClient, monke
 
 
 @pytest.mark.asyncio
+async def test_patient_charts_lists_saved_notes_only(client: AsyncClient):
+    ctx = await _setup_clinic(client)
+    patient = await client.post(
+        "/api/v1/patients",
+        headers=ctx["headers"],
+        json={"full_name": "Chart List Patient"},
+    )
+    patient_id = patient.json()["id"]
+    start = datetime(2026, 10, 14, 2, 0, tzinfo=UTC)
+    with_note = await client.post(
+        "/api/v1/appointments",
+        headers=ctx["headers"],
+        json={
+            "patient_id": patient_id,
+            "doctor_id": ctx["doctor_id"],
+            "scheduled_start": start.isoformat(),
+            "scheduled_end": (start + timedelta(minutes=30)).isoformat(),
+            "reason_for_visit": "Cough",
+        },
+    )
+    without_note = await client.post(
+        "/api/v1/appointments",
+        headers=ctx["headers"],
+        json={
+            "patient_id": patient_id,
+            "doctor_id": ctx["doctor_id"],
+            "scheduled_start": (start + timedelta(hours=2)).isoformat(),
+            "scheduled_end": (start + timedelta(hours=2, minutes=30)).isoformat(),
+            "reason_for_visit": "Follow-up",
+        },
+    )
+    assert with_note.status_code == 200
+    assert without_note.status_code == 200
+    saved = await client.post(
+        f"/api/v1/appointments/{with_note.json()['id']}/soap-notes",
+        headers=ctx["headers"],
+        json=SOAP_BODY,
+    )
+    assert saved.status_code == 200
+
+    listed = await client.get(
+        f"/api/v1/patients/{patient_id}/charts",
+        headers=ctx["headers"],
+    )
+    assert listed.status_code == 200
+    items = listed.json()["items"]
+    assert listed.json()["total"] == 1
+    assert len(items) == 1
+    assert items[0]["appointment_id"] == with_note.json()["id"]
+    assert items[0]["reason_for_visit"] == "Cough"
+
+
+@pytest.mark.asyncio
 async def test_specialty_templates_list(client: AsyncClient):
     ctx = await _setup_clinic(client)
     res = await client.get("/api/v1/specialty-templates", headers=ctx["headers"])

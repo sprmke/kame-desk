@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const TABS: { label: string; section: PatientDetailSection; suffix: string }[] =
   [
     { label: "Overview", section: "overview", suffix: "" },
+    { label: "Records", section: "records", suffix: "/records" },
     { label: "Timeline", section: "timeline", suffix: "/timeline" },
     {
       label: "Prescriptions",
@@ -14,7 +15,6 @@ const TABS: { label: string; section: PatientDetailSection; suffix: string }[] =
       suffix: "/prescriptions",
     },
     { label: "Billing", section: "billing", suffix: "/billing" },
-    { label: "Orders", section: "orders", suffix: "/orders" },
     { label: "Documents", section: "documents", suffix: "/documents" },
     { label: "Activity", section: "activity", suffix: "/activity" },
   ];
@@ -53,6 +53,9 @@ export function PatientDetailSubNav({ patientId }: { patientId: string }) {
             to={to}
             params={{ patientId }}
             ref={setItemRef(tab.section)}
+            activeOptions={
+              tab.section === "overview" ? { exact: true } : undefined
+            }
             className={cn(
               "relative z-10 inline-flex h-full items-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors duration-150 ease-theme",
               active

@@ -138,11 +138,6 @@ export const scheduleTabs: SectionTab[] = [
 
 export const patientsTabs: SectionTab[] = [
   { label: "Directory", to: "/dashboard/patients" },
-  {
-    label: "Chart search",
-    to: "/dashboard/patients/chart-search",
-    permission: "patients:chart_search",
-  },
 ];
 
 export const billingTabs: SectionTab[] = [
@@ -154,7 +149,6 @@ export const billingTabs: SectionTab[] = [
 
 export const outreachTabs: SectionTab[] = [
   { label: "Reminders", to: "/dashboard/outreach/reminders" },
-  { label: "Recalls", to: "/dashboard/outreach/recalls" },
 ];
 
 export const documentsTabs: SectionTab[] = [

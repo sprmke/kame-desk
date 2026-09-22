@@ -1,11 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PatientDetailPage } from "@/features/patients/pages/PatientDetailPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/patients/$patientId/orders")({
-  component: RouteComponent,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: "/dashboard/patients/$patientId/records",
+      params,
+    });
+  },
 });
-
-function RouteComponent() {
-  const { patientId } = Route.useParams();
-  return <PatientDetailPage patientId={patientId} section="orders" />;
-}

@@ -1,22 +1,21 @@
 import { test, expect } from "@playwright/test";
-import { completeOnboarding } from "./helpers/onboarding";
+import {
+  completeOnboarding,
+  openSettings,
+  registerOwner,
+} from "./helpers/onboarding";
 
 test.describe("clinic assistant", () => {
   test("settings toggle and launcher render", async ({ page }) => {
-    const email = `owner-${Date.now()}@example.com`;
-    await page.goto("/register");
-    await page.getByLabel("Your name").fill("Dr E2E");
-    await page.getByLabel("Clinic name").fill("E2E Clinic");
-    await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password").fill("password123");
-    await page.getByRole("button", { name: "Create account" }).click();
+    await registerOwner(page);
     await completeOnboarding(page);
 
+    await openSettings(page);
     await page.getByRole("link", { name: "Assistant" }).click();
     await expect(
       page.getByRole("heading", { name: "Assistant" }),
     ).toBeVisible();
-    await expect(page.getByLabel("Enable clinic assistant")).toBeVisible();
+    await expect(page.getByText("Enable clinic assistant")).toBeVisible();
 
     await page
       .getByRole("navigation")

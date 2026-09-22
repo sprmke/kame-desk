@@ -24,6 +24,7 @@ from app.schemas.patient import (
     VitalsCreate,
     VitalsRead,
 )
+from app.schemas.soap import PatientChartListResponse
 from app.services import patient_integrity_service, patient_service
 from app.services.clinic_service import get_clinic
 from app.services.clinical_access import (
@@ -31,6 +32,7 @@ from app.services.clinical_access import (
     assert_soap_read,
 )
 from app.services.fhir_export_service import build_patient_fhir_bundle
+from app.services.soap_service import list_patient_charts
 from app.services.storage_service import create_presigned_download
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -122,6 +124,18 @@ async def get_patient_detail(
 ) -> PatientRead:
     patient = await patient_service.get_patient(db, clinic_id, patient_id)
     return PatientRead.model_validate(patient)
+
+
+@router.get("/{patient_id}/charts", response_model=PatientChartListResponse)
+async def get_patient_charts(
+    patient_id: uuid.UUID,
+    clinic_id: Annotated[uuid.UUID, Depends(_clinic_id)],
+    membership: ClinicStaff,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> PatientChartListResponse:
+    items = await list_patient_charts(db, clinic_id, patient_id, membership, user)
+    return PatientChartListResponse(items=items, total=len(items))
 
 
 @router.patch("/{patient_id}", response_model=PatientRead)

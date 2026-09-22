@@ -1,17 +1,37 @@
-import { test, expect } from "@playwright/test";
-import { completeOnboarding } from "./helpers/onboarding";
+import { test, expect, type Page } from "@playwright/test";
+import { completeOnboarding, registerOwner } from "./helpers/onboarding";
+
+function nextOpenDay(): Date {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  while (date.getDay() === 0) {
+    date.setDate(date.getDate() + 1);
+  }
+  return date;
+}
+
+async function pickDate(page: Page, date: Date) {
+  await page.getByLabel("Date").click();
+  const calendar = page.locator(".dd-datepicker");
+  await expect(calendar).toBeVisible();
+  const today = new Date();
+  if (
+    date.getMonth() !== today.getMonth() ||
+    date.getFullYear() !== today.getFullYear()
+  ) {
+    await page.getByRole("button", { name: "Go to the Next Month" }).click();
+  }
+  const day = String(date.getDate());
+  await calendar
+    .locator(".rdp-day:not(.rdp-outside) .rdp-day_button")
+    .filter({ hasText: new RegExp(`^${day}$`) })
+    .click();
+  await expect(page.getByLabel("Date")).not.toContainText("Pick a date");
+}
 
 test.describe("patients and appointments", () => {
   test("create patient and book appointment", async ({ page }) => {
-    const email = `owner-${Date.now()}@example.com`;
-    await page.goto("/register");
-    await page.getByLabel("Your name").fill("Dr E2E");
-    await page.getByLabel("Clinic name").fill("E2E Clinic");
-    await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password").fill("password123");
-    await page.getByRole("button", { name: "Create account" }).click();
-    await expect(page).toHaveURL(/\/onboarding/);
-
+    await registerOwner(page);
     await completeOnboarding(page);
 
     await page
@@ -19,7 +39,7 @@ test.describe("patients and appointments", () => {
       .getByRole("link", { name: "Patients" })
       .click();
     await expect(page).toHaveURL(/\/dashboard\/patients/);
-    await page.getByRole("link", { name: "New patient" }).click();
+    await page.getByRole("link", { name: "New patient" }).first().click();
     await page.getByLabel("Full name").fill("E2E Patient");
     await page.getByLabel("Contact").fill("09171234567");
     await page.getByLabel(/consents to clinic data processing/i).check();
@@ -29,14 +49,9 @@ test.describe("patients and appointments", () => {
     ).toBeVisible();
 
     await page.getByRole("link", { name: "Book" }).click();
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().slice(0, 10);
-    await page.locator('input[type="date"]').fill(dateStr);
-    await page.locator("select").first().selectOption({ index: 1 });
-    await page.locator("select").nth(1).selectOption({ index: 1 });
+    await pickDate(page, nextOpenDay());
     await page.getByRole("button", { name: "Book" }).click();
-    await expect(page).toHaveURL(/\/dashboard\/appointments/);
-    await expect(page.getByText("E2E Patient")).toBeVisible();
+    await expect(page).toHaveURL(/\/dashboard\/appointments\/?$/);
+    await expect(page.getByText("E2E Patient").first()).toBeVisible();
   });
 });

@@ -18,12 +18,12 @@ This is the living implementation reference for the flagship feature specified i
 
 |                       | Staff-facing (AI Clinic Assistant)                      | Patient-facing (booking/FAQ assistant)                                                                         |
 | --------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Phase                 | 16                                                      | 18                                                                                                             |
+| Phase                 | 16                                                      | 18 (code shipped; **hidden from `/book/:slug` in solo-clinic MVP**)                                            |
 | Audience              | Clinic staff/doctors, authenticated                     | Anonymous patients on the public booking page                                                                  |
 | Module                | `apps/api/app/ai/assistant/`                            | `apps/api/app/ai/patient_assistant/`                                                                           |
 | Safety model          | RBAC re-check + 3-tier risk model                       | Grounding-facts scoping + independent output safety check (no RBAC — caller is anonymous)                      |
 | Can write clinic data | Yes, tiered (Tier 1 auto, Tier 2 confirm)               | Yes, but only `book_public_appointment` — the exact same validated path Phase 4's public booking endpoint uses |
-| Visibility            | Floating launcher, dashboard only, hidden from patients | Embedded in the public booking page only                                                                       |
+| Visibility            | Floating launcher, dashboard only, hidden from patients | **Not shown** on the public booking page in MVP v1.2 (slot picker only). API remains.                          |
 
 ## Context model (staff assistant, Phase 16)
 
@@ -103,6 +103,8 @@ A guest-safe context object built server-side, containing only clinic-level, boo
 | `answer_clinic_faq`                                                       | read (public assistant)                                          | n/a                                                    | 18    | Shipped |
 | `generate_visit_summary`                                                  | read (produces a draft, never sends)                             | n/a                                                    | 18    | Shipped |
 | `check_eligibility_status`                                                | read (latest on-file HMO/PhilHealth check, no live insurer call) | 0                                                      | 33    | Shipped |
+
+`search_charts` stays as a staff tool. The clinic Chart search tab is out of MVP (v1.2); staff find a SOAP from Patients → chart → Records.
 
 **Never-build list (explicitly never registered as a tool, for either assistant):** delete a patient record, delete a chart version, bulk-message the entire patient list, any direct SQL/raw-query execution tool, any tool that changes another clinic's data, any tool that disables RBAC/audit logging.
 

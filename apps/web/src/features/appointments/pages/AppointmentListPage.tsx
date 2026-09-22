@@ -5,13 +5,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { CalendarDays, CalendarPlus, Notebook } from "lucide-react";
 import { api, type Appointment } from "@/lib/apiClient";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
-import { getClinicId } from "@/lib/auth";
-import { doctorLabel } from "@/lib/doctorLabel";
-import { DatePicker, DateRangePicker } from "@/components/ui/date-picker";
+import { DateRangePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -47,7 +45,6 @@ import {
 } from "@/components/mobile/SwipeRevealRow";
 import { useIsBelowLg, usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 import { useListSearch } from "@/hooks/useListSearch";
-import { PatientCombobox } from "@/features/patients/components/PatientCombobox";
 import {
   ListSortHeader,
   ListStack,
@@ -65,7 +62,7 @@ function formatManila(iso: string) {
 }
 
 const APPOINTMENT_VIEWS: ListViewMode[] = ["table", "list", "calendar"];
-const APPOINTMENT_EXTRA = ["status", "doctorId", "from", "to"] as const;
+const APPOINTMENT_EXTRA = ["status", "from", "to"] as const;
 const APPOINTMENT_SORTS = [
   { value: "start:asc", label: "Soonest" },
   { value: "start:desc", label: "Latest" },
@@ -165,7 +162,6 @@ function SwipeAppointmentRow({ appointment }: { appointment: Appointment }) {
 }
 
 export function AppointmentListPage() {
-  const clinicId = getClinicId()!;
   const qc = useQueryClient();
   const list = useListSearch({
     defaultSort: "start:asc",
@@ -173,22 +169,15 @@ export function AppointmentListPage() {
     extraKeys: APPOINTMENT_EXTRA,
   });
   const status = list.extras.status || "all";
-  const doctorId = list.extras.doctorId || "all";
   const fromDate = list.extras.from;
   const toDate = list.extras.to;
   const isCalendar = list.view === "calendar";
-
-  const { data: doctors } = useQuery({
-    queryKey: ["doctors", clinicId],
-    queryFn: () => api.listDoctors(clinicId),
-  });
 
   const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: [
       "appointments",
       list.q,
       status,
-      doctorId,
       fromDate,
       toDate,
       list.page,
@@ -200,7 +189,6 @@ export function AppointmentListPage() {
       api.listAppointments({
         q: list.q || undefined,
         status: status === "all" ? undefined : status,
-        doctor_id: doctorId === "all" ? undefined : doctorId,
         start_from: fromDate
           ? new Date(`${fromDate}T00:00:00+08:00`).toISOString()
           : undefined,
@@ -222,11 +210,6 @@ export function AppointmentListPage() {
       }),
   });
 
-  const { data: waitlist } = useQuery({
-    queryKey: ["waitlist"],
-    queryFn: () => api.listWaitlist({ status: "waiting" }),
-  });
-
   const confirmPublic = useMutation({
     mutationFn: (id: string) =>
       api.patchAppointment(id, { appointment_status: "Confirmed" }),
@@ -235,37 +218,11 @@ export function AppointmentListPage() {
     },
   });
 
-  const [waitPatient, setWaitPatient] = useState("");
-  const [waitDoctor, setWaitDoctor] = useState("any");
-  const [waitDate, setWaitDate] = useState("");
-
-  const addWaitlist = useMutation({
-    mutationFn: () =>
-      api.createWaitlist({
-        patient_id: waitPatient,
-        doctor_id: waitDoctor === "any" ? undefined : waitDoctor,
-        preferred_date: waitDate || undefined,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["waitlist"] });
-      setWaitPatient("");
-      setWaitDate("");
-    },
-  });
-
-  const dropWaitlist = useMutation({
-    mutationFn: (id: string) => api.patchWaitlist(id, { status: "cancelled" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["waitlist"] }),
-  });
-
   const isBelowLg = useIsBelowLg();
   const reducedMotion = usePrefersReducedMotion();
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
-  const refineCount =
-    (status !== "all" ? 1 : 0) +
-    (doctorId !== "all" ? 1 : 0) +
-    (fromDate || toDate ? 1 : 0);
+  const refineCount = (status !== "all" ? 1 : 0) + (fromDate || toDate ? 1 : 0);
 
   const statusSelect = (
     <Select
@@ -289,38 +246,15 @@ export function AppointmentListPage() {
   );
 
   const refineFilters = (
-    <>
-      <div className="flex flex-col gap-1.5">
-        <Label>Doctor</Label>
-        <Select
-          value={doctorId}
-          onValueChange={(value) =>
-            list.setParams({ doctorId: value, page: 1 })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            {(doctors ?? []).map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {doctorLabel(d)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="appointment-date-range">Date range</Label>
-        <DateRangePicker
-          id="appointment-date-range"
-          from={fromDate}
-          to={toDate}
-          onValueChange={(range) => list.setParams({ ...range, page: 1 })}
-        />
-      </div>
-    </>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="appointment-date-range">Date range</Label>
+      <DateRangePicker
+        id="appointment-date-range"
+        from={fromDate}
+        to={toDate}
+        onValueChange={(range) => list.setParams({ ...range, page: 1 })}
+      />
+    </div>
   );
 
   return (
@@ -367,74 +301,6 @@ export function AppointmentListPage() {
         </Card>
       )}
 
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Waitlist</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <form
-            className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!waitPatient) return;
-              addWaitlist.mutate();
-            }}
-          >
-            <PatientCombobox
-              value={waitPatient}
-              onValueChange={setWaitPatient}
-              disabled={addWaitlist.isPending}
-            />
-            <Select value={waitDoctor} onValueChange={setWaitDoctor}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="any">Any doctor</SelectItem>
-                {(doctors ?? []).map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {doctorLabel(d)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <DatePicker value={waitDate} onValueChange={setWaitDate} />
-            <Button type="submit" size="sm" disabled={addWaitlist.isPending}>
-              Add
-            </Button>
-          </form>
-          {(waitlist ?? []).length === 0 ? (
-            <EmptyState
-              icon={CalendarDays}
-              heading="No waitlist entries"
-              size="sm"
-            />
-          ) : (
-            <ul className="flex flex-col divide-y divide-border text-sm">
-              {waitlist?.map((w) => (
-                <li
-                  key={w.id}
-                  className="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0"
-                >
-                  <span>
-                    {w.patient_name ?? "Patient"}
-                    {w.doctor_name ? ` · ${w.doctor_name}` : ""}
-                    {w.preferred_date ? ` · ${w.preferred_date}` : ""}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => dropWaitlist.mutate(w.id)}
-                  >
-                    Remove
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-
       <ManagedList
         entityLabel="appointments"
         total={total}
@@ -457,7 +323,6 @@ export function AppointmentListPage() {
         onClearFilters={() =>
           list.setParams({
             status: undefined,
-            doctorId: undefined,
             from: undefined,
             to: undefined,
             page: 1,

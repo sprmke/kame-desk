@@ -15,13 +15,6 @@ import {
   ResponsiveModalHeader,
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type InviteValues = {
   email: string;
@@ -59,11 +52,13 @@ export function InviteTeammateModal({ clinicId, open, onOpenChange }: Props) {
     <ResponsiveModal open={open} onOpenChange={setOpen}>
       <ResponsiveModalContent className="max-w-sm">
         <ResponsiveModalHeader>
-          <ResponsiveModalTitle>Invite a teammate</ResponsiveModalTitle>
+          <ResponsiveModalTitle>Invite secretary</ResponsiveModalTitle>
         </ResponsiveModalHeader>
         <form
           className="flex flex-col gap-4"
-          onSubmit={form.handleSubmit((v) => invite.mutate(v))}
+          onSubmit={form.handleSubmit((v) =>
+            invite.mutate({ ...v, role: "reception" }),
+          )}
         >
           <Field>
             <FieldLabel htmlFor="invite-email" label="Email" required />
@@ -75,24 +70,7 @@ export function InviteTeammateModal({ clinicId, open, onOpenChange }: Props) {
             />
             <FieldError>{form.formState.errors.email?.message}</FieldError>
           </Field>
-          <Field>
-            <FieldLabel htmlFor="invite-role" label="Role" />
-            <Select
-              value={form.watch("role")}
-              onValueChange={(v) =>
-                form.setValue("role", v as InviteValues["role"])
-              }
-            >
-              <SelectTrigger id="invite-role" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="reception">Reception</SelectItem>
-                <SelectItem value="doctor">Doctor</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
+          <input type="hidden" {...form.register("role")} />
           <FieldError>
             {invite.error instanceof Error ? invite.error.message : null}
           </FieldError>

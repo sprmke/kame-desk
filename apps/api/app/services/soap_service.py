@@ -5,10 +5,25 @@ from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import ActivityLog, Clinic, ClinicMembership, DoctorProfile, Patient, SoapNote, User
-from app.schemas.soap import SoapNoteCreate
+from app.models import (
+    ActivityLog,
+    Appointment,
+    Clinic,
+    ClinicMembership,
+    DoctorProfile,
+    Patient,
+    SoapNote,
+    User,
+)
+from app.schemas.soap import PatientChartRead, SoapNoteCreate
 from app.services.appointment_service import get_appointment
-from app.services.clinical_access import assert_soap_write
+from app.services.clinic_service import get_clinic
+from app.services.clinical_access import (
+    assert_soap_read,
+    assert_soap_write,
+    get_doctor_profile_for_user,
+)
+from app.services.patient_service import get_patient
 
 
 async def _next_version(db: AsyncSession, appointment_id: uuid.UUID) -> int:
@@ -291,3 +306,65 @@ async def get_soap_pdf_bytes(
     row = doctor_result.one_or_none()
     doctor_name = row[1].full_name if row else "Doctor"
     return render_soap_pdf(clinic, patient, note, doctor_name)
+
+
+async def list_patient_charts(
+    db: AsyncSession,
+    clinic_id: uuid.UUID,
+    patient_id: uuid.UUID,
+    membership: ClinicMembership,
+    actor: User,
+) -> list[PatientChartRead]:
+    patient = await get_patient(db, clinic_id, patient_id)
+    clinic = await get_clinic(db, clinic_id)
+    await assert_soap_read(db, membership, clinic)
+
+    latest = (
+        select(
+            SoapNote.appointment_id.label("appointment_id"),
+            func.max(SoapNote.version_number).label("max_version"),
+        )
+        .where(
+            SoapNote.clinic_id == clinic_id,
+            SoapNote.patient_id == patient.id,
+        )
+        .group_by(SoapNote.appointment_id)
+        .subquery()
+    )
+
+    q = (
+        select(SoapNote, Appointment)
+        .join(
+            latest,
+            (SoapNote.appointment_id == latest.c.appointment_id)
+            & (SoapNote.version_number == latest.c.max_version),
+        )
+        .join(Appointment, Appointment.id == SoapNote.appointment_id)
+        .where(
+            SoapNote.clinic_id == clinic_id,
+            SoapNote.patient_id == patient.id,
+        )
+        .order_by(Appointment.scheduled_start.desc())
+    )
+
+    if membership.role == "doctor":
+        doctor = await get_doctor_profile_for_user(db, actor, clinic_id)
+        if doctor is None:
+            return []
+        q = q.where(SoapNote.doctor_id == doctor.id)
+
+    result = await db.execute(q)
+    rows = result.all()
+    return [
+        PatientChartRead(
+            appointment_id=note.appointment_id,
+            soap_note_id=note.id,
+            version_number=note.version_number,
+            visit_start=appt.scheduled_start,
+            reason_for_visit=appt.reason_for_visit,
+            diagnosis_primary=note.diagnosis_primary,
+            signed_at=note.signed_at,
+            specialty_template_key=note.specialty_template_key,
+        )
+        for note, appt in rows
+    ]

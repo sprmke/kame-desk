@@ -1,12 +1,14 @@
 # `/dashboard/settings/organization`
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Staff route redirects to Billing plan. APIs remain for Phase 2 multi-clinic.
+
+Org owners do not see this page in the solo-clinic MVP. Super Admin still manages tenants on `/platform`.
 
 ## Behavior
 
-Org owners see their organization name, subscription plan/status, enrolled clinics (with enrollment badges), and an **Add clinic** action. Staff who are not org owners do not see this page (gated by `settings:organization` on `/auth/me`).
+`/dashboard/settings/organization` and `/dashboard/settings/organization/clinics/new` redirect to `/dashboard/settings/plan`. Add clinic is hidden in this MVP. Org APIs stay for Phase 2.
 
-Adding a clinic creates it under the org with `pending_enrollment`. The owner is redirected to `/onboarding` for the new clinic. Super Admin activates enrollment via `/platform/tenants/{org_id}`.
+Adding a clinic (API) creates it under the org with `pending_enrollment`. Super Admin activates enrollment via `/platform/tenants/{org_id}`.
 
 ## Save paths
 
@@ -27,7 +29,4 @@ Adding a clinic creates it under the org with `pending_enrollment`. The owner is
 
 ## Host-facing knowledge
 
-- One account can own multiple organizations.
-- Each organization can have multiple clinics (plan limits apply).
-- New branches need platform activation before doctor invites and public booking go live.
-- Patient records do not sync across clinics in the same org.
+This MVP is one clinic. Organization and add-clinic screens are hidden. Super Admin still manages tenants on Platform.

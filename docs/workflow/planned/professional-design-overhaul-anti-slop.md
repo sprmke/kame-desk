@@ -1,6 +1,8 @@
 # Professional design overhaul (anti-slop)
 
 **Status:** In progress. Phases 42–43 done (waiting-room Kanban retained; brand hue not ratified; anti-slop rule/skill/checker/harness shipped). Next: Phase 44 Hierarchy and density. Tracker: [`docs/workflow/in-progress/professional-design-overhaul-anti-slop.md`](../in-progress/professional-design-overhaul-anti-slop.md). Phases 44–47 not started.
+
+**Solo-clinic MVP (v1.2):** redesign **kept** daily-loop screens only (Today, Schedule, Waiting, Patients, SOAP/Rx, Billing/HMO, Documents, Reminders, Reports, thin Settings, Assistant). Do not polish hidden Phase 2 surfaces (rooms, org/add-clinic, patient portal, recall hub, memberships, patient booking chatbot, per-doctor calendar columns). Multi-doctor calendar columns are Phase 2.
 **Scope:** Presentation layer of `apps/web` + the agent rules/skills/docs that govern it. No API, schema, or business-logic changes.
 **Goal:** The product should read as designed by a person who cares, working in a clinical domain, and not as a Tailwind admin template with a healthcare noun substituted in.
 
@@ -702,8 +704,8 @@ Each screen gets: a hierarchy decision, real domain data, correct density, and i
 - [ ] FullCalendar styling pass: event chips, current-time indicator, working-hours vs closed shading, doctor color coding, overlap handling, all-day/blocked time. Borrow the verified patterns from §3.4: appointment **type** by color, alerts by block **style**, unavailable time as solid untitled grey, and appointment blocks never exceeding 50% of column width so overlaps stay readable.
 - [ ] Adopt Jane App's figure/ground inversion: give **bookable shift time a tinted background and leave unavailable time plain white**, so the eye reads bookable time as the figure.
 - [ ] Add a **pop-out** for appointment detail rather than navigating away, and include the fields staff need while the patient is standing there: phone, email, balance, and next scheduled visit. That last point is a post-launch lesson from the Athelas case study, not a guess.
-- [ ] Target 5+ providers visible at once on desktop. This is the "birds eye view of the day ahead" that clinical staff ask for and that the current padding prevents.
-- [ ] Day view for the front desk; week view for planning; resource/doctor columns for multi-doctor clinics.
+- [ ] Target a usable one-doctor day view on desktop. Multi-provider "5+ columns" is Phase 2.
+- [ ] Day view for the front desk; week view for planning. Resource/doctor columns are **Phase 2 (multi-doctor)**, not this overhaul.
 - [ ] Add a keyboard density control in the spirit of Jane's number keys 1–7 setting how many upcoming days are shown. Cheap, and their docs call it a staff favourite.
 - [ ] Appointment event content must be legible at real density (patient, time, type, status) without hover, since tablets have no hover.
 - [ ] `AppointmentNewPage` (402 lines) — form craft pass: logical grouping, conflict feedback shown inline at the moment of choosing a slot rather than on submit, slot picking instead of raw time entry, recurring-series scope choices stated in plain language.
@@ -746,7 +748,7 @@ Each screen gets: a hierarchy decision, real domain data, correct density, and i
 - [ ] Documents generate/templates: template editor and preview need to look like the printed output.
 - [ ] Insights/Reports: chart styling pass (ApexCharts theme bridge), correct axis formatting, no chart junk, no gratuitous chart types, empty and single-data-point states.
 - [ ] Activity log: dense, scannable, monospace where it helps; this is an audit surface and should look like one.
-- [ ] Settings: the B1 settings-row conversion, plus grouping review across 11 settings pages.
+- [ ] Settings: the B1 settings-row conversion, plus grouping review across **kept** settings pages (account, doctor, clinic details/hours/branding/receipts, services, payers, templates, team, notifications, assistant, plan). Skip rooms, organization, memberships.
 - [ ] Platform/super-admin: deliberately distinct from clinic UI so an operator never confuses the two contexts.
 
 **D9. AI assistant surface**
@@ -971,5 +973,6 @@ Each candidate ships with a written rationale against the brief ("calm, clinical
 
 - No API, schema, or business-logic changes. This is entirely `apps/web` plus docs and agent tooling.
 - No new features. Where a screen is missing data (elapsed wait time, patient balance in a list), the data already exists in the API; if it does not, that becomes a separate scoped item rather than growing this plan.
+- Do not redesign screens hidden in `docs/mvp.md` §14 (rooms, org, portal, recalls hub, memberships, public booking chatbot, per-doctor resource calendars).
 - No decorative motion, gradients, glassmorphism, bento grids, or illustration sets. "Professional" here means clinical confidence, not visual novelty. The existing prohibition in `motion.mdc` stands.
 - No component-library migration. shadcn/ui + Radix + `cva` stays; what changes is the taste layer on top of it.

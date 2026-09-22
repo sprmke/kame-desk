@@ -323,6 +323,22 @@ export type SoapNoteListResponse = {
   latest_version: number | null;
 };
 
+export type PatientChart = {
+  appointment_id: string;
+  soap_note_id: string;
+  version_number: number;
+  visit_start: string;
+  reason_for_visit: string | null;
+  diagnosis_primary: string | null;
+  signed_at: string | null;
+  specialty_template_key: string | null;
+};
+
+export type PatientChartListResponse = {
+  items: PatientChart[];
+  total: number;
+};
+
 export type ConsultationRecording = {
   id: string;
   appointment_id: string;
@@ -1451,6 +1467,8 @@ export const api = {
       `/appointments/${appointmentId}/soap-notes${qs}`,
     );
   },
+  listPatientCharts: (patientId: string) =>
+    apiFetch<PatientChartListResponse>(`/patients/${patientId}/charts`),
   createSoapNote: (appointmentId: string, body: Record<string, unknown>) =>
     apiFetch<SoapNote>(`/appointments/${appointmentId}/soap-notes`, {
       method: "POST",

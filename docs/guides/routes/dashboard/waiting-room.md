@@ -9,7 +9,7 @@
   - **Desktop (`lg+`):** Four-column interactive board with drag-and-drop (`KanbanBoard` / `@dnd-kit`). Staff can drag patient cards between columns (`Scheduled` → `Arrived` → `In consultation` → `Completed`) or use the one-tap forward action button on each card. Invalid skips or backward transitions are rejected. Walk-in is opened via the top action button.
   - **Phone/tablet (`<lg`):** Segmented column switcher (`Scheduled`, `Arrived`, `In consult`, `Done`) with vertical list. An empty column uses a card. Staff can swipe a card left to reveal the forward action, or tap the action button directly. Walk-in opens a native bottom sheet (`ResponsiveModal`).
 - **Elapsed wait badges:** Cards in Arrived and In consultation show a live wait duration (`14m wait`, `1h 5m wait`) with `tabular-nums`, updating every 15 seconds. Urgency: green under 15m, outline 15–29m, amber warning at 30m+. Arrived column sorts longest wait first. Cards show initials plus the patient name.
-- **Doctor filter:** When two or more doctors appear in today's queue, filter pills (`All`, each doctor + count) sit above the board. Choice persists in `localStorage` (`dd-waiting-room-doctor`).
+- **Doctor filter:** Hidden unless two or more doctors appear in today's queue (Phase 2 multi-doctor). Choice still persists in `localStorage` if shown.
 - **Arrival feedback:** Remote `visit.arrived` notifications already toast via the Notification Center. A soft two-tone chime plays with that toast unless reduced motion is on or `localStorage` `dd-waiting-room-chime=off`. The actor who marked Arrived does not hear their own toast/chime.
 
 ## Behavior

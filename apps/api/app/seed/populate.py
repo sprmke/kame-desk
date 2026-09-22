@@ -58,7 +58,6 @@ from app.models import (
     Prescription,
     PrescriptionItem,
     Reminder,
-    Room,
     ServiceFee,
     SoapNote,
     StaffInvitation,
@@ -70,16 +69,9 @@ from app.models.base import new_uuid
 from app.seed.constants import (
     ADMIN_EMAIL,
     BIR_COMPLIANCE,
-    BRANCH_CLINIC_NAME,
-    BRANCH_CLINIC_SLUG,
-    BRANCH_PATIENTS,
-    BRANCH_RECEIPT_NUMBERING,
-    BRANCH_SERVICE_FEES,
     CLINIC_NAME,
     CLINIC_SLUG,
     DEMO_PASSWORD,
-    DOCTOR2_EMAIL,
-    DOCTOR_B_EMAIL,
     GROWTH_SETTINGS,
     NOTIFICATION_PREFERENCES,
     ORG_NAME,
@@ -88,7 +80,6 @@ from app.seed.constants import (
     PATIENTS,
     PLATFORM_EMAIL,
     RECEIPT_NUMBERING,
-    RECEPTION_B_EMAIL,
     RECEPTION_EMAIL,
     SERVICE_FEES,
     SOAP_DIAGNOSES,
@@ -202,72 +193,25 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
         bir_compliance_config=BIR_COMPLIANCE,
         growth_settings=GROWTH_SETTINGS,
     )
-    branch = Clinic(
-        name=BRANCH_CLINIC_NAME,
-        slug=BRANCH_CLINIC_SLUG,
-        address="5F High Street South Corporate Plaza, BGC, Taguig",
-        contact_phone="+63281234568",
-        contact_email="bgc@makati-family-clinic.example",
-        license_info="DOH-LIC-2024-00124",
-        accreditation_info="PhilHealth accredited",
-        working_hours=WORKING_HOURS,
-        holiday_dates=["2026-12-25", "2026-12-30"],
-        default_appointment_duration_minutes=30,
-        onboarding_invite_skipped=True,
-        onboarding_completed_at=now,
-        public_booking_auto_confirm=True,
-        reception_can_view_soap=False,
-        receipt_numbering_config=BRANCH_RECEIPT_NUMBERING,
-        notification_preferences={
-            **NOTIFICATION_PREFERENCES,
-            "sender_name": BRANCH_CLINIC_NAME,
-        },
-        recording_consent_enabled=True,
-        ai_assistant_enabled=True,
-        brand_color="#1D4ED8",
-        organization_id=org.id,
-        plan_key="clinic",
-        status="active",
-        bir_compliance_config=BIR_COMPLIANCE,
-        growth_settings=GROWTH_SETTINGS,
-    )
-    db.add_all([clinic, branch])
+    db.add(clinic)
     await db.flush()
-    db.add_all(
-        [
-            OrganizationEnrolledClinic(
-                organization_id=org.id,
-                clinic_id=clinic.id,
-                status="active",
-                enrolled_at=now - timedelta(days=120),
-            ),
-            OrganizationEnrolledClinic(
-                organization_id=org.id,
-                clinic_id=branch.id,
-                status="active",
-                enrolled_at=now - timedelta(days=40),
-            ),
-        ]
+    db.add(
+        OrganizationEnrolledClinic(
+            organization_id=org.id,
+            clinic_id=clinic.id,
+            status="active",
+            enrolled_at=now - timedelta(days=120),
+        )
     )
 
-    doctor2 = await _create_user(db, email=DOCTOR2_EMAIL, full_name="Dr. James Santos", now=now)
     reception = await _create_user(db, email=RECEPTION_EMAIL, full_name="Liza Reyes", now=now)
     admin = await _create_user(db, email=ADMIN_EMAIL, full_name="Mark Villanueva", now=now)
     platform = await _create_user(db, email=PLATFORM_EMAIL, full_name="Alex Rivera", now=now)
-    doctor_b = await _create_user(db, email=DOCTOR_B_EMAIL, full_name="Dr. Nina Reyes", now=now)
-    reception_b = await _create_user(
-        db, email=RECEPTION_B_EMAIL, full_name="Carlo Mendoza", now=now
-    )
 
     _add_membership(db, owner, clinic, "owner")
-    _add_membership(db, owner, branch, "owner")
-    _add_membership(db, doctor2, clinic, "doctor")
     _add_membership(db, reception, clinic, "reception")
     _add_membership(db, admin, clinic, "admin")
-    _add_membership(db, admin, branch, "admin")
     _add_membership(db, platform, clinic, "admin")
-    _add_membership(db, doctor_b, branch, "doctor")
-    _add_membership(db, reception_b, branch, "reception")
 
     owner_profile = DoctorProfile(
         user_id=owner.id,
@@ -278,25 +222,7 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
         follow_up_fee=Decimal("350.00"),
         default_appointment_duration_minutes=30,
     )
-    doctor2_profile = DoctorProfile(
-        user_id=doctor2.id,
-        clinic_id=clinic.id,
-        specialty="Internal Medicine",
-        prc_license_number="PRC-654321",
-        consultation_fee=Decimal("600.00"),
-        follow_up_fee=Decimal("400.00"),
-        default_appointment_duration_minutes=30,
-    )
-    doctor_b_profile = DoctorProfile(
-        user_id=doctor_b.id,
-        clinic_id=branch.id,
-        specialty="Pediatrics",
-        prc_license_number="PRC-778899",
-        consultation_fee=Decimal("600.00"),
-        follow_up_fee=Decimal("400.00"),
-        default_appointment_duration_minutes=30,
-    )
-    db.add_all([owner_profile, doctor2_profile, doctor_b_profile])
+    db.add(owner_profile)
     await db.flush()
 
     for name, amount, category, duration in SERVICE_FEES:
@@ -309,25 +235,6 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
                 duration_minutes=duration,
             )
         )
-    for name, amount, category, duration in BRANCH_SERVICE_FEES:
-        db.add(
-            ServiceFee(
-                clinic_id=branch.id,
-                name=name,
-                amount=amount,
-                category=category,
-                duration_minutes=duration,
-            )
-        )
-
-    room_a = Room(clinic_id=clinic.id, name="Room 1", is_active=True, created_at=now)
-    room_b = Room(clinic_id=clinic.id, name="Room 2", is_active=True, created_at=now)
-    room_inactive = Room(
-        clinic_id=clinic.id, name="Room 3 (storage)", is_active=False, created_at=now
-    )
-    room_bgc = Room(clinic_id=branch.id, name="Consult 1", is_active=True, created_at=now)
-    db.add_all([room_a, room_b, room_inactive, room_bgc])
-    await db.flush()
 
     db.add_all(
         [
@@ -342,15 +249,6 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
             ),
             StaffInvitation(
                 clinic_id=clinic.id,
-                email="dr.invite@example.com",
-                role="doctor",
-                invited_by_user_id=admin.id,
-                token_hash=_hash_token(secrets.token_urlsafe(32)),
-                expires_at=now + timedelta(days=5),
-                created_at=now - timedelta(days=1),
-            ),
-            StaffInvitation(
-                clinic_id=clinic.id,
                 email="expired.invite@example.com",
                 role="reception",
                 invited_by_user_id=owner.id,
@@ -358,19 +256,10 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
                 expires_at=now - timedelta(days=2),
                 created_at=now - timedelta(days=10),
             ),
-            StaffInvitation(
-                clinic_id=branch.id,
-                email="bgc.front@example.com",
-                role="reception",
-                invited_by_user_id=owner.id,
-                token_hash=_hash_token(secrets.token_urlsafe(32)),
-                expires_at=now + timedelta(days=7),
-                created_at=now,
-            ),
         ]
     )
 
-    templates = await _seed_document_templates(db, clinic, branch, now)
+    templates = await _seed_document_templates(db, clinic, now)
     await _seed_payers(db, clinic)
     membership_plan = MembershipPlan(
         clinic_id=clinic.id,
@@ -387,7 +276,6 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
     await db.flush()
 
     patients = await _seed_patients(db, clinic, PATIENTS, owner.id, now)
-    branch_patients = await _seed_patients(db, branch, BRANCH_PATIENTS, owner.id, now)
 
     helena = next(p for p in patients if p.full_name == "Helena Go")
     db.add(
@@ -405,17 +293,10 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
     appointments, completed_appts = await _seed_appointments(
         db,
         clinic=clinic,
-        branch=branch,
         patients=patients,
-        branch_patients=branch_patients,
         owner=owner,
         reception=reception,
         owner_profile=owner_profile,
-        doctor2_profile=doctor2_profile,
-        doctor_b_profile=doctor_b_profile,
-        room_a=room_a,
-        room_b=room_b,
-        room_bgc=room_bgc,
         today=today,
         now=now,
     )
@@ -427,10 +308,8 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
         appointments=appointments,
         completed_appts=completed_appts,
         owner=owner,
-        doctor2=doctor2,
         reception=reception,
         owner_profile=owner_profile,
-        doctor2_profile=doctor2_profile,
         templates=templates,
         now=now,
         today=today,
@@ -441,14 +320,11 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
     await _seed_billing(
         db,
         clinic=clinic,
-        branch=branch,
         patients=patients,
-        branch_patients=branch_patients,
         completed_appts=completed_appts,
         owner=owner,
         admin=admin,
         reception=reception,
-        reception_b=reception_b,
         now=now,
     )
 
@@ -460,20 +336,19 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
         appointments=appointments,
         completed_appts=completed_appts,
         owner=owner,
-        doctor2=doctor2,
         reception=reception,
         admin=admin,
         now=now,
         today=today,
     )
 
-    await _seed_platform(db, org=org, clinic=clinic, branch=branch, platform=platform, now=now)
+    await _seed_platform(db, org=org, clinic=clinic, platform=platform, now=now)
     await db.commit()
     return result
 
 
 async def _seed_document_templates(
-    db: AsyncSession, clinic: Clinic, branch: Clinic, now: datetime
+    db: AsyncSession, clinic: Clinic, now: datetime
 ) -> dict[str, DocumentTemplate]:
     specs = [
         (
@@ -513,20 +388,6 @@ async def _seed_document_templates(
         )
         db.add(row)
         templates[key] = row
-    db.add(
-        DocumentTemplate(
-            clinic_id=branch.id,
-            template_key="medical_certificate",
-            name="Medical certificate",
-            template_type="medical_certificate",
-            schema_version=1,
-            body={},
-            body_template="<p>This is to certify that {{patient.full_name}} was examined.</p>",
-            is_active=True,
-            created_at=now,
-            updated_at=now,
-        )
-    )
     await db.flush()
     return templates
 
@@ -563,9 +424,7 @@ async def _seed_patients(
             occupation=fixture.occupation,
             contact_number=fixture.contact_number,
             email=fixture.email,
-            address="Makati City, Metro Manila"
-            if clinic.slug == CLINIC_SLUG
-            else "BGC, Taguig, Metro Manila",
+            address="Makati City, Metro Manila",
             emergency_contact={"name": "Family contact", "phone": fixture.contact_number},
             insurance_info=fixture.insurance_info,
             created_by_user_id=created_by,
@@ -606,22 +465,14 @@ async def _seed_appointments(
     db: AsyncSession,
     *,
     clinic: Clinic,
-    branch: Clinic,
     patients: list[Patient],
-    branch_patients: list[Patient],
     owner: User,
     reception: User,
     owner_profile: DoctorProfile,
-    doctor2_profile: DoctorProfile,
-    doctor_b_profile: DoctorProfile,
-    room_a: Room,
-    room_b: Room,
-    room_bgc: Room,
     today: date,
     now: datetime,
 ) -> tuple[list[Appointment], list[Appointment]]:
     appointments: list[Appointment] = []
-    doctors = [owner_profile, doctor2_profile]
     doctor_day_hour: dict[tuple[uuid.UUID, date], int] = {}
 
     def next_hour(doctor_id: uuid.UUID, day: date, start: int = 8) -> int:
@@ -632,29 +483,26 @@ async def _seed_appointments(
 
     def add_appointment(
         patient: Patient,
-        doctor: DoctorProfile,
         day: date,
         hour: int | None = None,
         *,
-        clinic_row: Clinic = clinic,
         status: str = "Confirmed",
         visit_status: str | None = None,
         reason: str = "Follow-up",
-        room: Room | None = None,
         booking_source: str = "staff",
         duration: int = 30,
         created_by: uuid.UUID | None = None,
         notes: str | None = None,
         minute: int = 0,
     ) -> Appointment:
-        slot_hour = hour if hour is not None else next_hour(doctor.id, day)
+        slot_hour = hour if hour is not None else next_hour(owner_profile.id, day)
         start = manila_dt(day, slot_hour, minute)
         end = start + timedelta(minutes=duration)
         appt = Appointment(
-            clinic_id=clinic_row.id,
+            clinic_id=clinic.id,
             patient_id=patient.id,
-            doctor_id=doctor.id,
-            room_id=room.id if room else None,
+            doctor_id=owner_profile.id,
+            room_id=None,
             scheduled_start=start,
             scheduled_end=end,
             reason_for_visit=reason,
@@ -676,87 +524,67 @@ async def _seed_appointments(
 
     add_appointment(
         patients[0],
-        owner_profile,
         today,
         h0,
         status="Confirmed",
         visit_status="Arrived",
         reason="BP check",
-        room=room_a,
     )
     add_appointment(
         patients[4],
-        owner_profile,
         today,
         h1,
         status="Confirmed",
         visit_status="In Consultation",
         reason="Migraine follow-up",
-        room=room_a,
     )
-    add_appointment(
-        patients[2],
-        doctor2_profile,
-        today,
-        h0,
-        status="Confirmed",
-        visit_status="Arrived",
-        reason="Pediatric consult",
-        room=room_b,
-    )
-    add_appointment(
-        patients[6],
-        doctor2_profile,
-        today,
-        h1,
-        status="Scheduled",
-        reason="Prenatal visit",
-        room=room_b,
-    )
-    add_appointment(
-        patients[9],
-        owner_profile,
-        today,
-        h2,
-        status="Confirmed",
-        reason="Back pain",
-        booking_source="public_link",
-    )
-    if len(hours) > 3:
-        add_appointment(
-            patients[11],
-            owner_profile,
-            today,
-            h3,
-            status="Scheduled",
-            reason="Gout flare",
-        )
     if len(hours) > 2:
         add_appointment(
-            patients[1],
-            doctor2_profile,
+            patients[2],
             today,
             h2,
             status="Confirmed",
+            visit_status="Arrived",
+            reason="Pediatric consult",
+        )
+    if len(hours) > 3:
+        add_appointment(
+            patients[6],
+            today,
+            h3,
+            status="Scheduled",
+            reason="Prenatal visit",
+        )
+    if len(hours) > 4:
+        add_appointment(
+            patients[9],
+            today,
+            hours[4],
+            status="Confirmed",
+            reason="Back pain",
+            booking_source="public_link",
+        )
+    if len(hours) > 5:
+        add_appointment(
+            patients[1],
+            today,
+            hours[5],
+            status="Confirmed",
             reason="Diabetes follow-up",
         )
-    walk_in_hour = h3 if len(hours) > 3 else (hours[1] if len(hours) > 1 else h0)
-    walk_in_minute = 0 if len(hours) > 3 else 30
-    add_appointment(
-        patients[7],
-        doctor2_profile,
-        today,
-        walk_in_hour,
-        minute=walk_in_minute,
-        status="Confirmed",
-        visit_status="Arrived",
-        reason="Walk-in: asthma",
-        notes="Walk-in at desk",
-        created_by=reception.id,
-    )
+    if len(hours) > 6:
+        add_appointment(
+            patients[7],
+            today,
+            hours[6],
+            status="Confirmed",
+            visit_status="Arrived",
+            reason="Walk-in: asthma",
+            notes="Walk-in at desk",
+            created_by=reception.id,
+        )
     add_appointment(
         patients[10],
-        owner_profile,
         today,
         h1,
         minute=30,
@@ -766,7 +594,6 @@ async def _seed_appointments(
     )
     add_appointment(
         patients[14],
-        doctor2_profile,
         today,
         h0,
         minute=30,
@@ -775,7 +602,6 @@ async def _seed_appointments(
     )
     rescheduled = add_appointment(
         patients[3],
-        owner_profile,
         today,
         h2,
         minute=30,
@@ -784,36 +610,12 @@ async def _seed_appointments(
     )
     add_appointment(
         patients[3],
-        owner_profile,
         today + timedelta(days=2 if today.weekday() != 5 else 3),
         10,
         status="Scheduled",
         reason="Allergic rhinitis (rescheduled)",
         notes=f"Moved from {rescheduled.scheduled_start.date()}",
         booking_source="ai_assistant",
-    )
-
-    add_appointment(
-        branch_patients[0],
-        doctor_b_profile,
-        today,
-        h0,
-        clinic_row=branch,
-        status="Confirmed",
-        visit_status="Arrived",
-        reason="Well-child",
-        room=room_bgc,
-        created_by=owner.id,
-    )
-    add_appointment(
-        branch_patients[1],
-        doctor_b_profile,
-        today,
-        h1,
-        clinic_row=branch,
-        status="Confirmed",
-        reason="Asthma review",
-        room=room_bgc,
     )
 
     for offset in range(1, 46):
@@ -823,10 +625,8 @@ async def _seed_appointments(
         patient = patients[offset % len(patients)]
         if patient.is_archived:
             continue
-        doctor = doctors[offset % 2]
         add_appointment(
             patient,
-            doctor,
             past_day,
             status="Confirmed",
             visit_status="Completed" if offset % 2 == 0 else None,
@@ -836,7 +636,6 @@ async def _seed_appointments(
         if offset % 3 == 0:
             add_appointment(
                 patients[(offset + 5) % len(patients)],
-                doctors[(offset + 1) % 2],
                 past_day,
                 status="No Show" if offset == 15 else "Confirmed",
                 visit_status="Completed" if offset % 5 == 0 else None,
@@ -845,7 +644,6 @@ async def _seed_appointments(
         if offset == 8:
             add_appointment(
                 patients[12],
-                owner_profile,
                 past_day,
                 16,
                 status="Cancelled",
@@ -858,7 +656,6 @@ async def _seed_appointments(
             continue
         add_appointment(
             patients[i % len(patients)],
-            doctors[i % 2],
             future_day,
             status="Scheduled" if i % 2 else "Confirmed",
             reason="Scheduled follow-up",
@@ -886,7 +683,6 @@ async def _seed_appointments(
             day += timedelta(days=1)
         add_appointment(
             patients[0],
-            owner_profile,
             day,
             hour=10,
             status="Scheduled",
@@ -912,7 +708,7 @@ async def _seed_appointments(
         AppointmentWaitlist(
             clinic_id=clinic.id,
             patient_id=patients[5].id,
-            doctor_id=doctor2_profile.id,
+            doctor_id=owner_profile.id,
             preferred_date=today + timedelta(days=1),
             notes="Any afternoon",
             status="cancelled",
@@ -1037,15 +833,12 @@ async def _seed_clinical(
     appointments: list[Appointment],
     completed_appts: list[Appointment],
     owner: User,
-    doctor2: User,
     reception: User,
     owner_profile: DoctorProfile,
-    doctor2_profile: DoctorProfile,
     templates: dict[str, DocumentTemplate],
     now: datetime,
     today: date,
 ) -> list[SoapNote]:
-    doctor_user = {owner_profile.id: owner.id, doctor2_profile.id: doctor2.id}
     soap_notes: list[SoapNote] = []
     by_id = {p.id: p for p in patients}
 
@@ -1055,7 +848,7 @@ async def _seed_clinical(
         template_key, specialty_data = (
             _specialty_for_patient(patient) if patient else ("general", {})
         )
-        actor_id = doctor_user.get(appt.doctor_id, owner.id)
+        actor_id = owner.id
         note = SoapNote(
             appointment_id=appt.id,
             patient_id=appt.patient_id,
@@ -1184,14 +977,14 @@ async def _seed_clinical(
 
     voided_rx = Prescription(
         patient_id=patients[7].id,
-        doctor_id=doctor2_profile.id,
+        doctor_id=owner_profile.id,
         clinic_id=clinic.id,
         status="voided",
         notes="Wrong patient selected",
         issued_at=now - timedelta(days=10),
         voided_at=now - timedelta(days=9),
         void_reason="Issued to wrong chart",
-        created_by_user_id=doctor2.id,
+        created_by_user_id=owner.id,
     )
     db.add(voided_rx)
     await db.flush()
@@ -1369,7 +1162,7 @@ async def _seed_clinical(
                     r2_key=f"seed/{clinic.id}/recording-003.webm",
                     duration_seconds=60,
                     transcription_status="failed",
-                    created_by_user_id=doctor2.id,
+                    created_by_user_id=owner.id,
                     created_at=now - timedelta(days=5),
                 )
             )
@@ -1382,14 +1175,11 @@ async def _seed_billing(
     db: AsyncSession,
     *,
     clinic: Clinic,
-    branch: Clinic,
     patients: list[Patient],
-    branch_patients: list[Patient],
     completed_appts: list[Appointment],
     owner: User,
     admin: User,
     reception: User,
-    reception_b: User,
     now: datetime,
 ) -> list[Invoice]:
     invoice_specs: list[
@@ -1525,42 +1315,6 @@ async def _seed_billing(
             created_at=now - timedelta(hours=8),
         )
     )
-
-    branch_inv = Invoice(
-        clinic_id=branch.id,
-        patient_id=branch_patients[1].id,
-        invoice_number="BGC-0010",
-        status="issued",
-        subtotal=Decimal("550.00"),
-        total=Decimal("550.00"),
-        issued_at=now - timedelta(days=2),
-        created_by_user_id=owner.id,
-    )
-    db.add(branch_inv)
-    await db.flush()
-    db.add(
-        InvoiceLineItem(
-            invoice_id=branch_inv.id,
-            description="General consultation",
-            category="consultation",
-            quantity=Decimal("1"),
-            unit_price=Decimal("550.00"),
-            amount=Decimal("550.00"),
-            sort_order=0,
-        )
-    )
-    db.add(
-        Payment(
-            invoice_id=branch_inv.id,
-            clinic_id=branch.id,
-            method="cash",
-            amount=Decimal("550.00"),
-            paid_at=now - timedelta(days=2),
-            recorded_by_user_id=reception_b.id,
-            created_at=now - timedelta(days=2),
-        )
-    )
-    branch_inv.status = "paid"
 
     claim_paid = InsuranceClaim(
         clinic_id=clinic.id,
@@ -1771,7 +1525,6 @@ async def _seed_communications(
     appointments: list[Appointment],
     completed_appts: list[Appointment],
     owner: User,
-    doctor2: User,
     reception: User,
     admin: User,
     now: datetime,
@@ -1945,7 +1698,7 @@ async def _seed_communications(
         )
     )
 
-    doc_conv = AiAssistantConversation(clinic_id=clinic.id, user_id=doctor2.id)
+    doc_conv = AiAssistantConversation(clinic_id=clinic.id, user_id=owner.id)
     db.add(doc_conv)
     await db.flush()
     db.add(
@@ -2141,7 +1894,6 @@ async def _seed_platform(
     *,
     org: Organization,
     clinic: Clinic,
-    branch: Clinic,
     platform: User,
     now: datetime,
 ) -> None:
@@ -2159,7 +1911,7 @@ async def _seed_platform(
                 action="tenant.activated",
                 target_type="organization",
                 target_id=str(org.id),
-                summary="Activated Makati Family Group enrollment",
+                summary="Activated Makati Family Clinic enrollment",
                 created_at=now - timedelta(days=40),
             ),
             PlatformAuditLog(
@@ -2169,14 +1921,6 @@ async def _seed_platform(
                 target_id=str(clinic.id),
                 summary="Set clinic plan to Clinic",
                 created_at=now - timedelta(days=39),
-            ),
-            PlatformAuditLog(
-                actor_user_id=platform.id,
-                action="clinic.enrolled",
-                target_type="clinic",
-                target_id=str(branch.id),
-                summary="Activated BGC branch enrollment",
-                created_at=now - timedelta(days=40),
             ),
         ]
     )

@@ -1,8 +1,23 @@
 import { expect, type Page } from "@playwright/test";
 
+export async function registerOwner(
+  page: Page,
+  opts?: { name?: string; clinic?: string; email?: string },
+) {
+  const email = opts?.email ?? `owner-${Date.now()}@example.com`;
+  await page.goto("/register");
+  await page.getByLabel("Your name").fill(opts?.name ?? "Dr E2E");
+  await page.getByLabel("Clinic name").fill(opts?.clinic ?? "E2E Clinic");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("password123");
+  await page.getByRole("button", { name: "Create clinic" }).click();
+  await expect(page).toHaveURL(/\/onboarding/);
+  return email;
+}
+
 export async function completeOnboarding(page: Page) {
   await expect(
-    page.getByRole("heading", { name: "Set up your clinic" }),
+    page.getByRole("heading", { name: "Clinic profile" }),
   ).toBeVisible();
 
   await page.getByLabel("Address").fill("123 Test St");
@@ -32,4 +47,9 @@ export async function completeOnboarding(page: Page) {
   await skipInvite.click();
 
   await expect(page).toHaveURL(/\/dashboard/);
+}
+
+export async function openSettings(page: Page) {
+  await page.getByRole("button", { name: "Account menu" }).click();
+  await page.getByRole("menuitem", { name: "Settings" }).click();
 }

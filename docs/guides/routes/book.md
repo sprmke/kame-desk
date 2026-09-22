@@ -5,9 +5,9 @@
 ## Behavior
 
 - No login required.
-- Shows clinic name, address, doctors, calendar date picker, available slot pills, guest name and contact (shared placeholders). No slots uses a compact empty state in a card; slot fetch uses pill skeletons.
+- Shows clinic name, address, calendar date picker, available slot pills, guest name and contact. If the clinic has more than one doctor in data, a doctor picker appears; otherwise the sole doctor is used.
 - Submits a booking request; auto-confirms when clinic setting is on.
-- Optional **Chat** widget calls `POST /api/v1/public/clinics/{slug}/assistant/messages` (SSE, anonymous, rate-limited). Grounded on clinic hours/services only.
+- **Patient chat assistant is hidden** in this MVP. The public API remains. Slot picker only.
 
 ## Save paths
 
@@ -34,4 +34,4 @@ None (public). Scoped by clinic slug only.
 
 ## Host-facing knowledge
 
-Share the **Public link** from the staff calendar. Patients pick a doctor, date, and time without calling. If **Auto-confirm public bookings** is off, requests stay `Scheduled` until staff confirms. The page has a sun/moon button (top right) for light or dark.
+Share the **Public link** from the staff calendar. Patients pick a date and time without calling. If **Auto-confirm public bookings** is off, requests stay Scheduled until staff confirms.

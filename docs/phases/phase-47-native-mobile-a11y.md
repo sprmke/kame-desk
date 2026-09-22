@@ -10,6 +10,8 @@
 
 Retune motion for an operational tool, close mobile craft gaps, and pass WCAG 2.2 AA on token pairs and core keyboard/SR flows. Then archive the in-progress tracker.
 
+**Scope lock (solo-clinic MVP):** keyboard/SR/mobile gates on kept daily-loop flows only (book, arrive, SOAP, payment, assistant). Hidden Phase 2 routes are out.
+
 activity-log: N/A — presentation and a11y.
 
 ## Tasks

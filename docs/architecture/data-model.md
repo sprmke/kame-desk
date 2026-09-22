@@ -9,6 +9,7 @@ Standing entity reference for DoctorDesk. Tables are grouped by the phase that i
 - Timestamps are stored UTC; all patient-facing display is converted to `Asia/Manila` at the edge.
 - Append-only tables (`activity_log`, `soap_notes`, `visit_status_events`, `soap_note_embeddings`, `ai_assistant_actions`) never have an `UPDATE`/`DELETE` code path targeting their core content — new state is always a new row.
 - Alembic migrations are additive only; a shipped migration under `apps/api/migrations/versions/` is never edited.
+- **Clinic-facing MVP (v1.2)** is one doctor + secretary. Tables for rooms, waitlist, organizations, portal, recalls, memberships stay shipped. Do not drop them. Do not add clinic UI that treats multi-doctor as the default.
 
 ## Entity map by phase
 
@@ -218,6 +219,7 @@ Migration `003_patients_appointments.py` adds two `EXCLUDE USING gist` constrain
 - `consultation_recordings`: audio object key in R2, `transcription_status` (`pending` / `processing` / `done` / `failed`), optional `transcript_text`.
 - `soap_note_embeddings`: pgvector column (`vector(256)`), `embedding_model_version` for re-embed jobs after model upgrades.
 - `clinics.recording_consent_enabled`: owner opt-in before any recording upload is accepted.
+- Clinic Chart search tab is out of MVP v1.2. Embeddings and `GET .../chart-search` stay. Staff open SOAP from the patient chart Records tab. `GET /patients/{id}/charts` lists saved SOAP notes only.
 
 ## AI Clinic Assistant (Phase 16)
 

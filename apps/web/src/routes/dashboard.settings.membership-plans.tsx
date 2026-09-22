@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { MembershipPlansSettingsPage } from "@/features/settings/membership/pages/MembershipPlansSettingsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/settings/membership-plans")({
-  component: MembershipPlansSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/settings/services" });
+  },
 });

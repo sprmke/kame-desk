@@ -61,5 +61,5 @@ export const ROLE_LABELS: Record<ClinicRole, string> = {
   owner: "Owner",
   admin: "Admin",
   doctor: "Doctor",
-  reception: "Reception",
+  reception: "Secretary",
 };

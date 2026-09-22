@@ -30,28 +30,18 @@ pnpm run db:seed:force        # replace demo clinic only (local dev)
 pnpm run db:reset:local       # drop DB, migrate, seed (clean slate)
 ```
 
-All demo staff accounts use password `password123`. Seed covers every shipped module (patients, calendar, waiting room, SOAP, Rx, billing, claims, LOA, eligibility, documents, reminders, recalls, notifications, reports, audit log, waitlist, clinical orders, AI assistant, patient portal, organization, Super Admin).
+All demo staff accounts use password `password123`. Seed is one clinic and one doctor (the owner) plus a secretary. Extra doctor and BGC clinic rows from older seeds are deleted on `db:seed:force`. Super Admin still has a one-clinic organization envelope for `/platform`.
 
 **Makati Family Clinic** (`makati-family-clinic`, public booking `/book/makati-family-clinic`):
 
 | Role                     | Email                   |
 | ------------------------ | ----------------------- |
-| Owner                    | `demo@example.com`      |
-| Doctor                   | `dr.santos@example.com` |
+| Owner (clinic doctor)    | `demo@example.com`      |
 | Reception                | `reception@example.com` |
 | Admin                    | `admin@example.com`     |
 | Admin (also Super Admin) | `platform@example.com`  |
 
-**Makati Family Clinic BGC** (`makati-family-clinic-bgc`, `/book/makati-family-clinic-bgc`):
-
-| Role              | Email                       |
-| ----------------- | --------------------------- |
-| Owner (same user) | `demo@example.com`          |
-| Doctor            | `dr.reyes@example.com`      |
-| Reception         | `reception.bgc@example.com` |
-| Admin (same user) | `admin@example.com`         |
-
-Organization: `Makati Family Group`. Owner and admin can switch clinics in the header. Super Admin (`/platform`) requires `PLATFORM_ADMIN_EMAILS=platform@example.com` in `apps/api/.env`. Patient portal: `/patient-portal/makati-family-clinic/login` (seed prints a verify link). Data is fictional. Never use real patient information in seeds.
+Super Admin (`/platform`) requires `PLATFORM_ADMIN_EMAILS=platform@example.com` in `apps/api/.env`. Data is fictional. Never use real patient information in seeds.
 
 Mailhog captures all outbound email locally (never sends real email in dev). MinIO stands in for Cloudflare R2 with an S3-compatible API — presigned URL logic is identical against both, only the endpoint/credentials differ per environment.
 
@@ -113,26 +103,26 @@ Local restore drill evidence: run `pnpm run backup:db:dev` then `pnpm run rollba
 
 ## Phase 19 production-readiness evidence
 
-| Checklist area                          | Evidence in repo                                                                                                                                                                                   |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Full regression                         | `pnpm run ci:quality` (pytest + Vitest + type-check + lint + build)                                                                                                                                |
-| Patient lifecycle (API)                 | `apps/api/tests/test_patient_lifecycle.py`                                                                                                                                                         |
-| Double-booking concurrency              | `apps/api/tests/test_calendar_public_booking.py::test_public_staff_booking_race`, `scripts/load/concurrent_booking.py`                                                                             |
-| Tier 2 confirm / kill switch            | `apps/api/tests/test_assistant.py`                                                                                                                                                                 |
-| Visit summary never auto-sends          | `apps/api/tests/test_phase18.py::test_visit_summary_requires_approval`                                                                                                                             |
-| Patient assistant grounding             | `apps/api/tests/test_phase18.py`, `apps/web/src/features/booking/lib/groundingFacts.test.ts`                                                                                                       |
-| No-show risk heuristic                  | `apps/api/tests/test_no_show_risk.py`                                                                                                                                                              |
-| RBAC spot-check                         | `apps/api/tests/test_security_rbac.py`, `test_soap.py` (reception SOAP), `test_prescriptions.py`                                                                                                   |
-| Patient intake consent                  | Migration `020_hardening`, `PatientNewPage` checkbox, `test_security_rbac.py::test_patient_create_requires_consent_*`                                                                              |
-| Public assistant tool injection         | Production ignores `__tool__:` payloads; natural-language booking uses the LLM planner. Tests may inject `__tool__:` only when `DOCTORDESK_TESTING=1` (`test_security_rbac.py`, `test_phase18.py`) |
-| Chart immutability                      | `apps/api/tests/test_soap*.py` (versioned writes)                                                                                                                                                  |
-| PWA manifest + SW                       | `apps/web/public/manifest.webmanifest`, `apps/web/public/sw.js` (SW off in Vite dev)                                                                                                               |
-| Staff Web Push (optional)               | API: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; Web: `VITE_VAPID_PUBLIC_KEY`. Push fanout no-ops when unset.                                                                        |
-| Command palette                         | `apps/web/src/components/CommandPalette.tsx` (Cmd/Ctrl+K)                                                                                                                                          |
-| E2E (onboarding + patients + assistant) | `apps/web/e2e/*.spec.ts` via `scripts/ci/e2e.sh` (CI `e2e` job)                                                                                                                                    |
-| Local backup                            | `pnpm run backup:db:dev` (`scripts/deploy/backup-db.sh`; Docker Compose `pg_dump` fallback when host tools missing)                                                                                |
-| Deploy scripts                          | `scripts/deploy/deploy-api.sh` (rsync + SSH + migrate + systemd), `deploy-web.sh` (build + wrangler pages); template `scripts/deploy/.env.example`                                                 |
-| Prod deploy                             | **Manual** — provision infra, copy `.env.prod`, run with `deskwave` unlock (not run in agent sessions by default)                                                                                  |
+| Checklist area                                     | Evidence in repo                                                                                                                                                                                   |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Full regression                                    | `pnpm run ci:quality` (pytest + Vitest + type-check + lint + build)                                                                                                                                |
+| Patient lifecycle (API)                            | `apps/api/tests/test_patient_lifecycle.py`                                                                                                                                                         |
+| Double-booking concurrency                         | `apps/api/tests/test_calendar_public_booking.py::test_public_staff_booking_race`, `scripts/load/concurrent_booking.py`                                                                             |
+| Tier 2 confirm / kill switch                       | `apps/api/tests/test_assistant.py`                                                                                                                                                                 |
+| Visit summary never auto-sends                     | `apps/api/tests/test_phase18.py::test_visit_summary_requires_approval`                                                                                                                             |
+| Patient assistant grounding                        | `apps/api/tests/test_phase18.py`, `apps/web/src/features/booking/lib/groundingFacts.test.ts`                                                                                                       |
+| No-show risk heuristic                             | `apps/api/tests/test_no_show_risk.py`                                                                                                                                                              |
+| RBAC spot-check                                    | `apps/api/tests/test_security_rbac.py`, `test_soap.py` (reception SOAP), `test_prescriptions.py`                                                                                                   |
+| Patient intake consent                             | Migration `020_hardening`, `PatientNewPage` checkbox, `test_security_rbac.py::test_patient_create_requires_consent_*`                                                                              |
+| Public assistant tool injection                    | Production ignores `__tool__:` payloads; natural-language booking uses the LLM planner. Tests may inject `__tool__:` only when `DOCTORDESK_TESTING=1` (`test_security_rbac.py`, `test_phase18.py`) |
+| Chart immutability                                 | `apps/api/tests/test_soap*.py` (versioned writes)                                                                                                                                                  |
+| PWA manifest + SW                                  | `apps/web/public/manifest.webmanifest`, `apps/web/public/sw.js` (SW off in Vite dev)                                                                                                               |
+| Staff Web Push (optional)                          | API: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; Web: `VITE_VAPID_PUBLIC_KEY`. Push fanout no-ops when unset.                                                                        |
+| Command palette                                    | `apps/web/src/components/CommandPalette.tsx` (Cmd/Ctrl+K)                                                                                                                                          |
+| E2E (onboarding + patients + assistant + org hide) | `apps/web/e2e/*.spec.ts` via `scripts/ci/e2e.sh` (CI `e2e` job)                                                                                                                                    |
+| Local backup                                       | `pnpm run backup:db:dev` (`scripts/deploy/backup-db.sh`; Docker Compose `pg_dump` fallback when host tools missing)                                                                                |
+| Deploy scripts                                     | `scripts/deploy/deploy-api.sh` (rsync + SSH + migrate + systemd), `deploy-web.sh` (build + wrangler pages); template `scripts/deploy/.env.example`                                                 |
+| Prod deploy                                        | **Manual** — provision infra, copy `.env.prod`, run with `deskwave` unlock (not run in agent sessions by default)                                                                                  |
 
 ## Monitoring & incident response
 

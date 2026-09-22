@@ -1,6 +1,8 @@
 # Membership plans (`/dashboard/settings/membership-plans`)
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Staff route redirects to Services. APIs remain.
+
+Do not teach this page to clinic staff. Super Admin / Phase 2 can restore the catalog UI.
 
 ## Behavior
 

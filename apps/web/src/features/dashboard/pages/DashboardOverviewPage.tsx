@@ -42,7 +42,6 @@ import {
   FailedRemindersCard,
   OpenClaimsCard,
   OutstandingCard,
-  RecallsCard,
 } from "../components/AttentionCards";
 
 export function DashboardOverviewPage() {
@@ -57,9 +56,7 @@ export function DashboardOverviewPage() {
     void queryClient.invalidateQueries({ queryKey: ["appointments"] });
   }
 
-  const { role, can } = useSession();
-  const canRecalls = can("outreach:manage");
-  const showRecalls = role !== "doctor";
+  const { can } = useSession();
   const showTrend = can("reports:view");
   const trend = useMemo(
     () => ({
@@ -95,12 +92,6 @@ export function DashboardOverviewPage() {
     queryKey: ["outstanding-balances", clinicId],
     queryFn: () => api.getOutstandingBalances(clinicId!),
     enabled: Boolean(clinicId),
-  });
-
-  const { data: recalls, isLoading: loadingRecalls } = useQuery({
-    queryKey: ["recalls", clinicId],
-    queryFn: () => api.listRecalls(clinicId!),
-    enabled: Boolean(clinicId) && canRecalls,
   });
 
   const { data: failedReminders, isLoading: loadingReminders } = useQuery({
@@ -267,23 +258,12 @@ export function DashboardOverviewPage() {
         </div>
       )}
 
-      <div
-        className={cn(
-          "mt-4 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2",
-          showRecalls ? "lg:grid-cols-4" : "lg:grid-cols-3",
-        )}
-      >
+      <div className="mt-4 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <OutstandingCard
           total={outstanding?.total_outstanding ?? null}
           items={outstanding?.items ?? []}
           loading={loadingOutstanding}
         />
-        {showRecalls ? (
-          <RecallsCard
-            items={recalls?.items ?? []}
-            loading={role == null || loadingRecalls}
-          />
-        ) : null}
         <FailedRemindersCard
           items={failedReminders ?? []}
           loading={loadingReminders}

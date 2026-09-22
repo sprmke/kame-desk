@@ -24,7 +24,7 @@ const ROLE_LABEL: Record<string, string> = {
   owner: "Owner",
   admin: "Admin",
   doctor: "Doctor",
-  reception: "Reception",
+  reception: "Secretary",
 };
 
 export function TeamSettingsPage() {
@@ -187,7 +187,7 @@ export function TeamSettingsPage() {
                             <SelectItem value="owner">Owner</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                             <SelectItem value="doctor">Doctor</SelectItem>
-                            <SelectItem value="reception">Reception</SelectItem>
+                            <SelectItem value="reception">Secretary</SelectItem>
                           </SelectContent>
                         </Select>
                         {m.is_active && m.role !== "owner" && (

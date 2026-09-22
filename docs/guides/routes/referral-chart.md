@@ -1,6 +1,6 @@
 # Public referral chart share (`/referral-chart/{token}`)
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Public token page still exists; staff UI for creating shares is not part of this MVP.
 
 ## Behavior
 

@@ -1,6 +1,6 @@
 # Public NPS survey reply (`/nps/{token}`)
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Public token page still exists; clinics cannot turn review/NPS on from Settings.
 
 ## Behavior
 

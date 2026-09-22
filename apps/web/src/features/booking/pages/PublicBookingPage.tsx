@@ -1,10 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarCheck } from "lucide-react";
 import { api } from "@/lib/apiClient";
 import { ApiError } from "@/lib/apiError";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
-import { PublicAssistantChat } from "@/features/booking/components/PublicAssistantChat";
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -40,6 +39,13 @@ export function PublicBookingPage({ slug }: Props) {
     queryKey: ["public-clinic", slug],
     queryFn: () => api.getPublicClinic(slug),
   });
+
+  useEffect(() => {
+    if (!clinic?.doctors.length) return;
+    if (clinic.doctors.length === 1) {
+      setDoctorId(clinic.doctors[0].id);
+    }
+  }, [clinic]);
 
   const { data: slots, isFetching } = useQuery({
     queryKey: ["public-slots", slug, doctorId, date],
@@ -101,28 +107,30 @@ export function PublicBookingPage({ slug }: Props) {
         </p>
       )}
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="doctor">Doctor</Label>
-          <Select
-            value={doctorId}
-            onValueChange={(v) => {
-              setDoctorId(v);
-              setSlot(null);
-            }}
-          >
-            <SelectTrigger id="doctor">
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {clinic.doctors.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.full_name}
-                  {d.specialty ? ` · ${d.specialty}` : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {clinic.doctors.length > 1 ? (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="doctor">Doctor</Label>
+            <Select
+              value={doctorId}
+              onValueChange={(v) => {
+                setDoctorId(v);
+                setSlot(null);
+              }}
+            >
+              <SelectTrigger id="doctor">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                {clinic.doctors.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.full_name}
+                    {d.specialty ? ` · ${d.specialty}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="date">Date</Label>
           <DatePicker
@@ -206,7 +214,6 @@ export function PublicBookingPage({ slug }: Props) {
           {book.isPending ? "Booking…" : "Confirm booking"}
         </Button>
       </div>
-      <PublicAssistantChat slug={slug} />
     </AuthLayout>
   );
 }

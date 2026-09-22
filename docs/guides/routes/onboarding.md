@@ -1,11 +1,15 @@
 # Onboarding wizard
 
 **Route:** `/onboarding`  
-**Status:** Documented
+**Status:** Documented (solo-clinic MVP)
 
 ## Behavior
 
-Multi-step clinic setup after registration. Steps: clinic profile, doctor profile, working hours, fees, invite staff (or skip). A `Stepper` shows progress (mobile bar, desktop node track). Hours use a time picker in 15-minute steps. Progress is stored on the server; reload resumes at `current_step` from `GET /api/v1/clinics/{clinic_id}/onboarding-status`.
+Multi-step clinic setup after registration. Steps: clinic profile, doctor profile, working hours, fees, invite secretary (or skip). A `Stepper` shows progress. Hours use a time picker in 15-minute steps. Progress is stored on the server; reload resumes at `current_step` from `GET /api/v1/clinics/{clinic_id}/onboarding-status`.
+
+Invite always sends role `reception`. Extra doctors and rooms are Phase 2.
+
+Incomplete onboarding redirects away from `/dashboard` to `/onboarding`.
 
 Incomplete onboarding redirects away from `/dashboard` to `/onboarding`. Theme matches the rest of the app (icon toggle, top right).
 
@@ -30,7 +34,7 @@ Authenticated clinic member. Write steps require `owner` or `admin`.
 
 ## Host-facing knowledge
 
-New clinics complete setup in the onboarding wizard before using the dashboard. You can skip inviting staff and add team members later under Team settings.
+New clinics complete setup in the onboarding wizard before using the dashboard. You can skip inviting a secretary and add them later under Team.
 
 Light and dark appearance is a device setting. During onboarding, use the sun/moon button at the top right. On the dashboard, open your profile picture at the top right and pick Light, Dark, or System under Theme. The choice is remembered on this device.
 

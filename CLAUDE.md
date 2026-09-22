@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**DoctorDesk (kame-desk)** — a clinic management platform for independent doctors and small clinics. Core loop: front desk books an appointment, patient arrives, doctor writes a SOAP note and issues prescriptions, billing records payment, reminders/recalls keep patients coming back. Layered on top: an **AI Clinic Assistant** — a chat panel that can execute real dashboard actions (book, reschedule, draft a SOAP note, check a balance, generate a certificate) instead of the user clicking through screens, with a tiered risk model and full audit trail.
+**DoctorDesk (kame-desk)** — clinic desk software for **one doctor and one secretary**. Core loop: secretary books, patient arrives, doctor writes a SOAP note and issues a prescription, billing records payment (self-pay or HMO). Layered on top: an **AI Clinic Assistant** that can book, look up a patient, draft a SOAP note, and help with billing instead of only clicking screens, with a tiered risk model and full audit trail. Multi-doctor clinics are Phase 2 (`docs/mvp.md` §14).
 
 Full product scope: **`docs/mvp.md`** (authoritative PRD — read before any module work). Stack: **`docs/tech-stack.md`** (authoritative — read before any infra/tooling decision). Build plan: **`docs/phases/README.md`** (read before starting any phase).
 
@@ -92,9 +92,9 @@ Full diagram + invariants: `docs/tech-stack.md` § Architecture. Directory-level
 | `docs/`                           | Doc index at `docs/README.md`                                                    |
 | `docs/phases/`                    | The build plan — read the current phase file before starting work                |
 
-### Multi-doctor / clinic scoping
+### Clinic scoping (MVP is one doctor)
 
-Every table that isn't global (`clinics`, platform-level lookups) carries a `clinic_id` and every query is scoped through the authenticated user's clinic membership — never trust a client-supplied `clinic_id`. Roles are clinic-scoped: `owner`, `admin`, `doctor`, `reception` (see `docs/mvp.md` §6.11 for the full permission matrix). A clinic can have 2+ doctors sharing one front desk and one patient registry (`docs/mvp.md` §7.1) — do not assume single-doctor when building scheduling or patient search.
+Every table that isn't global (`clinics`, platform-level lookups) carries a `clinic_id` and every query is scoped through the authenticated user's clinic membership — never trust a client-supplied `clinic_id`. Roles are clinic-scoped: `owner`, `admin`, `doctor`, `reception` (see `docs/mvp.md` §6.11). **Clinic-facing MVP is one doctor + secretary.** `doctor_id` remains on appointments. Per-doctor calendars, extra-doctor invite, rooms, and waitlist are Phase 2 UI, not deleted APIs.
 
 ### Appointment / visit status workflow
 

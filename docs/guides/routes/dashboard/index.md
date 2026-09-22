@@ -4,26 +4,23 @@
 
 ## Progress overview
 
-| Section          | E2E | Validation | Docs | Notes                                          |
-| ---------------- | --- | ---------- | ---- | ---------------------------------------------- |
-| KPI cards        | N/A | N/A        | Done | Today, Waiting, Completed, Revenue             |
-| Today + queue    | N/A | N/A        | Done | Queue owns floor visits; Today omits them      |
-| Trend + upcoming | N/A | N/A        | Done | 14-day chart and next 7 days                   |
-| Follow-up cards  | N/A | Partial    | Done | Outstanding, Recalls, Failed reminders, Claims |
+| Section          | E2E | Validation | Docs | Notes                                                      |
+| ---------------- | --- | ---------- | ---- | ---------------------------------------------------------- |
+| KPI cards        | N/A | N/A        | Done | Today, Waiting, Completed, Revenue                         |
+| Today + queue    | N/A | N/A        | Done | Queue owns floor visits; Today omits them                  |
+| Trend + upcoming | N/A | N/A        | Done | 14-day chart and next 7 days                               |
+| Follow-up cards  | N/A | Partial    | Done | Outstanding, Failed reminders, Claims (recalls out of MVP) |
 
 ## Overview
 
-Home screen for clinic staff after sign-in. It answers what is happening today and what still needs follow-up (queue, balances, recalls, failed reminders, open claims). On a phone, open Dashboard from **More**.
+Home screen for clinic staff after sign-in. It answers what is happening today and what still needs follow-up (queue, balances, failed reminders, open claims). On a phone, open Dashboard from **More**.
 
 ## Host-facing knowledge
 
-The dashboard is the morning board. Four number cards show **Today**, **Waiting**, **Completed**, and **Revenue**. **Today** is this clinic day's appointments that are not already in the waiting room. **Queue** is who has arrived or is with the doctor. **Waiting** is that same floor count. A "scheduled" hint under Waiting means people are booked but have not arrived yet; they stay on Today, not Queue. **Completed** is finished visits. **Revenue** is payments this month, with today and this week underneath. The highlighted row in Today is the next slot. Queue stays live while the indicator says Live; Polling still refreshes every few seconds. **Appointments, last 14 days** is booked vs completed. **Upcoming** is the next 7 days. Four follow-up cards cover outstanding balances, recalls, failed reminders, and open claims. Walk-in, New patient, and New appointment are on the top of the page. The assistant launcher stays in the corner on every dashboard screen.
-
-**Q: Why is the next patient highlighted?**
-A: That row is the next uncompleted appointment from now. It is not a status change.
+The dashboard is the morning board. Four number cards show **Today**, **Waiting**, **Completed**, and **Revenue**. Follow-up cards cover outstanding balances, failed reminders, and open claims. Walk-in, New patient, and New appointment are at the top. The assistant launcher stays in the corner.
 
 **Q: I do not see Recalls.**
-A: Recalls are for owner, admin, and reception. Doctors still see Today, Queue, Upcoming, billing, reminders, and claims.
+A: Recall campaigns are not in this MVP. Follow-up dates still save on the SOAP note.
 
 **Q: I do not see the 14-day chart.**
 A: That chart is for owner and admin. Open Insights → Reports for the full appointments report. Doctors and reception see Calendar and Upcoming instead.
@@ -39,7 +36,7 @@ A: Retry only works on failed rows. Open Reminders if it still fails after a sec
 - **Queue** lists who has Arrived or is In consultation, with the live/polling indicator. Booked-but-not-arrived visits stay on Today. Updates share the clinic WebSocket used on `/dashboard/waiting-room`.
 - **Appointments, last 14 days** is booked vs completed (`GET /reports/appointments`). All opens Insights → Reports.
 - **Upcoming** lists the next 7 days in one column beside the chart (time, then name). Extra days scroll inside the card. Next to Calendar it uses a two-column week strip.
-- **Outstanding**, **Recalls**, **Failed reminders**, and **Claims** are separate cards. Failed reminder rows can Retry. Claim rows open that claim.
+- **Outstanding**, **Failed reminders**, and **Claims** are separate cards. Failed reminder rows can Retry. Claim rows open that claim. Recalls are out of this MVP.
 - Today, Queue, the 14-day chart, Upcoming, and follow-up modules sit in bordered cards with a stable body height. Extra rows scroll inside the card.
 
 ## Save paths
