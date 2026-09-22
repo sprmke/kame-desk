@@ -30,28 +30,18 @@ pnpm run db:seed:force        # replace demo clinic only (local dev)
 pnpm run db:reset:local       # drop DB, migrate, seed (clean slate)
 ```
 
-All demo staff accounts use password `password123`. Seed covers every shipped module (patients, calendar, waiting room, SOAP, Rx, billing, claims, LOA, eligibility, documents, reminders, recalls, notifications, reports, audit log, waitlist, clinical orders, AI assistant, patient portal, organization, Super Admin).
+All demo staff accounts use password `password123`. Seed is one clinic and one doctor (the owner) plus a secretary. Extra doctor and BGC clinic rows from older seeds are deleted on `db:seed:force`. Super Admin still has a one-clinic organization envelope for `/platform`.
 
 **Makati Family Clinic** (`makati-family-clinic`, public booking `/book/makati-family-clinic`):
 
 | Role                     | Email                   |
 | ------------------------ | ----------------------- |
-| Owner                    | `demo@example.com`      |
-| Doctor                   | `dr.santos@example.com` |
+| Owner (clinic doctor)    | `demo@example.com`      |
 | Reception                | `reception@example.com` |
 | Admin                    | `admin@example.com`     |
 | Admin (also Super Admin) | `platform@example.com`  |
 
-**Makati Family Clinic BGC** (`makati-family-clinic-bgc`, `/book/makati-family-clinic-bgc`):
-
-| Role              | Email                       |
-| ----------------- | --------------------------- |
-| Owner (same user) | `demo@example.com`          |
-| Doctor            | `dr.reyes@example.com`      |
-| Reception         | `reception.bgc@example.com` |
-| Admin (same user) | `admin@example.com`         |
-
-Organization: `Makati Family Group`. Owner and admin can switch clinics in the header. Super Admin (`/platform`) requires `PLATFORM_ADMIN_EMAILS=platform@example.com` in `apps/api/.env`. Patient portal: `/patient-portal/makati-family-clinic/login` (seed prints a verify link). Data is fictional. Never use real patient information in seeds.
+Super Admin (`/platform`) requires `PLATFORM_ADMIN_EMAILS=platform@example.com` in `apps/api/.env`. Data is fictional. Never use real patient information in seeds.
 
 Mailhog captures all outbound email locally (never sends real email in dev). MinIO stands in for Cloudflare R2 with an S3-compatible API — presigned URL logic is identical against both, only the endpoint/credentials differ per environment.
 

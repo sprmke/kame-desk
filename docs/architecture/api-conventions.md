@@ -92,6 +92,7 @@ Import requires a `full_name` column. Merge writes `patient.merged`. Import comm
 | GET    | `/api/v1/patients/{id}/orders`            | Lab/imaging orders                                                     |
 | POST   | `/api/v1/patients/{id}/orders`            | Create (`ordered`)                                                     |
 | PATCH  | `/api/v1/patients/{id}/orders/{order_id}` | Status / result                                                        |
+| GET    | `/api/v1/patients/{id}/charts`            | Latest saved SOAP per visit. Doctor, owner; reception if SOAP access   |
 | PATCH  | `/api/v1/documents/{id}`                  | Referral recipient, status (`draft`/`sent`/`acknowledged`/`completed`) |
 
 `POST /patients/{id}/prescription-conflicts` now includes `type: unchecked` when a drug is not in `drug_reference`. Unchecked does not require an override.

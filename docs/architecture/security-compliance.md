@@ -26,7 +26,7 @@ Canonical strings live in `apps/api/app/core/permissions.py` and are returned on
 | Owner     | All eight                 | All groups                                                                        |
 | Admin     | All eight                 | All except clinic deletion                                                        |
 | Doctor    | No Outreach               | Account, Doctor profile                                                           |
-| Reception | No Documents, no Insights | Account only; Chart search under Patients when clinic enables reception SOAP view |
+| Reception | No Documents, no Insights | Account only. SOAP on the patient chart if the clinic enables reception SOAP view |
 
 Hidden items, not disabled. Plan doctor seat limits (`starter` 1, `pro` 5, `clinic` unlimited) are enforced on doctor invites and accept via `app/services/seat_service.py`.
 

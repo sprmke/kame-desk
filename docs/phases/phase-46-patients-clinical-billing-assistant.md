@@ -10,6 +10,8 @@
 
 Apply the Phase 44 hierarchy language to the remaining operational modules. Patient list identity already started in 44. Finish chart IA, SOAP writing surface, billing numerals, insights charts, remaining settings rows, and assistant confirm cards.
 
+**Scope lock (solo-clinic MVP):** kept screens only (Patients, SOAP/Rx, Billing/HMO, Documents, Reminders, Reports, Settings thin, Assistant). Skip rooms, memberships, org, portal, recalls hub, BIR PTU/CAS UI.
+
 activity-log: N/A — presentation layer unless a list starts showing an API field it already returns.
 
 ## Tasks

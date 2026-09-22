@@ -10,6 +10,8 @@
 
 Redesign first-run and day-of operations screens. `/` is not a marketing page; it redirects. Today is the day-of board (what to do now), not a KPI dashboard. Brand hue stays unratified; Today is the visual-pilot surface for a later palette pass, not a place to pick teal/navy/forest from adjectives.
 
+**Scope lock (solo-clinic MVP):** one doctor. Do not spend craft on per-doctor calendar columns, waiting-room doctor filters for 2+ doctors, rooms, or the public booking chatbot.
+
 activity-log: N/A — presentation layer.
 
 ## Tasks
