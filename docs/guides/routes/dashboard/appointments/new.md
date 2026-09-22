@@ -4,7 +4,7 @@
 
 ## Behavior
 
-- Select patient, doctor (by name), optional type (service duration), optional room, date, time (Manila wall clock), duration. Required fields use a mark and inline errors. Reason uses a shared placeholder.
+- Select patient, date, time (Manila wall clock), duration. The clinic's only doctor is selected automatically (picker only if more than one doctor exists in data). No room field in this MVP. Required fields use a mark and inline errors. Reason uses a shared placeholder.
 - Optional **Recurring** with weekly / biweekly / monthly presets (12 occurrences).
 - Client-side conflict pre-check against same-day appointments for the doctor.
 - Recurring create returns expansion summary; conflicts are listed if any occurrence could not be booked.

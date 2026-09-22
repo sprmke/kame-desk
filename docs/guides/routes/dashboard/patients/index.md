@@ -5,7 +5,7 @@
 ## Behavior
 
 - Paginated list of clinic patients with fuzzy search on name, contact, and patient number.
-- The fixed **Patients** title and description sit above the Directory / Chart search tabs; the patient content renders below the tabs. **Import** and **New patient** are contributed to the section header by this tab. Switching tabs changes only the content, never the title or description.
+- The fixed **Patients** title sits above the list. No Chart search tab. **Import** and **New patient** are contributed to the section header.
 - Toolbar matches other clinic lists: live search, sort, per-page (25/50/100), and Table / List views. Phone defaults to List. Query params keep `q`, `page`, `limit`, `sort`, and `view`.
 - Table and list rows use an identity block (initials, name, patient number) plus age/sex and contact so two people with the same name can be told apart.
 - **New patient** opens `/dashboard/patients/new`. Possible matches by name or contact appear before save.
@@ -46,7 +46,10 @@ Not yet (Phase 16).
 
 ## Host-facing knowledge
 
-Staff use **Patients** (bottom tab on a phone, sidebar on a computer) to find or add people. Search matches partial names and phone numbers. Change how many rows show, sort by name or number, and switch Table or List. Each patient gets a clinic-specific number (#1, #2, …). Owners and admins can open **Import**, drop in a CSV, and preview it before creating records.
+Staff use **Patients** (bottom tab on a phone, sidebar on a computer) to find or add people. Search matches partial names and phone numbers. Open the person. **Records** is charts, labs, and files. **Documents** is certificates. Change how many rows show, sort by name or number, and switch Table or List. Each patient gets a clinic-specific number (#1, #2, …). Owners and admins can open **Import**, drop in a CSV, and preview it before creating records.
+
+**Q: How do I find a SOAP note?**  
+A: Search the patient, open their chart, tap Records, then tap the chart.
 
 **Q: Can I delete a patient?**  
 A: Records are archived, not deleted, to keep clinical history intact.
