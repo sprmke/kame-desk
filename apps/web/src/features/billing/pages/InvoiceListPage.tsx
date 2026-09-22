@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, TriangleAlert } from "lucide-react";
-import { api, type BirCompliance, type Invoice } from "@/lib/apiClient";
+import { FileText } from "lucide-react";
+import { api, type Invoice } from "@/lib/apiClient";
 import { getClinicId } from "@/lib/auth";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
 import { useListSearch } from "@/hooks/useListSearch";
@@ -36,25 +36,6 @@ import {
   ManagedList,
 } from "@/components/list";
 import type { ListViewMode } from "@/lib/list/viewMode";
-
-function birComplianceWarning(bir: BirCompliance | undefined): string | null {
-  if (!bir) return null;
-  if (!bir.tin)
-    return "Add your clinic's TIN in Settings so receipts satisfy BIR filing.";
-  if (
-    bir.compliance_mode !== "not_yet_accredited" &&
-    !bir.accreditation_number
-  ) {
-    return "Add your PTU/CAS accreditation number in Settings.";
-  }
-  if (bir.accreditation_valid_until) {
-    const today = new Date().toISOString().slice(0, 10);
-    if (bir.accreditation_valid_until < today) {
-      return "Your PTU/CAS accreditation has expired. Update it in Settings.";
-    }
-  }
-  return null;
-}
 
 const INVOICE_VIEWS: ListViewMode[] = ["table", "list"];
 const INVOICE_EXTRA = ["status", "from", "to"] as const;
@@ -120,15 +101,6 @@ export function InvoiceListPage() {
     enabled: Boolean(clinicId),
   });
 
-  const { data: clinic } = useQuery({
-    queryKey: ["clinic", clinicId],
-    queryFn: () => api.getClinic(clinicId!),
-    enabled: Boolean(clinicId),
-  });
-  const complianceWarning = birComplianceWarning(
-    clinic?.bir_compliance ?? undefined,
-  );
-
   async function exportCsv() {
     const csv = await api.exportClinicInvoicesCsv({
       q: list.q || undefined,
@@ -158,13 +130,6 @@ export function InvoiceListPage() {
           Export
         </Button>
       </SectionHeaderActions>
-
-      {complianceWarning && (
-        <p className="mb-4 flex items-start gap-2 text-sm text-foreground">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-          {complianceWarning}
-        </p>
-      )}
 
       {outstanding && Number(outstanding.total_outstanding) > 0 && (
         <p className="mb-4 text-sm">

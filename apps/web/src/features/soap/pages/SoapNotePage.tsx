@@ -156,6 +156,7 @@ export function SoapNotePage({ appointmentId }: Props) {
       setQueuedOffline(queued);
       if (!queued) {
         qc.invalidateQueries({ queryKey: ["soap-notes", appointmentId] });
+        qc.invalidateQueries({ queryKey: ["patient-charts"] });
       }
       setViewVersion(null);
     },
@@ -174,8 +175,10 @@ export function SoapNotePage({ appointmentId }: Props) {
 
   const signSoap = useMutation({
     mutationFn: (version: number) => api.signSoapNote(appointmentId, version),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["soap-notes", appointmentId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["soap-notes", appointmentId] });
+      qc.invalidateQueries({ queryKey: ["patient-charts"] });
+    },
   });
 
   const icdHits = filterIcd10(icdQuery);

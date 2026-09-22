@@ -134,12 +134,14 @@ export function WaitingRoomPage({ connectionState }: Props) {
         <ErrorState onRetry={() => refetch()} />
       ) : (
         <div className="flex flex-col gap-3">
-          <DoctorFilterBar
-            doctors={doctors}
-            totalCount={allItems.length}
-            value={activeDoctorFilter}
-            onChange={handleDoctorFilter}
-          />
+          {doctors.length > 1 ? (
+            <DoctorFilterBar
+              doctors={doctors}
+              totalCount={allItems.length}
+              value={activeDoctorFilter}
+              onChange={handleDoctorFilter}
+            />
+          ) : null}
 
           {isBelowLg ? (
             <div className="flex flex-col gap-3">
