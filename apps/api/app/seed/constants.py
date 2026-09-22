@@ -10,36 +10,33 @@ DEMO_PASSWORD = "password123"
 
 # example.com passes Pydantic EmailStr; .local is rejected and breaks /auth/login (422).
 OWNER_EMAIL = "demo@example.com"
-DOCTOR2_EMAIL = "dr.santos@example.com"
 RECEPTION_EMAIL = "reception@example.com"
 ADMIN_EMAIL = "admin@example.com"
 PLATFORM_EMAIL = "platform@example.com"
-DOCTOR_B_EMAIL = "dr.reyes@example.com"
-RECEPTION_B_EMAIL = "reception.bgc@example.com"
 
+# Former multi-doctor / BGC accounts. Kept so force-reseed can delete them.
 LEGACY_DEMO_EMAILS = (
     "demo@doctordesk.local",
     "dr.santos@doctordesk.local",
     "reception@doctordesk.local",
     "admin@doctordesk.local",
+    "dr.santos@example.com",
+    "dr.reyes@example.com",
+    "reception.bgc@example.com",
 )
 
 DEMO_EMAILS: tuple[str, ...] = (
     OWNER_EMAIL,
-    DOCTOR2_EMAIL,
     RECEPTION_EMAIL,
     ADMIN_EMAIL,
     PLATFORM_EMAIL,
-    DOCTOR_B_EMAIL,
-    RECEPTION_B_EMAIL,
     *LEGACY_DEMO_EMAILS,
 )
 
 CLINIC_NAME = "Makati Family Clinic"
 CLINIC_SLUG = "makati-family-clinic"
-BRANCH_CLINIC_NAME = "Makati Family Clinic BGC"
 BRANCH_CLINIC_SLUG = "makati-family-clinic-bgc"
-ORG_NAME = "Makati Family Group"
+ORG_NAME = "Makati Family Clinic"
 ORG_SLUG = "makati-family-group"
 DEMO_CLINIC_SLUGS: tuple[str, ...] = (CLINIC_SLUG, BRANCH_CLINIC_SLUG)
 
@@ -67,7 +64,6 @@ NOTIFICATION_PREFERENCES: dict = {
 }
 
 RECEIPT_NUMBERING = {"prefix": "INV-", "next_number": 56, "pad_width": 4}
-BRANCH_RECEIPT_NUMBERING = {"prefix": "BGC-", "next_number": 12, "pad_width": 4}
 
 BIR_COMPLIANCE = {
     "tin": "123-456-789-000",
@@ -368,81 +364,6 @@ PATIENTS: list[PatientFixture] = [
     ),
 ]
 
-BRANCH_PATIENTS: list[PatientFixture] = [
-    PatientFixture(
-        full_name="Nina Castillo",
-        birthdate=date(2016, 2, 14),
-        sex="Female",
-        contact_number="+639171222001",
-        email=None,
-        allergies=[],
-        chronic_conditions=[],
-        medical_history="Well-child and vaccines.",
-        civil_status="Single",
-    ),
-    PatientFixture(
-        full_name="Leo Marquez",
-        birthdate=date(1984, 5, 9),
-        sex="Male",
-        contact_number="+639171222002",
-        email="leo.marquez@example.com",
-        allergies=[],
-        chronic_conditions=["Asthma"],
-        medical_history="Exercise-induced asthma.",
-        civil_status="Married",
-        occupation="Sales",
-        insurance_info={"provider": "Maxicare", "member_id": "MX-BGC-02", "payer_type": "hmo"},
-    ),
-    PatientFixture(
-        full_name="Andrea Chua",
-        birthdate=date(1993, 10, 18),
-        sex="Female",
-        contact_number="+639171222003",
-        email="andrea.chua@example.com",
-        allergies=[],
-        chronic_conditions=[],
-        medical_history="Prenatal transfer from Makati branch.",
-        civil_status="Married",
-        occupation="Architect",
-    ),
-    PatientFixture(
-        full_name="Benjamin Yap",
-        birthdate=date(1971, 12, 4),
-        sex="Male",
-        contact_number="+639171222004",
-        email="benjamin.yap@example.com",
-        allergies=[],
-        chronic_conditions=["Hypertension"],
-        medical_history="Office BP checks.",
-        civil_status="Married",
-        occupation="Lawyer",
-    ),
-    PatientFixture(
-        full_name="Katrina Uy",
-        birthdate=date(2001, 7, 27),
-        sex="Female",
-        contact_number="+639171222005",
-        email="katrina.uy@example.com",
-        allergies=[{"substance": "Peanuts", "reaction": "Anaphylaxis", "severity": "severe"}],
-        chronic_conditions=[],
-        medical_history="Carries epinephrine auto-injector.",
-        civil_status="Single",
-        occupation="Student",
-    ),
-    PatientFixture(
-        full_name="Oscar Padilla",
-        birthdate=date(1959, 3, 3),
-        sex="Male",
-        contact_number="+639171222006",
-        email=None,
-        allergies=[],
-        chronic_conditions=["Type 2 Diabetes"],
-        medical_history="BGC follow-up for HbA1c.",
-        civil_status="Married",
-        occupation="Retired",
-    ),
-]
-
 SERVICE_FEES: list[tuple[str, Decimal, str | None, int | None]] = [
     ("General consultation", Decimal("500.00"), "consultation", 30),
     ("Follow-up visit", Decimal("350.00"), "consultation", 20),
@@ -452,12 +373,6 @@ SERVICE_FEES: list[tuple[str, Decimal, str | None, int | None]] = [
     ("Nebulization", Decimal("400.00"), "procedure", 20),
     ("Prenatal consult", Decimal("700.00"), "consultation", 30),
     ("Pediatric consult", Decimal("550.00"), "consultation", 30),
-]
-
-BRANCH_SERVICE_FEES: list[tuple[str, Decimal, str | None, int | None]] = [
-    ("General consultation", Decimal("550.00"), "consultation", 30),
-    ("Pediatric consult", Decimal("600.00"), "consultation", 30),
-    ("Follow-up visit", Decimal("380.00"), "consultation", 20),
 ]
 
 SOAP_DIAGNOSES: list[tuple[str, str, str, str, str, str]] = [
