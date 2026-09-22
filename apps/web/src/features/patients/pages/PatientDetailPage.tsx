@@ -16,6 +16,7 @@ import { PatientEligibilityCard } from "@/features/billing/components/PatientEli
 import { PatientMembershipCard } from "@/features/billing/components/PatientMembershipCard";
 import { api } from "@/lib/apiClient";
 import type { MedicalInfo } from "@/lib/apiClient";
+import { PatientChartList } from "@/features/patients/components/PatientChartList";
 import { useSession } from "@/hooks/useSession";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
 import { InitialsAvatar } from "@/components/PersonIdentity";
@@ -39,12 +40,19 @@ import {
 
 export type PatientDetailSection =
   | "overview"
+  | "records"
   | "timeline"
   | "prescriptions"
   | "billing"
   | "orders"
   | "documents"
   | "activity";
+
+const CERTIFICATE_TYPES = new Set([
+  "medical_certificate",
+  "confinement_certificate",
+  "referral_letter",
+]);
 
 type Props = {
   patientId: string;
@@ -53,6 +61,9 @@ type Props = {
 
 export function PatientDetailPage({ patientId, section = "overview" }: Props) {
   const qc = useQueryClient();
+  const { can } = useSession();
+  const canMerge = can("patients:merge");
+  const canReadSoap = can("soap:read");
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ["patient", patientId],
@@ -74,7 +85,7 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
   const { data: files } = useQuery({
     queryKey: ["patient-files", patientId],
     queryFn: () => api.listPatientFiles(patientId),
-    enabled: Boolean(patient),
+    enabled: Boolean(patient) && section === "records",
   });
 
   const { data: prescriptions } = useQuery({
@@ -104,17 +115,14 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
   const { data: orders } = useQuery({
     queryKey: ["clinical-orders", patientId],
     queryFn: () => api.listClinicalOrders(patientId),
-    enabled: Boolean(patient),
+    enabled: Boolean(patient) && section === "records",
   });
 
-  const { data: appointments } = useQuery({
-    queryKey: ["appointments", { patient_id: patientId }],
-    queryFn: () => api.listAppointments({ patient_id: patientId }),
-    enabled: Boolean(patient),
+  const { data: charts } = useQuery({
+    queryKey: ["patient-charts", patientId],
+    queryFn: () => api.listPatientCharts(patientId),
+    enabled: Boolean(patient) && section === "records" && canReadSoap,
   });
-
-  const { can } = useSession();
-  const canMerge = can("patients:merge");
 
   const medForm = useForm<MedicalInfo>({
     values: medical ?? {
@@ -235,12 +243,10 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
   ]
     .filter(Boolean)
     .join(" · ");
+  const certificateDocs = (documents?.items ?? []).filter((doc) =>
+    CERTIFICATE_TYPES.has(doc.document_type),
+  );
   const timeline = [
-    ...(appointments?.items ?? []).map((a) => ({
-      id: `a-${a.id}`,
-      at: a.scheduled_start,
-      label: `Visit · ${a.appointment_status}`,
-    })),
     ...(prescriptions?.items ?? []).map((rx) => ({
       id: `rx-${rx.id}`,
       at: rx.created_at,
@@ -316,6 +322,163 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
         }
         subNav={<PatientDetailSubNav patientId={patientId} />}
       />
+
+      {section === "records" ? (
+        <div className="flex flex-col gap-8">
+          <section>
+            <h2 className="mb-2 text-sm font-semibold text-foreground">
+              Charts
+            </h2>
+            <PatientChartList
+              charts={canReadSoap ? (charts?.items ?? []) : []}
+              canReadSoap={canReadSoap}
+            />
+          </section>
+          <section>
+            <h2 className="mb-2 text-sm font-semibold text-foreground">Labs</h2>
+            <div className="flex flex-col gap-4">
+              <form
+                className="flex flex-col gap-2 sm:flex-row sm:items-end"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!orderName.trim()) return;
+                  createOrder.mutate();
+                }}
+              >
+                <Field className="min-w-0 flex-1">
+                  <FieldLabel htmlFor="order-name" label="Order" />
+                  <Input
+                    id="order-name"
+                    value={orderName}
+                    onChange={(e) => setOrderName(e.target.value)}
+                    placeholder={FORM_PLACEHOLDERS.orderName}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="order-type" label="Type" />
+                  <Select
+                    value={orderType}
+                    onValueChange={(v) => setOrderType(v as "lab" | "imaging")}
+                  >
+                    <SelectTrigger id="order-type" className="w-full sm:w-36">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="lab">Lab</SelectItem>
+                      <SelectItem value="imaging">Imaging</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Button
+                  type="submit"
+                  disabled={createOrder.isPending || !orderName.trim()}
+                >
+                  Add
+                </Button>
+              </form>
+              {(orders ?? []).length === 0 ? (
+                <SectionCard>
+                  <EmptyState icon={Inbox} heading="No labs yet" size="sm" />
+                </SectionCard>
+              ) : (
+                <SectionCard>
+                  <ul className="flex flex-col divide-y divide-border text-sm">
+                    {orders?.map((order) => (
+                      <li
+                        key={order.id}
+                        className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <span className="font-medium text-foreground">
+                              {order.name}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {order.order_type}
+                            </span>
+                          </div>
+                          <Select
+                            value={order.status}
+                            onValueChange={(status) =>
+                              patchOrder.mutate({
+                                orderId: order.id,
+                                status,
+                              })
+                            }
+                          >
+                            <SelectTrigger
+                              size="sm"
+                              className="w-[140px]"
+                              aria-label={`Status for ${order.name}`}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ordered">Ordered</SelectItem>
+                              <SelectItem value="in_progress">
+                                In progress
+                              </SelectItem>
+                              <SelectItem value="resulted">Resulted</SelectItem>
+                              <SelectItem value="cancelled">
+                                Cancelled
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Input
+                          defaultValue={order.result_summary ?? ""}
+                          placeholder="Result"
+                          aria-label={`Result for ${order.name}`}
+                          onBlur={(e) => {
+                            const value = e.target.value.trim();
+                            if (value === (order.result_summary ?? "")) return;
+                            patchOrder.mutate({
+                              orderId: order.id,
+                              result_summary: value,
+                            });
+                          }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </SectionCard>
+              )}
+            </div>
+          </section>
+          <section>
+            <h2 className="mb-2 text-sm font-semibold text-foreground">
+              Files
+            </h2>
+            <SectionCard>
+              {(files ?? []).length === 0 ? (
+                <EmptyState icon={FileText} heading="No files yet" size="sm" />
+              ) : (
+                <ul className="flex flex-col divide-y divide-border text-sm">
+                  {files?.map((f) => (
+                    <li
+                      key={f.id}
+                      className="flex min-h-11 items-center justify-between py-2 first:pt-0 last:pb-0"
+                    >
+                      <span className="text-foreground">{f.file_type}</span>
+                      {f.download_url && (
+                        <a
+                          className="font-medium text-primary hover:underline"
+                          href={f.download_url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </SectionCard>
+          </section>
+        </div>
+      ) : null}
 
       {section === "overview" ? (
         <div className="flex flex-col gap-4">
@@ -616,38 +779,6 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
             </SectionCard>
           </section>
 
-          <section className="mb-8">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">
-              Files
-            </h2>
-            <SectionCard>
-              {(files ?? []).length === 0 ? (
-                <EmptyState icon={FileText} heading="No files yet" size="sm" />
-              ) : (
-                <ul className="flex flex-col divide-y divide-border text-sm">
-                  {files?.map((f) => (
-                    <li
-                      key={f.id}
-                      className="flex items-center justify-between py-2 first:pt-0 last:pb-0"
-                    >
-                      <span className="text-foreground">{f.file_type}</span>
-                      {f.download_url && (
-                        <a
-                          className="font-medium text-primary hover:underline"
-                          href={f.download_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </SectionCard>
-          </section>
-
           {canMerge && (
             <section className="mb-8">
               <h2 className="mb-2 text-sm font-semibold text-foreground">
@@ -688,32 +819,27 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
       ) : null}
 
       {section === "timeline" ? (
-        <section className="mb-8">
-          <h2 className="mb-2 text-sm font-semibold text-foreground">
-            Timeline
-          </h2>
-          <SectionCard>
-            {timeline.length === 0 ? (
-              <EmptyState icon={History} heading="No events yet" size="sm" />
-            ) : (
-              <ul className="flex flex-col divide-y divide-border text-sm">
-                {timeline.map((event) => (
-                  <li
-                    key={event.id}
-                    className="flex flex-wrap justify-between gap-2 py-2 first:pt-0 last:pb-0"
-                  >
-                    <span className="text-foreground">{event.label}</span>
-                    <span className="text-muted-foreground">
-                      {new Date(event.at).toLocaleString("en-PH", {
-                        timeZone: "Asia/Manila",
-                      })}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </SectionCard>
-        </section>
+        <SectionCard>
+          {timeline.length === 0 ? (
+            <EmptyState icon={History} heading="No events yet" size="sm" />
+          ) : (
+            <ul className="flex flex-col divide-y divide-border text-sm">
+              {timeline.map((event) => (
+                <li
+                  key={event.id}
+                  className="flex flex-wrap justify-between gap-2 py-2 first:pt-0 last:pb-0"
+                >
+                  <span className="text-foreground">{event.label}</span>
+                  <span className="text-muted-foreground">
+                    {new Date(event.at).toLocaleString("en-PH", {
+                      timeZone: "Asia/Manila",
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
       ) : null}
 
       {section === "prescriptions" ? (
@@ -856,131 +982,16 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
         </div>
       ) : null}
 
-      {section === "orders" ? (
-        <section className="mb-8">
-          <h2 className="mb-2 text-sm font-semibold text-foreground">
-            Lab and imaging
-          </h2>
-          <div className="flex flex-col gap-4">
-            <form
-              className="flex flex-col gap-2 sm:flex-row sm:items-end"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!orderName.trim()) return;
-                createOrder.mutate();
-              }}
-            >
-              <Field className="min-w-0 flex-1">
-                <FieldLabel htmlFor="order-name" label="Order" />
-                <Input
-                  id="order-name"
-                  value={orderName}
-                  onChange={(e) => setOrderName(e.target.value)}
-                  placeholder={FORM_PLACEHOLDERS.orderName}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="order-type" label="Type" />
-                <Select
-                  value={orderType}
-                  onValueChange={(v) => setOrderType(v as "lab" | "imaging")}
-                >
-                  <SelectTrigger id="order-type" className="w-full sm:w-36">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="lab">Lab</SelectItem>
-                    <SelectItem value="imaging">Imaging</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Button
-                type="submit"
-                disabled={createOrder.isPending || !orderName.trim()}
-              >
-                Add
-              </Button>
-            </form>
-            {(orders ?? []).length === 0 ? (
-              <SectionCard>
-                <EmptyState icon={Inbox} heading="No orders yet" size="sm" />
-              </SectionCard>
-            ) : (
-              <SectionCard>
-                <ul className="flex flex-col divide-y divide-border text-sm">
-                  {orders?.map((order) => (
-                    <li
-                      key={order.id}
-                      className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                          <span className="font-medium text-foreground">
-                            {order.name}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {" "}
-                            · {order.order_type}
-                          </span>
-                        </div>
-                        <Select
-                          value={order.status}
-                          onValueChange={(status) =>
-                            patchOrder.mutate({
-                              orderId: order.id,
-                              status,
-                            })
-                          }
-                        >
-                          <SelectTrigger
-                            size="sm"
-                            className="w-[140px]"
-                            aria-label={`Status for ${order.name}`}
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ordered">Ordered</SelectItem>
-                            <SelectItem value="in_progress">
-                              In progress
-                            </SelectItem>
-                            <SelectItem value="resulted">Resulted</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Input
-                        defaultValue={order.result_summary ?? ""}
-                        placeholder="Result"
-                        aria-label={`Result for ${order.name}`}
-                        onBlur={(e) => {
-                          const value = e.target.value.trim();
-                          if (value === (order.result_summary ?? "")) return;
-                          patchOrder.mutate({
-                            orderId: order.id,
-                            result_summary: value,
-                          });
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </SectionCard>
-            )}
-          </div>
-        </section>
-      ) : null}
-
       {section === "documents" ? (
         <section className="mb-8">
           <h2 className="mb-2 text-sm font-semibold text-foreground">
-            Documents
+            Certificates
           </h2>
           <SectionCard>
-            {(documents?.items ?? []).length === 0 ? (
+            {certificateDocs.length === 0 ? (
               <EmptyState
                 icon={FileText}
-                heading="No documents yet"
+                heading="No certificates yet"
                 size="sm"
                 action={
                   <Button asChild size="sm">
@@ -988,14 +999,14 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
                       to="/dashboard/patients/$patientId/documents/new"
                       params={{ patientId }}
                     >
-                      New document
+                      New
                     </Link>
                   </Button>
                 }
               />
             ) : (
               <ul className="flex flex-col divide-y divide-border text-sm">
-                {documents?.items.map((doc) => (
+                {certificateDocs.map((doc) => (
                   <li
                     key={doc.id}
                     className="flex flex-col gap-2 py-2.5 first:pt-0 last:pb-0"

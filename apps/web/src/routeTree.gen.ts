@@ -91,6 +91,7 @@ import { Route as DashboardPatientsPatientIdBillingRouteImport } from "./routes/
 import { Route as DashboardPatientsPatientIdDocumentsRouteImport } from "./routes/dashboard.patients.$patientId.documents";
 import { Route as DashboardPatientsPatientIdOrdersRouteImport } from "./routes/dashboard.patients.$patientId.orders";
 import { Route as DashboardPatientsPatientIdPrescriptionsRouteImport } from "./routes/dashboard.patients.$patientId.prescriptions";
+import { Route as DashboardPatientsPatientIdRecordsRouteImport } from "./routes/dashboard.patients.$patientId.records";
 import { Route as DashboardPatientsPatientIdTimelineRouteImport } from "./routes/dashboard.patients.$patientId.timeline";
 import { Route as DashboardSettingsClinicIndexRouteImport } from "./routes/dashboard.settings.clinic.index";
 import { Route as DashboardSettingsClinicBrandingRouteImport } from "./routes/dashboard.settings.clinic.branding";
@@ -544,6 +545,12 @@ const DashboardPatientsPatientIdPrescriptionsRoute =
     path: "/prescriptions",
     getParentRoute: () => DashboardPatientsPatientIdRoute,
   } as any);
+const DashboardPatientsPatientIdRecordsRoute =
+  DashboardPatientsPatientIdRecordsRouteImport.update({
+    id: "/records",
+    path: "/records",
+    getParentRoute: () => DashboardPatientsPatientIdRoute,
+  } as any);
 const DashboardPatientsPatientIdTimelineRoute =
   DashboardPatientsPatientIdTimelineRouteImport.update({
     id: "/timeline",
@@ -699,6 +706,7 @@ export interface FileRoutesByFullPath {
   "/dashboard/patients/$patientId/documents": typeof DashboardPatientsPatientIdDocumentsRouteWithChildren;
   "/dashboard/patients/$patientId/orders": typeof DashboardPatientsPatientIdOrdersRoute;
   "/dashboard/patients/$patientId/prescriptions": typeof DashboardPatientsPatientIdPrescriptionsRouteWithChildren;
+  "/dashboard/patients/$patientId/records": typeof DashboardPatientsPatientIdRecordsRoute;
   "/dashboard/patients/$patientId/timeline": typeof DashboardPatientsPatientIdTimelineRoute;
   "/dashboard/settings/clinic/branding": typeof DashboardSettingsClinicBrandingRoute;
   "/dashboard/settings/clinic/compliance": typeof DashboardSettingsClinicComplianceRoute;
@@ -785,6 +793,7 @@ export interface FileRoutesByTo {
   "/dashboard/patients/$patientId/documents": typeof DashboardPatientsPatientIdDocumentsRouteWithChildren;
   "/dashboard/patients/$patientId/orders": typeof DashboardPatientsPatientIdOrdersRoute;
   "/dashboard/patients/$patientId/prescriptions": typeof DashboardPatientsPatientIdPrescriptionsRouteWithChildren;
+  "/dashboard/patients/$patientId/records": typeof DashboardPatientsPatientIdRecordsRoute;
   "/dashboard/patients/$patientId/timeline": typeof DashboardPatientsPatientIdTimelineRoute;
   "/dashboard/settings/clinic/branding": typeof DashboardSettingsClinicBrandingRoute;
   "/dashboard/settings/clinic/compliance": typeof DashboardSettingsClinicComplianceRoute;
@@ -882,6 +891,7 @@ export interface FileRoutesById {
   "/dashboard/patients/$patientId/documents": typeof DashboardPatientsPatientIdDocumentsRouteWithChildren;
   "/dashboard/patients/$patientId/orders": typeof DashboardPatientsPatientIdOrdersRoute;
   "/dashboard/patients/$patientId/prescriptions": typeof DashboardPatientsPatientIdPrescriptionsRouteWithChildren;
+  "/dashboard/patients/$patientId/records": typeof DashboardPatientsPatientIdRecordsRoute;
   "/dashboard/patients/$patientId/timeline": typeof DashboardPatientsPatientIdTimelineRoute;
   "/dashboard/settings/clinic/branding": typeof DashboardSettingsClinicBrandingRoute;
   "/dashboard/settings/clinic/compliance": typeof DashboardSettingsClinicComplianceRoute;
@@ -980,6 +990,7 @@ export interface FileRouteTypes {
     | "/dashboard/patients/$patientId/documents"
     | "/dashboard/patients/$patientId/orders"
     | "/dashboard/patients/$patientId/prescriptions"
+    | "/dashboard/patients/$patientId/records"
     | "/dashboard/patients/$patientId/timeline"
     | "/dashboard/settings/clinic/branding"
     | "/dashboard/settings/clinic/compliance"
@@ -1066,6 +1077,7 @@ export interface FileRouteTypes {
     | "/dashboard/patients/$patientId/documents"
     | "/dashboard/patients/$patientId/orders"
     | "/dashboard/patients/$patientId/prescriptions"
+    | "/dashboard/patients/$patientId/records"
     | "/dashboard/patients/$patientId/timeline"
     | "/dashboard/settings/clinic/branding"
     | "/dashboard/settings/clinic/compliance"
@@ -1162,6 +1174,7 @@ export interface FileRouteTypes {
     | "/dashboard/patients/$patientId/documents"
     | "/dashboard/patients/$patientId/orders"
     | "/dashboard/patients/$patientId/prescriptions"
+    | "/dashboard/patients/$patientId/records"
     | "/dashboard/patients/$patientId/timeline"
     | "/dashboard/settings/clinic/branding"
     | "/dashboard/settings/clinic/compliance"
@@ -1778,6 +1791,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardPatientsPatientIdPrescriptionsRouteImport;
       parentRoute: typeof DashboardPatientsPatientIdRoute;
     };
+    "/dashboard/patients/$patientId/records": {
+      id: "/dashboard/patients/$patientId/records";
+      path: "/records";
+      fullPath: "/dashboard/patients/$patientId/records";
+      preLoaderRoute: typeof DashboardPatientsPatientIdRecordsRouteImport;
+      parentRoute: typeof DashboardPatientsPatientIdRoute;
+    };
     "/dashboard/patients/$patientId/timeline": {
       id: "/dashboard/patients/$patientId/timeline";
       path: "/timeline";
@@ -2076,6 +2096,7 @@ interface DashboardPatientsPatientIdRouteChildren {
   DashboardPatientsPatientIdDocumentsRoute: typeof DashboardPatientsPatientIdDocumentsRouteWithChildren;
   DashboardPatientsPatientIdOrdersRoute: typeof DashboardPatientsPatientIdOrdersRoute;
   DashboardPatientsPatientIdPrescriptionsRoute: typeof DashboardPatientsPatientIdPrescriptionsRouteWithChildren;
+  DashboardPatientsPatientIdRecordsRoute: typeof DashboardPatientsPatientIdRecordsRoute;
   DashboardPatientsPatientIdTimelineRoute: typeof DashboardPatientsPatientIdTimelineRoute;
   DashboardPatientsPatientIdIndexRoute: typeof DashboardPatientsPatientIdIndexRoute;
   DashboardPatientsPatientIdInvoicesInvoiceIdRoute: typeof DashboardPatientsPatientIdInvoicesInvoiceIdRoute;
@@ -2094,6 +2115,8 @@ const DashboardPatientsPatientIdRouteChildren: DashboardPatientsPatientIdRouteCh
       DashboardPatientsPatientIdOrdersRoute,
     DashboardPatientsPatientIdPrescriptionsRoute:
       DashboardPatientsPatientIdPrescriptionsRouteWithChildren,
+    DashboardPatientsPatientIdRecordsRoute:
+      DashboardPatientsPatientIdRecordsRoute,
     DashboardPatientsPatientIdTimelineRoute:
       DashboardPatientsPatientIdTimelineRoute,
     DashboardPatientsPatientIdIndexRoute: DashboardPatientsPatientIdIndexRoute,
