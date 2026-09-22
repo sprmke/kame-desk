@@ -1,21 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { completeOnboarding } from "./helpers/onboarding";
-
-async function registerClinic(page: import("@playwright/test").Page) {
-  const email = `mobile-${Date.now()}@example.com`;
-  await page.goto("/register");
-  await page.getByLabel("Your name").fill("Dr Mobile");
-  await page.getByLabel("Clinic name").fill("Mobile Clinic");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill("password123");
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page).toHaveURL(/\/onboarding/);
-  await completeOnboarding(page);
-}
+import { completeOnboarding, registerOwner } from "./helpers/onboarding";
 
 test.describe("native mobile shell", () => {
   test("bottom tabs on phone, sidebar on desktop", async ({ page }) => {
-    await registerClinic(page);
+    await registerOwner(page, { name: "Dr Mobile", clinic: "Mobile Clinic" });
+    await completeOnboarding(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
     const tabs = page.getByTestId("bottom-tab-bar");

@@ -283,8 +283,11 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
                 <FieldLabel htmlFor="date" label="Date" required />
                 <DatePicker
                   id="date"
-                  {...form.register("date")}
+                  name="date"
                   value={watchDate}
+                  onValueChange={(iso) =>
+                    form.setValue("date", iso, { shouldValidate: true })
+                  }
                 />
                 <FieldError>{form.formState.errors.date?.message}</FieldError>
               </Field>

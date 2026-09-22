@@ -51,7 +51,7 @@ Org envelope above clinics: billing and ownership at org level, operational/PHI 
 - [x] Public booking gated on active enrollment
 - [x] Org suspended blocks clinic access
 - [x] `test_organizations.py`
-- [x] E2E `multi-clinic-org.spec.ts`
+- [x] E2E `multi-clinic-org.spec.ts` (v1.2 asserts the staff route redirects to Billing plan)
 - [x] Docs sync
 
 ## Exit criteria
