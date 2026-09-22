@@ -57,19 +57,13 @@ export const settingsGroups: SettingsGroup[] = [
         permission: "settings:clinic",
       },
       {
-        label: "Rooms",
-        to: "/dashboard/settings/clinic/rooms",
-        icon: Building2,
-        permission: "settings:clinic",
-      },
-      {
         label: "Branding",
         to: "/dashboard/settings/clinic/branding",
         icon: Building2,
         permission: "settings:clinic",
       },
       {
-        label: "Compliance",
+        label: "Receipts",
         to: "/dashboard/settings/clinic/compliance",
         icon: Building2,
         permission: "settings:clinic",
@@ -85,12 +79,6 @@ export const settingsGroups: SettingsGroup[] = [
         to: "/dashboard/settings/payers",
         icon: Wallet,
         permission: "billing:view",
-      },
-      {
-        label: "Membership plans",
-        to: "/dashboard/settings/membership-plans",
-        icon: Wallet,
-        permission: "settings:services",
       },
       {
         label: "Document templates",
@@ -131,12 +119,6 @@ export const settingsGroups: SettingsGroup[] = [
   {
     label: "Plan",
     items: [
-      {
-        label: "Organization",
-        to: "/dashboard/settings/organization",
-        icon: Building2,
-        permission: "settings:organization",
-      },
       {
         label: "Billing plan",
         to: "/dashboard/settings/plan",

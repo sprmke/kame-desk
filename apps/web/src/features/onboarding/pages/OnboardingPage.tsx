@@ -41,8 +41,8 @@ const STEP_META: Record<
   },
   invite: {
     label: "Invite",
-    title: "Invite your team",
-    description: "Bring in front desk staff or other doctors.",
+    title: "Invite your secretary",
+    description: "Optional. You can add them later in Team.",
   },
 };
 

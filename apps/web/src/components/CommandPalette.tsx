@@ -71,7 +71,7 @@ export function CommandPalette({ open, onClose }: Props) {
       {
         id: "outreach",
         label: "Outreach",
-        keywords: "reminders recalls",
+        keywords: "reminders",
         permission: "outreach:view",
         run: () => navigate({ to: "/dashboard/outreach/reminders" }),
       },
