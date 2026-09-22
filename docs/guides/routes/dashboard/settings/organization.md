@@ -1,6 +1,8 @@
 # `/dashboard/settings/organization`
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Staff route redirects to Billing plan. APIs remain for Phase 2 multi-clinic.
+
+Org owners do not see this page in the solo-clinic MVP. Super Admin still manages tenants on `/platform`.
 
 ## Behavior
 

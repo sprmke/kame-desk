@@ -1,6 +1,6 @@
 # Recalls (`/dashboard/outreach/recalls`)
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Redirects to Reminders. Follow-up date still saves on SOAP. Recall APIs and ARQ job remain.
 
 ## Behavior
 

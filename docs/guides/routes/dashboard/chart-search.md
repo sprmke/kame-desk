@@ -1,14 +1,12 @@
-# Chart search (`/dashboard/chart-search`)
+# Chart search (`/dashboard/patients/chart-search`)
 
-**Status:** Documented
+**Status:** Out of MVP (v1.2). Redirects to Patients. Find the person in Directory, then open Records on the chart.
 
 ## Behavior
 
-- The fixed **Patients** title and description sit above the Directory / Chart search tabs; the search form renders below the tabs in a full-width card. Switching tabs changes only the content, never the title or description.
-- Semantic search over saved SOAP notes (pgvector embeddings).
-- Results are real chart rows: patient name, visit date, snippet, link to the SOAP page.
-- No AI-generated summaries; ranked pointers only.
-- The empty state prompts the user to type at least 2 characters. Idle and no-match empties sit in that same card as the search field.
+- `/dashboard/patients/chart-search` and `/dashboard/chart-search` redirect to `/dashboard/patients`.
+- No Patients tab, no command-palette entry. Search the patient by name, contact, or ID, then open Records on the chart.
+- Semantic search over saved SOAP notes (pgvector) stays in the API and in the staff assistant `search_charts` tool. The page component is unused in this MVP.
 
 ## Save paths
 
@@ -32,18 +30,19 @@
 
 ## AI assistant parity
 
-Phase 16 `search_charts` tool will call the same service function.
+`search_charts` calls the same service. There is no clinic tab for the same search.
 
 ## Edge cases
 
 - Embedding failures do not roll back SOAP saves.
 - Query must be at least 2 characters.
+- Bookmarked Chart search URLs land on Patients.
 
 ## Implementation map
 
-- Web: `features/chart-search/pages/ChartSearchPage.tsx`
+- Web: `apps/web/src/routes/dashboard.patients.chart-search.tsx`, `apps/web/src/routes/dashboard.chart-search.tsx` (redirects). Page: `features/chart-search/pages/ChartSearchPage.tsx` (unused in MVP).
 - API: `routers/recordings.py` (chart-search route), `services/chart_search_service.py`, `services/embedding_service.py`
 
 ## Host-facing knowledge
 
-Use **Charts** in the header to search notes by meaning (for example "migraine follow-up"). Each result opens the real saved SOAP version.
+Open **Patients**, search by name, contact, or ID, then open the person. **Records** on the chart opens that SOAP note. There is no Chart search tab in this MVP.

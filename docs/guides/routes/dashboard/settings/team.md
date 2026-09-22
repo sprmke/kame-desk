@@ -7,7 +7,7 @@
 
 Lists active members and pending invitations. Owners/admins can invite by email and role, resend or revoke pending invites, change roles, and deactivate non-owner members. Loading uses a member-row skeleton; no members uses `EmptyState` in a card. Invite fields use shared placeholders.
 
-**Invite** in the page header opens a `ResponsiveModal` (bottom sheet below `lg`, dialog at `lg+`) with email and role. Validation is Zod via `inviteSchema`; the server error is shown in the modal. Closing by any route (Cancel, X, Escape, overlay) resets the form. Pending invites and members stay as their own cards below.
+**Invite** in the page header opens a sheet with secretary email only (role is always reception). Extra doctor or admin invites are Phase 2; the API still accepts those roles.
 
 ## Save paths
 
@@ -36,4 +36,4 @@ Invitation emails link to `/invitations/accept?token=…` (public accept flow).
 
 ## Host-facing knowledge
 
-Use Team to add reception or additional doctors. Each invite gets an email with a join link. Use Resend if the first email was missed. The clinic must always keep at least one owner.
+Use Team to add a secretary. Each invite gets an email with a join link. Use Resend if the first email was missed. The clinic must always keep at least one owner.
