@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { RecallsPage } from "@/features/recalls/pages/RecallsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/outreach/recalls")({
-  component: RecallsPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/outreach/reminders" });
+  },
 });

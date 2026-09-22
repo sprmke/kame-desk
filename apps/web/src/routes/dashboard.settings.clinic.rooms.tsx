@@ -1,15 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { RequirePermission } from "@/components/layout/RequirePermission";
-import { ClinicSettingsPage } from "@/features/settings/clinic/pages/ClinicSettingsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/settings/clinic/rooms")({
-  component: RouteComponent,
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/settings/clinic/details" });
+  },
 });
-
-function RouteComponent() {
-  return (
-    <RequirePermission permission="settings:clinic">
-      <ClinicSettingsPage view="rooms" />
-    </RequirePermission>
-  );
-}

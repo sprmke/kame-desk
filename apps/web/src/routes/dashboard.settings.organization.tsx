@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { OrganizationSettingsPage } from "@/features/settings/organization/pages/OrganizationSettingsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/settings/organization")({
-  component: OrganizationSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/settings/plan" });
+  },
 });

@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CreateClinicPage } from "@/features/settings/organization/pages/CreateClinicPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
   "/dashboard/settings/organization/clinics/new",
 )({
-  component: CreateClinicPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/settings/plan" });
+  },
 });
