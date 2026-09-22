@@ -216,7 +216,8 @@ async def seed_demo_data(db: AsyncSession) -> SeedResult:
     owner_profile = DoctorProfile(
         user_id=owner.id,
         clinic_id=clinic.id,
-        specialty="Family Medicine",
+        specialty="General practitioner",
+        specialty_key="general_practitioner",
         prc_license_number="PRC-123456",
         consultation_fee=Decimal("500.00"),
         follow_up_fee=Decimal("350.00"),

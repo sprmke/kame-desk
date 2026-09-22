@@ -40,6 +40,7 @@ async def register_user(db: AsyncSession, data: RegisterRequest) -> AuthResponse
         email=data.email.lower(),
         hashed_password=hash_password(data.password),
         full_name=data.full_name,
+        phone=(data.phone or "").strip() or None,
     )
     plan_key = data.plan_key if data.plan_key in {"starter", "pro", "clinic"} else "starter"
     db.add(user)

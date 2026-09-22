@@ -12,6 +12,7 @@ export const registerSchema = z.object({
   clinic_name: z.string().min(1, "Clinic name is required"),
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "At least 8 characters"),
+  phone: z.string().max(50).optional(),
 });
 
 export type RegisterValues = z.infer<typeof registerSchema>;

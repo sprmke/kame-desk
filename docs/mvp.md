@@ -117,7 +117,8 @@ DoctorDesk is the one desk for that clinic. It is not a hospital EMR, not a lab 
 ### 6.1 Authentication & Clinic Setup
 
 - Email/password login, JWT access + refresh. Optional Google OAuth stays if already shipped.
-- Doctor profile: name, specialty, PRC license, signature image (Rx/certs), photo
+- Register collects optional mobile (`users.phone`).
+- Doctor profile: name, typed specialty catalog (Other plus free text), PRC license, signature image (Rx/certs), photo (presigned upload)
 - Clinic profile: name, logo, license, address, contact
 - Working hours and holidays (block booking)
 - Default appointment duration; service fee list (consult, follow-up, procedures, medicine sold on site)
@@ -169,7 +170,7 @@ Public bookings that are not auto-confirmed sit in a review list on Schedule.
 - Visit vitals, treatment plan, follow-up date (stored on the note; no recall-campaign hub)
 - Linked prescriptions and visit attachments
 - Chart versioning: every save is a new version; never overwrite in place
-- Specialty templates: **general, dental (odontogram), pediatric, OB-GYN, family/internal med, ENT**. Psychiatry and dermatology templates may remain in code; they are not marketed.
+- SOAP templates: **general, dental (odontogram), pediatric, OB-GYN, family/internal med, ENT**. Psychiatry and dermatology templates may remain in code; they are not marketed. New SOAP notes default the template from the doctor's `specialty_key` (dentist → dental, unknown → general). The doctor can still switch per visit.
 - Doctor signature on finalize; print/export PDF
 - AI SOAP draft streams into the form; doctor confirms before save
 

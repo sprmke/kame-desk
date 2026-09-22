@@ -29,6 +29,7 @@ export function RegisterPage() {
     mutationFn: (values: RegisterValues) =>
       api.register({
         ...values,
+        phone: values.phone?.trim() || undefined,
         plan_key:
           plan === "starter" || plan === "pro" || plan === "clinic"
             ? plan
@@ -64,6 +65,17 @@ export function RegisterPage() {
             {...register("clinic_name")}
           />
           <FieldError>{errors.clinic_name?.message}</FieldError>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="phone" label="Mobile" />
+          <Input
+            id="phone"
+            type="tel"
+            autoComplete="tel"
+            placeholder={FORM_PLACEHOLDERS.phone}
+            {...register("phone")}
+          />
+          <FieldError>{errors.phone?.message}</FieldError>
         </Field>
         <Field>
           <FieldLabel htmlFor="email" label="Email" required />

@@ -153,6 +153,7 @@ async def me(
         id=user.id,
         email=user.email,
         full_name=user.full_name,
+        phone=user.phone,
         email_verified_at=user.email_verified_at,
         memberships=memberships,
         organizations=organizations,

@@ -98,6 +98,7 @@ export type SessionUser = {
   id: string;
   email: string;
   full_name: string;
+  phone?: string | null;
   memberships: Array<{
     clinic_id: string;
     clinic_name: string;
@@ -128,8 +129,11 @@ export type DoctorProfile = {
   user_id: string;
   clinic_id: string;
   specialty: string | null;
+  specialty_key?: string | null;
+  specialty_other?: string | null;
   prc_license_number: string | null;
   signature_image_key: string | null;
+  photo_url?: string | null;
   consultation_fee: string | null;
   follow_up_fee: string | null;
   full_name?: string | null;
@@ -854,6 +858,7 @@ export const api = {
     password: string;
     full_name: string;
     clinic_name: string;
+    phone?: string;
     plan_key?: string;
   }) =>
     apiFetch<AuthResponse>("/auth/register", {
@@ -1124,6 +1129,18 @@ export const api = {
     apiFetch<{ upload_url: string; object_key: string }>(
       `/doctors/${doctorId}/signature-upload`,
       { method: "POST", body: JSON.stringify(body) },
+    ),
+  photoUpload: (
+    doctorId: string,
+    body: { content_type: string; file_size_bytes: number },
+  ) =>
+    apiFetch<{ upload_url: string; object_key: string }>(
+      `/doctors/${doctorId}/photo-upload`,
+      { method: "POST", body: JSON.stringify(body) },
+    ),
+  listSpecialties: () =>
+    apiFetch<Array<{ key: string; label: string; soap_template_key: string }>>(
+      `/specialties`,
     ),
   createServiceFee: (
     clinicId: string,

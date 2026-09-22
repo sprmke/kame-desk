@@ -33,14 +33,17 @@ def create_presigned_upload(
     doctor_id: uuid.UUID,
     content_type: str,
     file_size_bytes: int,
+    kind: str = "signature",
 ) -> tuple[str, str]:
     if content_type not in ALLOWED_CONTENT_TYPES:
         raise ValueError("Unsupported content type")
     if file_size_bytes > 2_000_000:
         raise ValueError("File too large")
+    if kind not in ("signature", "photo"):
+        raise ValueError("Unsupported upload kind")
 
     ext = content_type.split("/")[-1]
-    object_key = f"clinics/{clinic_id}/doctors/{doctor_id}/signature.{ext}"
+    object_key = f"clinics/{clinic_id}/doctors/{doctor_id}/{kind}.{ext}"
     client = _client()
 
     url = client.generate_presigned_url(

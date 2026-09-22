@@ -9,6 +9,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8)
     full_name: str = Field(min_length=1, max_length=255)
     clinic_name: str = Field(min_length=1, max_length=255)
+    phone: str | None = Field(default=None, max_length=50)
     plan_key: str | None = Field(default=None, max_length=32)
 
 
@@ -94,6 +95,7 @@ class UserRead(BaseModel):
     id: uuid.UUID
     email: EmailStr
     full_name: str
+    phone: str | None = None
     email_verified_at: datetime | None = None
     memberships: list[ClinicMembershipRead]
     organizations: list[OrganizationSummaryRead] = Field(default_factory=list)

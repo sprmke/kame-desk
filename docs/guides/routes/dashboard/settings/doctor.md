@@ -5,13 +5,14 @@
 
 ## Behavior
 
-Edit the signed-in doctor's profile (or the first clinic doctor for owners without a profile): specialty, PRC license, consultation fee, signature image via a dropzone and presigned URL. The dropzone shows a local preview of the file just uploaded (the stored object is private).
+Edit the signed-in doctor's profile (or the first clinic doctor for owners without a profile): specialty catalog (Other plus a name), PRC license, consultation fee, photo, and signature image via dropzones and presigned URLs. Each dropzone shows a local preview of the file just uploaded (the stored object is private).
 
 ## Save paths
 
 | Action                | API                                                                               |
 | --------------------- | --------------------------------------------------------------------------------- |
 | Create/update profile | `POST /api/v1/clinics/{clinic_id}/doctors` or `PATCH /api/v1/doctors/{doctor_id}` |
+| Photo upload          | `POST /api/v1/doctors/{doctor_id}/photo-upload` then `PUT` to presigned URL       |
 | Signature upload      | `POST /api/v1/doctors/{doctor_id}/signature-upload` then `PUT` to presigned URL   |
 
 ## RBAC
@@ -25,4 +26,4 @@ Doctor may edit own profile; owners/admins manage clinic doctors via onboarding 
 
 ## Host-facing knowledge
 
-Doctor signature and license details are used later for prescriptions and certificates. Upload a clear signature image (PNG/JPEG/WebP, max 2 MB).
+Doctor signature, photo, license, and specialty are used on prescriptions, certificates, and SOAP defaults. Upload a clear signature image (PNG/JPEG/WebP, max 2 MB). Photo uses the same size and types.

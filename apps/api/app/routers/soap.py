@@ -10,8 +10,10 @@ from app.ai.soap_draft_service import stream_soap_draft_sse
 from app.core.db import get_db
 from app.core.deps import ClinicStaff
 from app.core.security import get_active_clinic_membership, get_current_user
+from app.data.specialties import catalog_as_dicts
 from app.data.specialty_templates import SPECIALTY_TEMPLATES
 from app.models import ClinicMembership, User
+from app.schemas.clinic import DoctorSpecialtyRead
 from app.schemas.soap import (
     SoapDraftRequest,
     SoapNoteCreate,
@@ -52,6 +54,13 @@ async def _enrich_notes(db: AsyncSession, notes: list) -> list[SoapNoteRead]:
         row.author_name = name_map.get(n.created_by_user_id)
         out.append(row)
     return out
+
+
+@router.get("/specialties", response_model=list[DoctorSpecialtyRead])
+async def list_doctor_specialties(
+    membership: ClinicStaff,
+) -> list[DoctorSpecialtyRead]:
+    return [DoctorSpecialtyRead(**item) for item in catalog_as_dicts()]
 
 
 @router.get("/specialty-templates", response_model=list[SpecialtyTemplateRead])
