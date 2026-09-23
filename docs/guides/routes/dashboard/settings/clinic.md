@@ -4,18 +4,18 @@
 
 ## Routes
 
-| Path                                    | Content                        |
-| --------------------------------------- | ------------------------------ |
-| `/dashboard/settings/clinic`            | Redirects to Details           |
-| `/dashboard/settings/clinic/details`    | Profile, secretary SOAP access |
-| `/dashboard/settings/clinic/hours`      | Working hours, holidays        |
-| `/dashboard/settings/clinic/rooms`      | Redirects to Details (Phase 2) |
-| `/dashboard/settings/clinic/branding`   | Logo, brand color              |
-| `/dashboard/settings/clinic/compliance` | Receipt numbering only         |
+| Path                                    | Content                               |
+| --------------------------------------- | ------------------------------------- |
+| `/dashboard/settings/clinic`            | Redirects to Details                  |
+| `/dashboard/settings/clinic/details`    | Profile, secretary SOAP access        |
+| `/dashboard/settings/clinic/hours`      | Working hours, breaks, public booking |
+| `/dashboard/settings/clinic/rooms`      | Redirects to Details (Phase 2)        |
+| `/dashboard/settings/clinic/branding`   | Logo, brand color                     |
+| `/dashboard/settings/clinic/compliance` | Receipt numbering only                |
 
 ## Behavior
 
-Owners and admins edit clinic profile, logo upload, brand color (letterhead/PDF accent), working hours, holidays, secretary SOAP access, and receipt numbering. Rooms, BIR PTU/CAS, and growth/NPS settings are Phase 2 (APIs remain).
+Owners and admins edit clinic profile, logo upload, brand color (letterhead/PDF accent), working hours, optional lunch breaks, holidays, public-booking buffer / advance window / cancel notice / intake toggles, secretary SOAP access, and receipt numbering. Rooms, BIR PTU/CAS, and growth/NPS settings are Phase 2 (APIs remain).
 
 - Each view carries its own page title matching the settings nav item (Clinic details, Hours and holidays, Branding, Receipts). The settings layout renders the nav only, so there is no second "Settings" heading above it.
 - **Logo:** `ImageFileDropzone` (click or drag). Uploads to R2 via presigned URL; preview uses a short-lived download URL.
@@ -25,12 +25,12 @@ Owners and admins edit clinic profile, logo upload, brand color (letterhead/PDF 
 
 ## Save paths
 
-| Action                       | API                                   | DB                               |
-| ---------------------------- | ------------------------------------- | -------------------------------- |
-| Logo upload                  | `POST /clinics/{id}/logo-upload`      | `clinics.logo_url` (object key)  |
-| Profile / SOAP / brand color | `PATCH /clinics/{id}`                 | `clinics`                        |
-| Hours / holidays             | `PUT /clinics/{id}/working-hours`     | `working_hours`, `holiday_dates` |
-| Receipt numbering            | `PUT /clinics/{id}/receipt-numbering` | `receipt_numbering_config`       |
+| Action                                        | API                                   | DB                                                                                 |
+| --------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------- |
+| Logo upload                                   | `POST /clinics/{id}/logo-upload`      | `clinics.logo_url` (object key)                                                    |
+| Profile / SOAP / brand color / public booking | `PATCH /clinics/{id}`                 | `clinics` (incl. buffer, advance days, cancel hours, intake toggles, auto-confirm) |
+| Hours / holidays / breaks                     | `PUT /clinics/{id}/working-hours`     | `working_hours` (optional `breaks[]` per day), `holiday_dates`                     |
+| Receipt numbering                             | `PUT /clinics/{id}/receipt-numbering` | `receipt_numbering_config`                                                         |
 
 Default numbering is prefix `OR-`, next number `1`, pad width `6`. Hidden APIs still exist: `PUT /clinics/{id}/bir-compliance`, `PUT /clinics/{id}/growth-settings`, `GET/POST /clinics/{id}/rooms`.
 
@@ -41,8 +41,10 @@ Owner and admin edit. Receipt numbering is readable by any clinic staff via `GET
 ## Implementation map
 
 - Web: `apps/web/src/features/settings/clinic/pages/ClinicSettingsPage.tsx`; routes under `apps/web/src/routes/dashboard.settings.clinic*.tsx`
-- API: `apps/api/app/routers/clinics.py`, migrations `029_clinic_brand_color`, `031_bir_compliance_depth`
+- API: `apps/api/app/routers/clinics.py`, `slot_service.py`; migrations `029_clinic_brand_color`, `031_bir_compliance_depth`, `042_clinic_scheduling_settings`
+
+activity-log: profile and scheduling writes reuse `clinic.updated`; hours reuse `clinic.working_hours_updated`.
 
 ## Host-facing knowledge
 
-Use Clinic to change hours, holidays, address, logo, brand color on printed documents, and whether the secretary can open SOAP notes. Receipt numbering is the Official Receipt series used when an invoice is issued.
+Use Clinic to change hours, lunch breaks, holidays, address, logo, brand color on printed documents, and whether the secretary can open SOAP notes. Hours also controls how far ahead patients can book, the gap after each visit, the cancel-notice line on the public thank-you screen, and which extra questions appear on the public form. Receipt numbering is the Official Receipt series used when an invoice is issued.

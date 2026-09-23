@@ -206,13 +206,13 @@ activity-log: `doctor.photo_updated` on photo upload; specialty writes reuse `do
 
 ### Wave 2 — Public booking + scheduling settings
 
-- [ ] Public UI: appointment type (from public clinic `services` once duration is in `PublicClinicRead`), then date, then slots with `duration_minutes`.
-- [ ] Public UI: configurable intake (name/phone required; email, DOB, sex, address, reason, new/existing, notes). Persist on `patients` / `appointments.reason_for_visit` / `appointments.notes`.
-- [ ] Clinic settings: buffer minutes, advance booking days, cancellation notice hours, `public_booking_auto_confirm` (already), public field toggles JSON.
-- [ ] `working_hours` day object: optional `breaks[]`. `slot_service.get_available_slots` skips break windows and applies buffer between busy intervals.
-- [ ] Confirm page: no PHI beyond the booking just made.
-- [ ] Tests: `test_calendar_public_booking.py` (type duration, buffer, breaks, 409 still).
-- [ ] Docs: `guides/routes/book.md`, clinic hours guide, `data-model.md`.
+- [x] Public UI: appointment type (from public clinic `services` once duration is in `PublicClinicRead`), then date, then slots with `duration_minutes`.
+- [x] Public UI: configurable intake (name/phone required; email, DOB, sex, address, reason, new/existing, notes). Persist on `patients` / `appointments.reason_for_visit` / `appointments.notes`.
+- [x] Clinic settings: buffer minutes, advance booking days, cancellation notice hours, `public_booking_auto_confirm` (already), public field toggles JSON.
+- [x] `working_hours` day object: optional `breaks[]`. `slot_service.get_available_slots` skips break windows and applies buffer between busy intervals.
+- [x] Confirm page: no PHI beyond the booking just made.
+- [x] Tests: `test_calendar_public_booking.py` (type duration, buffer, breaks, 409 still).
+- [x] Docs: `guides/routes/book.md`, clinic hours guide, `data-model.md`.
 
 ### Wave 3 — Patient Appointments tab + clinical timeline
 

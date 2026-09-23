@@ -159,7 +159,7 @@ Patient name / contact / ID search is the clinic search. Semantic chart search i
 
 **Visit status:** `Arrived → In Consultation → Completed`
 
-**Features:** drag reschedule, walk-in (straight to Arrived), optional recurring series, double-book block (`btree_gist` per doctor), optional public booking link (slot picker only).
+**Features:** drag reschedule, walk-in (straight to Arrived), optional recurring series, double-book block (`btree_gist` per doctor), optional public booking link (type, date, slots, configurable intake). Clinic hours may include a lunch break; slots honor buffer minutes and an advance-booking cap.
 
 Public bookings that are not auto-confirmed sit in a review list on Schedule.
 
@@ -255,7 +255,7 @@ Not a clinic-facing module. `/platform` stays so we can run tenants, plans, and 
 
 1. **One doctor + secretary** — the user we are building for. Multi-doctor is Phase 2.
 2. **Onboarding** — empty dashboard without hours/fees fails on day one.
-3. **Public booking link** — optional; secretary can still book by phone. Slot picker only (no patient chatbot).
+3. **Public booking link** — optional; secretary can still book by phone. Type, date, and slot picker plus clinic-configured intake (no patient chatbot).
 4. **Waiting room** — secretary needs to know who is here now.
 5. **Patient search** — required once the roster is more than a page.
 6. **Email reminders** — the simple no-show lever.

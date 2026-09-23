@@ -28,4 +28,4 @@ All four staff roles.
 
 ## Host-facing knowledge
 
-Use **Calendar** for the week view. Drag a block to move it. Share **Public link** so patients pick a slot without calling.
+Use **Calendar** for the week view. Drag a block to move it. Share **Public link** so patients pick a type, date, and time without calling. Auto-confirm and extra public questions also live under Hours.
