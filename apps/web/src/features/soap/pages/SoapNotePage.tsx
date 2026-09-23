@@ -18,6 +18,7 @@ import { SpecialtyFields } from "@/features/soap/components/SpecialtyFields";
 import { SoapRecordingPanel } from "@/features/soap/components/SoapRecordingPanel";
 import { useSoapDraftStream } from "@/features/soap/hooks/useSoapDraftStream";
 import { filterIcd10, type SoapFormValues } from "@/features/soap/lib/schemas";
+import { soapTemplateForSpecialtyKey } from "@/lib/doctorSpecialties";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
 import { pageContainerClass } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -73,10 +74,19 @@ export function SoapNotePage({ appointmentId }: Props) {
     },
   });
 
+  const clinicId = getClinicId();
   const { data: templates } = useQuery({
     queryKey: ["specialty-templates"],
     queryFn: () => api.listSpecialtyTemplates(),
   });
+  const { data: doctors } = useQuery({
+    queryKey: ["doctors", clinicId],
+    queryFn: () => api.listDoctors(clinicId!),
+    enabled: Boolean(clinicId),
+  });
+  const defaultTemplate = soapTemplateForSpecialtyKey(
+    doctors?.find((d) => d.id === appointment?.doctor_id)?.specialty_key,
+  );
 
   const { data: soapHistory, isLoading: loadingSoap } = useQuery({
     queryKey: ["soap-notes", appointmentId],
@@ -110,7 +120,7 @@ export function SoapNotePage({ appointmentId }: Props) {
           icd10_codes: viewingNote.icd10_codes ?? [],
           follow_up_date: viewingNote.follow_up_date ?? "",
           specialty_template_key:
-            viewingNote.specialty_template_key ?? "general",
+            viewingNote.specialty_template_key ?? defaultTemplate,
           specialty_data: viewingNote.specialty_data ?? {},
         }
       : {
@@ -123,7 +133,7 @@ export function SoapNotePage({ appointmentId }: Props) {
           diagnosis_primary: "",
           icd10_codes: [],
           follow_up_date: "",
-          specialty_template_key: "general",
+          specialty_template_key: defaultTemplate,
           specialty_data: {},
         },
   });

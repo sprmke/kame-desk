@@ -179,3 +179,124 @@ async def test_doctor_invite_accept_does_not_double_count_own_seat(
     )
     assert login.status_code == 200
     assert "tokens" in login.json()
+
+
+@pytest.mark.asyncio
+async def test_register_optional_phone(client: AsyncClient):
+    suffix = uuid.uuid4().hex[:8]
+    res = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": f"owner-{suffix}@example.com",
+            "password": "password123",
+            "full_name": "Dr Owner",
+            "clinic_name": f"Test Clinic {suffix}",
+            "phone": "09171234567",
+        },
+    )
+    assert res.status_code == 200
+    me = await client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {res.json()['tokens']['access_token']}"},
+    )
+    assert me.status_code == 200
+    assert me.json()["phone"] == "09171234567"
+
+
+@pytest.mark.asyncio
+async def test_specialty_catalog_and_doctor_key(client: AsyncClient):
+    data = await register_owner(client, suffix=str(uuid.uuid4())[:8])
+    headers = {
+        "Authorization": f"Bearer {data['tokens']['access_token']}",
+        "X-Clinic-Id": data["clinic_id"],
+    }
+    catalog = await client.get("/api/v1/specialties", headers=headers)
+    assert catalog.status_code == 200
+    keys = {row["key"] for row in catalog.json()}
+    assert {
+        "dentist",
+        "obgyn",
+        "pediatrician",
+        "general_practitioner",
+        "dermatologist",
+        "cardiologist",
+        "ophthalmologist",
+        "orthopedic",
+        "ent",
+        "other",
+    }.issubset(keys)
+
+    created = await client.post(
+        f"/api/v1/clinics/{data['clinic_id']}/doctors",
+        headers=headers,
+        json={
+            "specialty": "General Practice",
+            "prc_license_number": "PRC-123",
+            "consultation_fee": "500.00",
+        },
+    )
+    assert created.status_code == 200
+    body = created.json()
+    assert body["specialty_key"] == "general_practitioner"
+    assert body["specialty"] == "General practitioner"
+
+    patched = await client.patch(
+        f"/api/v1/doctors/{body['id']}",
+        headers=headers,
+        json={"specialty_key": "dentist"},
+    )
+    assert patched.status_code == 200
+    assert patched.json()["specialty_key"] == "dentist"
+    assert patched.json()["specialty"] == "Dentist"
+
+    other = await client.patch(
+        f"/api/v1/doctors/{body['id']}",
+        headers=headers,
+        json={"specialty_key": "other"},
+    )
+    assert other.status_code == 400
+
+    named = await client.patch(
+        f"/api/v1/doctors/{body['id']}",
+        headers=headers,
+        json={"specialty_key": "other", "specialty_other": "Sports medicine"},
+    )
+    assert named.status_code == 200
+    assert named.json()["specialty_key"] == "other"
+    assert named.json()["specialty"] == "Sports medicine"
+    assert named.json()["specialty_other"] == "Sports medicine"
+
+
+@pytest.mark.asyncio
+async def test_doctor_photo_upload(client: AsyncClient, monkeypatch):
+    data = await register_owner(client, suffix=str(uuid.uuid4())[:8])
+    headers = {
+        "Authorization": f"Bearer {data['tokens']['access_token']}",
+        "X-Clinic-Id": data["clinic_id"],
+    }
+    created = await client.post(
+        f"/api/v1/clinics/{data['clinic_id']}/doctors",
+        headers=headers,
+        json={
+            "specialty_key": "pediatrician",
+            "prc_license_number": "PRC-123",
+            "consultation_fee": "500.00",
+        },
+    )
+    doctor_id = created.json()["id"]
+
+    def fake_upload(*_args, **_kwargs):
+        return ("https://upload.example/photo", f"clinics/x/doctors/{doctor_id}/photo.png")
+
+    monkeypatch.setattr("app.routers.doctors.create_presigned_upload", fake_upload)
+    res = await client.post(
+        f"/api/v1/doctors/{doctor_id}/photo-upload",
+        headers=headers,
+        json={"content_type": "image/png", "file_size_bytes": 1200},
+    )
+    assert res.status_code == 200
+    assert res.json()["object_key"].endswith("/photo.png")
+
+    listed = await client.get(f"/api/v1/clinics/{data['clinic_id']}/doctors", headers=headers)
+    assert listed.json()[0]["photo_url"].endswith("/photo.png")
+    assert listed.json()[0]["specialty_key"] == "pediatrician"

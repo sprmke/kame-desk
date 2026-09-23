@@ -13,7 +13,7 @@ This document is the **solo-clinic MVP** (v1.2): one doctor + secretary. Hidden 
 | `/forgot-password`                                 | [forgot-password.md](./forgot-password.md)                                             | Documented                          |
 | `/reset-password`                                  | [reset-password.md](./reset-password.md)                                               | Documented                          |
 | `/verify-email`                                    | [verify-email.md](./verify-email.md)                                                   | Documented                          |
-| `/register`                                        | (Phase 1 auth shell; `?plan=` from `/pricing`)                                         | Documented                          |
+| `/register`                                        | (Phase 1 auth shell; `?plan=` from `/pricing`; optional mobile)                        | Documented                          |
 | `/pricing`                                         | [pricing.md](./pricing.md)                                                             | Documented                          |
 | `/platform`                                        | [platform.md](./platform.md)                                                           | Documented                          |
 | `/onboarding`                                      | [onboarding.md](./onboarding.md)                                                       | Documented                          |

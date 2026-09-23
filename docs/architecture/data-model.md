@@ -85,6 +85,12 @@ A `user` can belong to more than one `clinic` (multiple `clinic_memberships` row
 
 Signup creates `organization` + `organization_subscription` + first `clinic` + `organization_enrolled_clinic` (active) + `clinic_memberships` (owner). Additional clinics are created by the org owner; enrollment starts `pending_enrollment` until Super Admin activates (manual billing rail).
 
+## Doctor specialty keys
+
+- `users.phone` is optional (register).
+- `doctor_profiles.specialty_key` is the stable catalog key (`dentist`, `obgyn`, `pediatrician`, `general_practitioner`, `dermatologist`, `cardiologist`, `ophthalmologist`, `orthopedic`, `ent`, `other`). `specialty_other` holds free text when the key is `other`. `specialty` stays the display label for older clients.
+- SOAP `specialty_template_key` is separate. New notes default from the doctor key (dentist → dental, obgyn → obgyn, pediatrician → pediatric, dermatologist → dermatology, else general).
+
 ## Load-bearing invariants (do not weaken these in a later phase without updating this doc and the PRD)
 
 1. **Double-booking prevention is a DB-level guarantee.** `appointments` carries a `btree_gist` exclusion constraint on `(doctor_id, tsrange(scheduled_start, scheduled_end))` (and separately on `room_id` when assigned), filtered to non-terminal appointment statuses. This is not app-level validation — it holds under concurrent writes. See `docs/phases/phase-03-patients-appointments.md`.

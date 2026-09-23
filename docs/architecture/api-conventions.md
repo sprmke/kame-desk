@@ -63,6 +63,19 @@ Standing reference for `apps/api`'s REST surface. Read this before adding or cha
 
 Password-reset and email-verify tokens live in `account_tokens` (SHA-256 hash, never stored raw).
 
+## Doctor profile
+
+| Method | Path                                           | Notes                                                                         |
+| ------ | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| GET    | `/api/v1/specialties`                          | Authenticated catalog (`key`, `label`, `soap_template_key`)                   |
+| GET    | `/api/v1/specialty-templates`                  | SOAP template switcher (unchanged)                                            |
+| POST   | `/api/v1/clinics/{id}/doctors`                 | Accepts `specialty_key` / `specialty_other`, or legacy `specialty` string     |
+| PATCH  | `/api/v1/doctors/{doctor_id}`                  | Same specialty fields. Does not accept client `photo_url`                     |
+| POST   | `/api/v1/doctors/{doctor_id}/photo-upload`     | Presigned R2/S3 PUT; stores object key on `photo_url`; `doctor.photo_updated` |
+| POST   | `/api/v1/doctors/{doctor_id}/signature-upload` | Existing signature upload; `doctor.signature_updated`                         |
+
+`POST /api/v1/auth/register` accepts optional `phone`.
+
 ## Patient integrity endpoints (Phase 23)
 
 | Method | Path                          | Notes                                               |

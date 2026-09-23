@@ -78,3 +78,46 @@ async def signature_upload(
     )
     await db.commit()
     return PresignedUploadResponse(upload_url=url, object_key=key)
+
+
+@router.post(
+    "/{doctor_id}/photo-upload",
+    response_model=PresignedUploadResponse,
+)
+async def photo_upload(
+    doctor_id: uuid.UUID,
+    data: PresignedUploadRequest,
+    membership: ClinicStaff,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> PresignedUploadResponse:
+    profile = await db.get(DoctorProfile, doctor_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    await assert_doctor_profile_write(membership, profile, user)
+    if profile.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Not your profile")
+    try:
+        url, key = create_presigned_upload(
+            profile.clinic_id,
+            profile.id,
+            data.content_type,
+            data.file_size_bytes,
+            kind="photo",
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    profile.photo_url = key
+    db.add(
+        ActivityLog(
+            clinic_id=profile.clinic_id,
+            actor_user_id=user.id,
+            actor_type="user",
+            action="doctor.photo_updated",
+            target_type="doctor_profile",
+            target_id=str(profile.id),
+            summary="Profile photo updated",
+        )
+    )
+    await db.commit()
+    return PresignedUploadResponse(upload_url=url, object_key=key)

@@ -5,9 +5,11 @@
 
 ## Behavior
 
-Multi-step clinic setup after registration. Steps: clinic profile, doctor profile, working hours, fees, invite secretary (or skip). A `Stepper` shows progress. Hours use a time picker in 15-minute steps. Progress is stored on the server; reload resumes at `current_step` from `GET /api/v1/clinics/{clinic_id}/onboarding-status`.
+Multi-step clinic setup after registration. Register may include optional mobile. Steps: clinic profile, doctor profile, working hours, fees, invite secretary (or skip). A `Stepper` shows progress. Hours use a time picker in 15-minute steps. Progress is stored on the server; reload resumes at `current_step` from `GET /api/v1/clinics/{clinic_id}/onboarding-status`.
 
 Invite always sends role `reception`. Extra doctors and rooms are Phase 2.
+
+The doctor step uses a specialty catalog (Other requires a name), PRC, consultation fee, and an optional photo (uploaded after the profile is saved).
 
 Incomplete onboarding redirects away from `/dashboard` to `/onboarding`.
 
@@ -15,13 +17,13 @@ Incomplete onboarding redirects away from `/dashboard` to `/onboarding`. Theme m
 
 ## Save paths
 
-| Step   | UI           | API                                                                          |
-| ------ | ------------ | ---------------------------------------------------------------------------- |
-| Clinic | `ClinicStep` | `PATCH /api/v1/clinics/{clinic_id}`                                          |
-| Doctor | `DoctorStep` | `POST /api/v1/clinics/{clinic_id}/doctors`                                   |
-| Hours  | `HoursStep`  | `PUT /api/v1/clinics/{clinic_id}/working-hours`                              |
-| Fees   | `FeesStep`   | `POST /api/v1/clinics/{clinic_id}/service-fees` (optional if doctor fee set) |
-| Invite | `InviteStep` | `POST .../invitations` or `POST .../onboarding/skip-invite`                  |
+| Step   | UI           | API                                                                                           |
+| ------ | ------------ | --------------------------------------------------------------------------------------------- |
+| Clinic | `ClinicStep` | `PATCH /api/v1/clinics/{clinic_id}`                                                           |
+| Doctor | `DoctorStep` | `POST /api/v1/clinics/{clinic_id}/doctors`; optional `POST /api/v1/doctors/{id}/photo-upload` |
+| Hours  | `HoursStep`  | `PUT /api/v1/clinics/{clinic_id}/working-hours`                                               |
+| Fees   | `FeesStep`   | `POST /api/v1/clinics/{clinic_id}/service-fees` (optional if doctor fee set)                  |
+| Invite | `InviteStep` | `POST .../invitations` or `POST .../onboarding/skip-invite`                                   |
 
 ## RBAC
 

@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Literal
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 
 class ClinicUpdate(BaseModel):
@@ -122,20 +122,29 @@ class DoctorProfileCreate(BaseModel):
     user_id: uuid.UUID | None = None
     email: EmailStr | None = None
     full_name: str | None = None
-    specialty: str = Field(min_length=1, max_length=128)
+    specialty: str | None = Field(default=None, min_length=1, max_length=128)
+    specialty_key: str | None = Field(default=None, max_length=64)
+    specialty_other: str | None = Field(default=None, max_length=128)
     prc_license_number: str = Field(min_length=1, max_length=64)
     consultation_fee: Decimal = Field(ge=0)
     follow_up_fee: Decimal | None = Field(default=None, ge=0)
     default_appointment_duration_minutes: int | None = Field(default=None, ge=5, le=480)
 
+    @model_validator(mode="after")
+    def require_specialty(self) -> "DoctorProfileCreate":
+        if not (self.specialty_key or self.specialty):
+            raise ValueError("specialty_key or specialty is required")
+        return self
+
 
 class DoctorProfileUpdate(BaseModel):
     specialty: str | None = None
+    specialty_key: str | None = None
+    specialty_other: str | None = None
     prc_license_number: str | None = None
     consultation_fee: Decimal | None = Field(default=None, ge=0)
     follow_up_fee: Decimal | None = Field(default=None, ge=0)
     default_appointment_duration_minutes: int | None = Field(default=None, ge=5, le=480)
-    photo_url: str | None = None
 
 
 class DoctorProfileRead(BaseModel):
@@ -143,6 +152,8 @@ class DoctorProfileRead(BaseModel):
     user_id: uuid.UUID
     clinic_id: uuid.UUID
     specialty: str | None
+    specialty_key: str | None = None
+    specialty_other: str | None = None
     prc_license_number: str | None
     signature_image_key: str | None
     photo_url: str | None
@@ -153,6 +164,12 @@ class DoctorProfileRead(BaseModel):
     email: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class DoctorSpecialtyRead(BaseModel):
+    key: str
+    label: str
+    soap_template_key: str
 
 
 class ServiceFeeCreate(BaseModel):

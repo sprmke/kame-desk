@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import hash_password
+from app.data.specialties import resolve_specialty
 from app.models import (
     ActivityLog,
     Clinic,
@@ -370,6 +371,12 @@ async def create_or_update_doctor_profile(
     if membership.role not in ("owner", "doctor", "admin"):
         membership.role = "doctor"
 
+    key, other, label = resolve_specialty(
+        specialty_key=data.specialty_key,
+        specialty_other=data.specialty_other,
+        specialty=data.specialty,
+    )
+
     existing = await db.execute(
         select(DoctorProfile).where(
             DoctorProfile.clinic_id == clinic.id, DoctorProfile.user_id == user_id
@@ -380,7 +387,9 @@ async def create_or_update_doctor_profile(
         profile = DoctorProfile(
             user_id=user_id,
             clinic_id=clinic.id,
-            specialty=data.specialty,
+            specialty=label,
+            specialty_key=key,
+            specialty_other=other,
             prc_license_number=data.prc_license_number,
             consultation_fee=data.consultation_fee,
             follow_up_fee=data.follow_up_fee,
@@ -388,7 +397,9 @@ async def create_or_update_doctor_profile(
         )
         db.add(profile)
     else:
-        profile.specialty = data.specialty
+        profile.specialty = label
+        profile.specialty_key = key
+        profile.specialty_other = other
         profile.prc_license_number = data.prc_license_number
         profile.consultation_fee = data.consultation_fee
         profile.follow_up_fee = data.follow_up_fee
@@ -418,7 +429,32 @@ async def update_doctor_profile(
     data: DoctorProfileUpdate,
     actor_id: uuid.UUID,
 ) -> DoctorProfile:
-    for field, value in data.model_dump(exclude_unset=True).items():
+    payload = data.model_dump(exclude_unset=True)
+    specialty_fields = ("specialty", "specialty_key", "specialty_other")
+    if any(field in payload for field in specialty_fields):
+        if "specialty_key" in payload:
+            key_arg = payload.get("specialty_key")
+            other_arg = payload.get("specialty_other", profile.specialty_other)
+            legacy_arg = payload.get("specialty")
+        elif "specialty" in payload:
+            key_arg = None
+            other_arg = payload.get("specialty_other")
+            legacy_arg = payload.get("specialty")
+        else:
+            key_arg = profile.specialty_key
+            other_arg = payload.get("specialty_other", profile.specialty_other)
+            legacy_arg = None
+        key, other, label = resolve_specialty(
+            specialty_key=key_arg,
+            specialty_other=other_arg,
+            specialty=legacy_arg,
+        )
+        profile.specialty_key = key
+        profile.specialty_other = other
+        profile.specialty = label
+        for field in specialty_fields:
+            payload.pop(field, None)
+    for field, value in payload.items():
         setattr(profile, field, value)
     db.add(
         ActivityLog(
@@ -707,11 +743,18 @@ async def accept_invitation(
 
     if invitation.metadata_ and invitation.role == "doctor":
         meta = invitation.metadata_
+        key, other, label = resolve_specialty(
+            specialty_key=meta.get("specialty_key"),
+            specialty_other=meta.get("specialty_other"),
+            specialty=meta.get("specialty"),
+        )
         db.add(
             DoctorProfile(
                 user_id=user.id,
                 clinic_id=invitation.clinic_id,
-                specialty=meta.get("specialty"),
+                specialty=label,
+                specialty_key=key,
+                specialty_other=other,
                 prc_license_number=meta.get("prc_license_number"),
                 consultation_fee=Decimal(str(meta.get("consultation_fee", 0))),
                 follow_up_fee=(

@@ -193,14 +193,16 @@ All rows keep `clinic_id`. Public booking creates/finds `patients` then `appoint
 
 ### Wave 1 — Specialty catalog, onboarding, photo
 
-- [ ] Add `SPECIALTY_CATALOG` in API (`apps/api/app/data/specialties.py`) + web mirror. Keys + labels only.
-- [ ] Alembic: `doctor_profiles.specialty_key` (nullable then backfill), `specialty_other` text; keep old `specialty` until backfill, then stop writing it.
-- [ ] Alembic: `users.phone` optional.
-- [ ] Register: optional mobile.
-- [ ] `DoctorStep` + `DoctorProfilePage`: Select specialty (Other → text), PRC, photo dropzone (copy `signature-upload` → `photo-upload` in `doctors.py` / `storage_service.py`).
-- [ ] SOAP page: default `specialty_template_key` from doctor `specialty_key` mapping (`dentist` → `dental`, unknown → `general`).
-- [ ] Tests: onboarding, doctor PATCH, specialty list endpoint.
-- [ ] Docs: `onboarding.md`, `settings/doctor.md`, `data-model.md`, `mvp.md` §6.1.
+- [x] Add `SPECIALTY_CATALOG` in API (`apps/api/app/data/specialties.py`) + web mirror. Keys + labels only.
+- [x] Alembic: `doctor_profiles.specialty_key` (nullable then backfill), `specialty_other` text; keep writing `specialty` as the display label.
+- [x] Alembic: `users.phone` optional.
+- [x] Register: optional mobile.
+- [x] `DoctorStep` + `DoctorProfilePage`: Select specialty (Other → text), PRC, photo dropzone (copy `signature-upload` → `photo-upload` in `doctors.py` / `storage_service.py`).
+- [x] SOAP page: default `specialty_template_key` from doctor `specialty_key` mapping (`dentist` → `dental`, unknown → `general`).
+- [x] Tests: onboarding, doctor PATCH, specialty list endpoint.
+- [x] Docs: `onboarding.md`, `settings/doctor.md`, `data-model.md`, `mvp.md` §6.1.
+
+activity-log: `doctor.photo_updated` on photo upload; specialty writes reuse `doctor_profile.upserted` / `doctor_profile.updated`. Catalog GET is N/A (read). Plans/RBAC: N/A (solo clinic, existing doctor-profile write gate).
 
 ### Wave 2 — Public booking + scheduling settings
 

@@ -21,6 +21,8 @@ class DoctorProfile(Base, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("clinics.id"), index=True, nullable=False
     )
     specialty: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    specialty_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    specialty_other: Mapped[str | None] = mapped_column(String(128), nullable=True)
     prc_license_number: Mapped[str | None] = mapped_column(String(64), nullable=True)
     signature_image_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
     photo_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)

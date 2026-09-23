@@ -4,7 +4,7 @@
 
 ## Behavior
 
-- S/O/A/P form with specialty template switcher (general, dental, pediatric, OB-GYN, psychiatry, dermatology). Dental renders a real interactive odontogram (Phase 39, below); pediatric has height/weight/percentile; OB has gravida/para/LMP/EDD; psychiatry has MSE/risk; dermatology has location/morphology. Loading uses a form skeleton; SOAP fields use shared placeholders. Versions, diff, and the clinician note are unboxed sections. The AI draft block uses a dashed border so it reads as draft, not as signed chart.
+- S/O/A/P form with specialty template switcher (general, dental, pediatric, OB-GYN, psychiatry, dermatology). A new note defaults the template from the doctor's specialty (dentist → dental, unknown → general). The doctor can still switch for that visit. Dental renders a real interactive odontogram (Phase 39, below); pediatric has height/weight/percentile; OB has gravida/para/LMP/EDD; psychiatry has MSE/risk; dermatology has location/morphology. Loading uses a form skeleton; SOAP fields use shared placeholders. Versions, diff, and the clinician note are unboxed sections. The AI draft block uses a dashed border so it reads as draft, not as signed chart.
 - Each **Save** creates a new version (append-only). Version history is read-only. **Diff** compares two versions field by field.
 - **Sign latest** applies the doctor signature from profile settings.
 - **PDF** opens a rendered note (letter size).
@@ -26,7 +26,8 @@
 | List versions              | `GET /api/v1/appointments/{id}/soap-notes`                         | read                                                                          |
 | Sign                       | `POST /api/v1/appointments/{id}/soap-notes/{version}/sign`         | `signed_at`, `activity_log`                                                   |
 | PDF                        | `GET /api/v1/appointments/{id}/soap-notes/{version}/pdf`           | read                                                                          |
-| Templates                  | `GET /api/v1/specialty-templates`                                  | static catalog                                                                |
+| Templates                  | `GET /api/v1/specialty-templates`                                  | static SOAP catalog                                                           |
+| Doctor specialties         | `GET /api/v1/specialties`                                          | static doctor catalog (SOAP default mapping)                                  |
 | Tooth chart list           | `GET /api/v1/patients/{id}/tooth-chart`                            | read                                                                          |
 | Tooth chart entry          | `POST /api/v1/patients/{id}/tooth-chart`                           | new `tooth_chart_entries` row, `activity_log`                                 |
 | Add tooth entry to invoice | `POST /api/v1/patients/{id}/tooth-chart/{entry_id}/add-to-invoice` | `invoice_line_items` row (new or appended draft invoice); entry → `completed` |
