@@ -91,6 +91,15 @@ Signup creates `organization` + `organization_subscription` + first `clinic` + `
 - `doctor_profiles.specialty_key` is the stable catalog key (`dentist`, `obgyn`, `pediatrician`, `general_practitioner`, `dermatologist`, `cardiologist`, `ophthalmologist`, `orthopedic`, `ent`, `other`). `specialty_other` holds free text when the key is `other`. `specialty` stays the display label for older clients.
 - SOAP `specialty_template_key` is separate. New notes default from the doctor key (dentist → dental, obgyn → obgyn, pediatrician → pediatric, dermatologist → dermatology, else general).
 
+## Public scheduling settings
+
+- `clinics.slot_buffer_minutes` (default 0): pad busy intervals when computing slots.
+- `clinics.advance_booking_days` (default 90): last bookable calendar day from today in the clinic timezone.
+- `clinics.cancellation_notice_hours` (default 0): public confirm copy only; 0 hides the line.
+- `clinics.public_intake_fields` JSON: `{ email, birthdate, sex, address, reason, existing_patient, notes }` booleans. Name and phone stay required. Missing JSON means all off.
+- `clinics.working_hours` day object may include `breaks: [{ start, end }]` (`HH:MM`). Additive; default none.
+- Public `GET /public/clinics/{slug}` services include `id`, `amount`, and `duration_minutes`. Never SOAP or medical history.
+
 ## Load-bearing invariants (do not weaken these in a later phase without updating this doc and the PRD)
 
 1. **Double-booking prevention is a DB-level guarantee.** `appointments` carries a `btree_gist` exclusion constraint on `(doctor_id, tsrange(scheduled_start, scheduled_end))` (and separately on `room_id` when assigned), filtered to non-terminal appointment statuses. This is not app-level validation — it holds under concurrent writes. See `docs/phases/phase-03-patients-appointments.md`.

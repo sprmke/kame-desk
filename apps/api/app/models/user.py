@@ -46,6 +46,10 @@ class Clinic(Base, TimestampMixin):
     default_appointment_duration_minutes: Mapped[int] = mapped_column(
         Integer, default=30, nullable=False
     )
+    slot_buffer_minutes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    advance_booking_days: Mapped[int] = mapped_column(Integer, default=90, nullable=False)
+    cancellation_notice_hours: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    public_intake_fields: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     onboarding_invite_skipped: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     onboarding_completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

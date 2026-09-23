@@ -16,6 +16,10 @@ class ClinicUpdate(BaseModel):
     license_info: str | None = None
     accreditation_info: str | None = None
     default_appointment_duration_minutes: int | None = Field(default=None, ge=5, le=480)
+    slot_buffer_minutes: int | None = Field(default=None, ge=0, le=120)
+    advance_booking_days: int | None = Field(default=None, ge=1, le=365)
+    cancellation_notice_hours: int | None = Field(default=None, ge=0, le=168)
+    public_intake_fields: dict[str, bool] | None = None
     public_booking_auto_confirm: bool | None = None
     reception_can_view_soap: bool | None = None
     recording_consent_enabled: bool | None = None
@@ -23,10 +27,22 @@ class ClinicUpdate(BaseModel):
     assistant_disabled_tools: list[str] | None = None
 
 
+class WorkingHoursBreak(BaseModel):
+    start: str
+    end: str
+
+    @model_validator(mode="after")
+    def start_before_end(self) -> "WorkingHoursBreak":
+        if self.start >= self.end:
+            raise ValueError("Break end must be after start")
+        return self
+
+
 class WorkingHoursDay(BaseModel):
     open: str
     close: str
     closed: bool = False
+    breaks: list[WorkingHoursBreak] = Field(default_factory=list)
 
 
 class WorkingHoursUpdate(BaseModel):
@@ -100,6 +116,10 @@ class ClinicRead(BaseModel):
     working_hours: dict[str, Any] | None
     holiday_dates: list[str] | None
     default_appointment_duration_minutes: int
+    slot_buffer_minutes: int = 0
+    advance_booking_days: int = 90
+    cancellation_notice_hours: int = 0
+    public_intake_fields: dict[str, bool] | None = None
     onboarding_completed_at: datetime | None
     slug: str
     public_booking_auto_confirm: bool

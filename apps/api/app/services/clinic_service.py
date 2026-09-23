@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import hash_password
+from app.data.public_intake import normalize_intake_fields
 from app.data.specialties import resolve_specialty
 from app.models import (
     ActivityLog,
@@ -87,6 +88,7 @@ def to_clinic_read(clinic: Clinic) -> ClinicRead:
     row.receipt_numbering = numbering_read(clinic)
     row.bir_compliance = bir_compliance_read(clinic)
     row.growth_settings = growth_settings_read(clinic)
+    row.public_intake_fields = normalize_intake_fields(clinic.public_intake_fields)
     return row
 
 
@@ -229,7 +231,10 @@ async def get_clinic_by_slug(db: AsyncSession, slug: str) -> Clinic:
 async def update_clinic(
     db: AsyncSession, clinic: Clinic, data: ClinicUpdate, actor_id: uuid.UUID
 ) -> Clinic:
-    for field, value in data.model_dump(exclude_unset=True).items():
+    payload = data.model_dump(exclude_unset=True)
+    if "public_intake_fields" in payload:
+        payload["public_intake_fields"] = normalize_intake_fields(payload["public_intake_fields"])
+    for field, value in payload.items():
         setattr(clinic, field, value)
     db.add(
         ActivityLog(
