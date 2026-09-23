@@ -27,3 +27,10 @@ export function toIsoDate(date: Date): string {
 export function todayIsoManila(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
 }
+
+export function addDaysIso(iso: string, days: number): string {
+  const date = parseIsoDate(iso);
+  if (!date) return iso;
+  date.setDate(date.getDate() + days);
+  return toIsoDate(date);
+}

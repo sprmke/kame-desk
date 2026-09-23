@@ -43,10 +43,19 @@ export type Clinic = {
   brand_color?: string | null;
   working_hours: Record<
     string,
-    { open: string; close: string; closed: boolean }
+    {
+      open: string;
+      close: string;
+      closed: boolean;
+      breaks?: { start: string; end: string }[];
+    }
   > | null;
   holiday_dates: string[] | null;
   default_appointment_duration_minutes: number;
+  slot_buffer_minutes?: number;
+  advance_booking_days?: number;
+  cancellation_notice_hours?: number;
+  public_intake_fields?: Record<string, boolean> | null;
   onboarding_completed_at: string | null;
   slug: string;
   public_booking_auto_confirm: boolean;
@@ -1076,7 +1085,12 @@ export const api = {
     body: {
       working_hours: Record<
         string,
-        { open: string; close: string; closed: boolean }
+        {
+          open: string;
+          close: string;
+          closed: boolean;
+          breaks?: { start: string; end: string }[];
+        }
       >;
       holiday_dates: string[];
     },
@@ -2187,11 +2201,18 @@ export const api = {
 
   getPublicClinic: (slug: string) =>
     apiFetch<PublicClinicProfile>(`/public/clinics/${slug}`),
-  getPublicSlots: (slug: string, doctorId: string, date: string) =>
+  getPublicSlots: (
+    slug: string,
+    doctorId: string,
+    date: string,
+    durationMinutes?: number,
+  ) =>
     apiFetch<{
       slots: Array<{ scheduled_start: string; scheduled_end: string }>;
     }>(
-      `/public/clinics/${slug}/available-slots?doctor_id=${doctorId}&date=${date}`,
+      `/public/clinics/${slug}/available-slots?doctor_id=${doctorId}&date=${date}${
+        durationMinutes ? `&duration_minutes=${durationMinutes}` : ""
+      }`,
     ),
   requestPublicAppointment: (slug: string, body: Record<string, unknown>) =>
     apiFetch<Appointment>(`/public/clinics/${slug}/appointment-requests`, {
@@ -2349,10 +2370,23 @@ export type PublicClinicProfile = {
   contact_email: string | null;
   working_hours: Record<
     string,
-    { open: string; close: string; closed: boolean }
+    {
+      open: string;
+      close: string;
+      closed: boolean;
+      breaks?: { start: string; end: string }[];
+    }
   > | null;
   holiday_dates: string[];
   default_appointment_duration_minutes: number;
+  advance_booking_days: number;
+  cancellation_notice_hours: number;
+  public_intake_fields: Record<string, boolean>;
   doctors: Array<{ id: string; specialty: string | null; full_name: string }>;
-  services: Array<{ name: string; amount: string }>;
+  services: Array<{
+    id: string;
+    name: string;
+    amount: string;
+    duration_minutes: number | null;
+  }>;
 };
