@@ -40,10 +40,20 @@ export const inviteSchema = z.object({
 
 export const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
-export const defaultHours = () =>
+export type WorkingHoursDay = {
+  open: string;
+  close: string;
+  closed: boolean;
+  breaks?: { start: string; end: string }[];
+};
+
+export const defaultHours = (): Record<
+  (typeof DAYS)[number],
+  WorkingHoursDay
+> =>
   Object.fromEntries(
     DAYS.map((d) => [
       d,
       { open: "09:00", close: "17:00", closed: d === "sun" },
     ]),
-  );
+  ) as Record<(typeof DAYS)[number], WorkingHoursDay>;

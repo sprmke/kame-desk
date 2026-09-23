@@ -2,8 +2,19 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/apiClient";
 import { getClinicId } from "@/lib/auth";
-import { DAYS, defaultHours } from "@/features/onboarding/lib/schemas";
+import {
+  DAYS,
+  defaultHours,
+  type WorkingHoursDay,
+} from "@/features/onboarding/lib/schemas";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
+import {
+  DEFAULT_PUBLIC_INTAKE,
+  PUBLIC_INTAKE_KEYS,
+  PUBLIC_INTAKE_LABELS,
+  normalizePublicIntake,
+  type PublicIntakeFields,
+} from "@/lib/publicIntake";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ClinicSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
 import { SettingsSection } from "@/components/settings/SettingsSection";
@@ -30,7 +41,24 @@ const DAY_LABELS: Record<string, string> = {
   sun: "Sunday",
 };
 
-type Hours = Record<string, { open: string; close: string; closed: boolean }>;
+type Hours = Record<string, WorkingHoursDay>;
+
+function patchDay(
+  hours: Hours,
+  day: string,
+  patch: Partial<WorkingHoursDay>,
+): Hours {
+  return {
+    ...hours,
+    [day]: {
+      open: hours[day]?.open ?? "09:00",
+      close: hours[day]?.close ?? "17:00",
+      closed: hours[day]?.closed ?? false,
+      breaks: hours[day]?.breaks ?? [],
+      ...patch,
+    },
+  };
+}
 
 export type ClinicSettingsView =
   "details" | "hours" | "rooms" | "branding" | "compliance";
@@ -67,6 +95,13 @@ export function ClinicSettingsPage({
   const [soap, setSoap] = useState(false);
   const [hours, setHours] = useState<Hours>(defaultHours());
   const [holidays, setHolidays] = useState("");
+  const [bufferMinutes, setBufferMinutes] = useState(0);
+  const [advanceDays, setAdvanceDays] = useState(90);
+  const [cancelHours, setCancelHours] = useState(0);
+  const [autoConfirm, setAutoConfirm] = useState(true);
+  const [intake, setIntake] = useState<PublicIntakeFields>(
+    DEFAULT_PUBLIC_INTAKE,
+  );
   const [prefix, setPrefix] = useState("OR-");
   const [nextNumber, setNextNumber] = useState(1);
   const [padWidth, setPadWidth] = useState(6);
@@ -84,6 +119,11 @@ export function ClinicSettingsPage({
     setSoap(clinic.reception_can_view_soap ?? false);
     setHours(clinic.working_hours ?? defaultHours());
     setHolidays((clinic.holiday_dates ?? []).join("\n"));
+    setBufferMinutes(clinic.slot_buffer_minutes ?? 0);
+    setAdvanceDays(clinic.advance_booking_days ?? 90);
+    setCancelHours(clinic.cancellation_notice_hours ?? 0);
+    setAutoConfirm(clinic.public_booking_auto_confirm);
+    setIntake(normalizePublicIntake(clinic.public_intake_fields));
     if (clinic.receipt_numbering) {
       setPrefix(clinic.receipt_numbering.prefix);
       setNextNumber(clinic.receipt_numbering.next_number);
@@ -133,6 +173,11 @@ export function ClinicSettingsPage({
         accreditation_info: accreditation,
         brand_color: brandColor,
         reception_can_view_soap: soap,
+        slot_buffer_minutes: bufferMinutes,
+        advance_booking_days: advanceDays,
+        cancellation_notice_hours: cancelHours,
+        public_booking_auto_confirm: autoConfirm,
+        public_intake_fields: intake,
       });
       await api.putWorkingHours(clinicId, {
         working_hours: hours,
@@ -268,79 +313,172 @@ export function ClinicSettingsPage({
         ) : null}
 
         {showHours ? (
-          <SettingsSection title="Hours">
-            <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
-              {DAYS.map((day) => (
+          <>
+            <SettingsSection title="Hours">
+              <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
+                {DAYS.map((day) => {
+                  const closed = hours[day]?.closed ?? false;
+                  const breakOn = (hours[day]?.breaks?.length ?? 0) > 0;
+                  const br = hours[day]?.breaks?.[0] ?? {
+                    start: "12:00",
+                    end: "13:00",
+                  };
+                  return (
+                    <div key={day} className="flex flex-col gap-2 px-3 py-2.5">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="w-24 shrink-0 text-sm font-medium">
+                          {DAY_LABELS[day]}
+                        </span>
+                        <TimePicker
+                          className="h-11 w-32"
+                          aria-label={`${DAY_LABELS[day]} open`}
+                          value={hours[day]?.open ?? "09:00"}
+                          disabled={closed}
+                          onValueChange={(open) =>
+                            setHours(patchDay(hours, day, { open }))
+                          }
+                        />
+                        <TimePicker
+                          className="h-11 w-32"
+                          aria-label={`${DAY_LABELS[day]} close`}
+                          value={hours[day]?.close ?? "17:00"}
+                          disabled={closed}
+                          onValueChange={(close) =>
+                            setHours(patchDay(hours, day, { close }))
+                          }
+                        />
+                        <Label className="ml-auto flex min-h-11 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                          Closed
+                          <Switch
+                            checked={closed}
+                            onCheckedChange={(next) =>
+                              setHours(patchDay(hours, day, { closed: next }))
+                            }
+                          />
+                        </Label>
+                      </div>
+                      {closed ? null : (
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="w-24 shrink-0 text-xs text-muted-foreground">
+                            Break
+                          </span>
+                          <Switch
+                            checked={breakOn}
+                            aria-label={`${DAY_LABELS[day]} break`}
+                            onCheckedChange={(on) =>
+                              setHours(
+                                patchDay(hours, day, {
+                                  breaks: on
+                                    ? [{ start: br.start, end: br.end }]
+                                    : [],
+                                }),
+                              )
+                            }
+                          />
+                          {breakOn ? (
+                            <>
+                              <TimePicker
+                                className="h-11 w-32"
+                                aria-label={`${DAY_LABELS[day]} break start`}
+                                value={br.start}
+                                onValueChange={(start) =>
+                                  setHours(
+                                    patchDay(hours, day, {
+                                      breaks: [{ start, end: br.end }],
+                                    }),
+                                  )
+                                }
+                              />
+                              <TimePicker
+                                className="h-11 w-32"
+                                aria-label={`${DAY_LABELS[day]} break end`}
+                                value={br.end}
+                                onValueChange={(end) =>
+                                  setHours(
+                                    patchDay(hours, day, {
+                                      breaks: [{ start: br.start, end }],
+                                    }),
+                                  )
+                                }
+                              />
+                            </>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="holidays">Holidays (YYYY-MM-DD)</Label>
+                <Textarea
+                  id="holidays"
+                  rows={3}
+                  value={holidays}
+                  onChange={(e) => setHolidays(e.target.value)}
+                />
+              </div>
+            </SettingsSection>
+            <SettingsSection title="Public booking">
+              <NumberSlider
+                id="slot-buffer"
+                label="Buffer"
+                min={0}
+                max={60}
+                step={5}
+                unit=" min"
+                value={bufferMinutes}
+                onChange={setBufferMinutes}
+              />
+              <NumberSlider
+                id="advance-days"
+                label="Advance days"
+                min={1}
+                max={365}
+                step={1}
+                unit=" days"
+                value={advanceDays}
+                onChange={setAdvanceDays}
+              />
+              <NumberSlider
+                id="cancel-hours"
+                label="Cancel notice"
+                min={0}
+                max={72}
+                step={1}
+                unit=" hr"
+                value={cancelHours}
+                onChange={setCancelHours}
+              />
+              <div className="flex min-h-11 items-center justify-between gap-3">
+                <Label htmlFor="auto-confirm" className="font-normal">
+                  Auto-confirm
+                </Label>
+                <Switch
+                  id="auto-confirm"
+                  checked={autoConfirm}
+                  onCheckedChange={setAutoConfirm}
+                />
+              </div>
+              {PUBLIC_INTAKE_KEYS.map((key) => (
                 <div
-                  key={day}
-                  className="flex flex-wrap items-center gap-3 px-3 py-2.5"
+                  key={key}
+                  className="flex min-h-11 items-center justify-between gap-3"
                 >
-                  <span className="w-24 shrink-0 text-sm font-medium">
-                    {DAY_LABELS[day]}
-                  </span>
-                  <TimePicker
-                    className="h-9 w-32"
-                    aria-label={`${DAY_LABELS[day]} open`}
-                    value={hours[day]?.open ?? "09:00"}
-                    disabled={hours[day]?.closed}
-                    onValueChange={(open) =>
-                      setHours({
-                        ...hours,
-                        [day]: {
-                          ...hours[day],
-                          open,
-                          close: hours[day]?.close ?? "17:00",
-                          closed: hours[day]?.closed ?? false,
-                        },
-                      })
-                    }
-                  />
-                  <TimePicker
-                    className="h-9 w-32"
-                    aria-label={`${DAY_LABELS[day]} close`}
-                    value={hours[day]?.close ?? "17:00"}
-                    disabled={hours[day]?.closed}
-                    onValueChange={(close) =>
-                      setHours({
-                        ...hours,
-                        [day]: {
-                          ...hours[day],
-                          close,
-                          open: hours[day]?.open ?? "09:00",
-                          closed: hours[day]?.closed ?? false,
-                        },
-                      })
-                    }
-                  />
-                  <Label className="ml-auto flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-                    Closed
-                    <Switch
-                      checked={hours[day]?.closed ?? false}
-                      onCheckedChange={(closed) =>
-                        setHours({
-                          ...hours,
-                          [day]: {
-                            open: hours[day]?.open ?? "09:00",
-                            close: hours[day]?.close ?? "17:00",
-                            closed,
-                          },
-                        })
-                      }
-                    />
+                  <Label htmlFor={`intake-${key}`} className="font-normal">
+                    {PUBLIC_INTAKE_LABELS[key]}
                   </Label>
+                  <Switch
+                    id={`intake-${key}`}
+                    checked={intake[key]}
+                    onCheckedChange={(checked) =>
+                      setIntake({ ...intake, [key]: checked })
+                    }
+                  />
                 </div>
               ))}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="holidays">Holidays (YYYY-MM-DD)</Label>
-              <Textarea
-                id="holidays"
-                rows={3}
-                value={holidays}
-                onChange={(e) => setHolidays(e.target.value)}
-              />
-            </div>
-          </SettingsSection>
+            </SettingsSection>
+          </>
         ) : null}
 
         {showCompliance ? (
