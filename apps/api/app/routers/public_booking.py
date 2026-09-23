@@ -7,12 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.rate_limit import enforce_public_rate_limit
+from app.data.public_intake import normalize_intake_fields, require_public_intake
 from app.models import ClinicMembership, DoctorProfile, Patient, ServiceFee, User
 from app.schemas.appointment import AppointmentRead
 from app.schemas.public import (
     PublicAppointmentRequest,
     PublicClinicRead,
     PublicDoctorRead,
+    PublicServiceRead,
     PublicSlotList,
 )
 from app.services import appointment_service, patient_service, slot_service
@@ -55,6 +57,9 @@ async def get_public_clinic(
         working_hours=clinic.working_hours,
         holiday_dates=clinic.holiday_dates or [],
         default_appointment_duration_minutes=clinic.default_appointment_duration_minutes,
+        advance_booking_days=clinic.advance_booking_days,
+        cancellation_notice_hours=clinic.cancellation_notice_hours,
+        public_intake_fields=normalize_intake_fields(clinic.public_intake_fields),
         doctors=[
             PublicDoctorRead(
                 id=d.id,
@@ -63,7 +68,15 @@ async def get_public_clinic(
             )
             for d, u in doctors.all()
         ],
-        services=[{"name": f.name, "amount": str(f.amount)} for f in fees.scalars()],
+        services=[
+            PublicServiceRead(
+                id=f.id,
+                name=f.name,
+                amount=str(f.amount),
+                duration_minutes=f.duration_minutes,
+            )
+            for f in fees.scalars()
+        ],
     )
 
 
@@ -91,6 +104,26 @@ async def public_appointment_request(
 ) -> AppointmentRead:
     enforce_public_rate_limit(request, slug)
     clinic = await _require_bookable_clinic(db, slug)
+    require_public_intake(normalize_intake_fields(clinic.public_intake_fields), data)
+
+    duration = None
+    if data.service_fee_id:
+        fee = await db.get(ServiceFee, data.service_fee_id)
+        if fee is None or fee.clinic_id != clinic.id:
+            raise HTTPException(status_code=400, detail="Unknown appointment type")
+        duration = fee.duration_minutes
+
+    from app.services.appointment_service import MANILA
+
+    slots = await slot_service.get_available_slots(
+        db,
+        clinic,
+        data.doctor_id,
+        data.scheduled_start.astimezone(MANILA).date(),
+        duration,
+    )
+    if not slot_service.slot_matches(slots, data.scheduled_start, data.scheduled_end):
+        raise HTTPException(status_code=409, detail="That slot is not available")
 
     owner = await db.execute(
         select(User)
@@ -117,9 +150,11 @@ async def public_appointment_request(
         AppointmentCreate(
             patient_id=patient.id,
             doctor_id=data.doctor_id,
+            service_fee_id=data.service_fee_id,
             scheduled_start=data.scheduled_start,
             scheduled_end=data.scheduled_end,
             reason_for_visit=data.reason_for_visit,
+            notes=_appointment_notes(data),
         ),
         owner_user.id,
         booking_source="public_link",
@@ -127,6 +162,28 @@ async def public_appointment_request(
     )
     row = AppointmentRead.model_validate(appt)
     return row
+
+
+def _appointment_notes(data: PublicAppointmentRequest) -> str | None:
+    parts: list[str] = []
+    if data.is_existing_patient is True:
+        parts.append("Existing patient")
+    elif data.is_existing_patient is False:
+        parts.append("New patient")
+    if data.notes and data.notes.strip():
+        parts.append(data.notes.strip())
+    return "\n".join(parts) if parts else None
+
+
+def _apply_public_patient_fields(patient: Patient, data: PublicAppointmentRequest) -> None:
+    if data.email and not patient.email:
+        patient.email = data.email
+    if data.birthdate and not patient.birthdate:
+        patient.birthdate = data.birthdate
+    if data.sex and not patient.sex:
+        patient.sex = data.sex
+    if data.address and not patient.address:
+        patient.address = data.address
 
 
 async def _find_or_create_public_patient(
@@ -145,6 +202,7 @@ async def _find_or_create_public_patient(
         )
         existing = result.scalar_one_or_none()
         if existing:
+            _apply_public_patient_fields(existing, data)
             return existing
 
     from app.schemas.patient import PatientCreate
@@ -156,6 +214,10 @@ async def _find_or_create_public_patient(
             full_name=data.full_name,
             contact_number=data.contact_number,
             email=data.email,
+            birthdate=data.birthdate,
+            sex=data.sex,
+            address=data.address,
+            data_processing_consent=True,
         ),
         actor_id,
     )
