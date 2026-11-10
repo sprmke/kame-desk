@@ -172,3 +172,13 @@ Index: `.claude/README.md` (Claude Code) · `.cursor/rules/README.md` (Cursor) �
 - Logging or emailing raw patient data (PHI) in error tracking, AI prompts beyond what's needed, or debug output.
 - **Production deploys or migrations without unlock** — `.cursor/rules/no-prod-deploy.mdc`. Never run or recommend `deploy:api:prod`, `deploy:web:prod`, `migrate:prod`, or any write against the prod Neon `DATABASE_URL` unless the user said **`deskwave`** in the same message. Shell hooks enforce this.
 - Attributing commits to Cursor/Claude/AI tooling — `.cursor/rules/git-commits.mdc`.
+
+<!-- global-agent-skills -->
+
+## Global agent skills
+
+This machine has 159 shared skills in `~/.agents/skill-library` (Claude Code, Cursor,
+Codex and OpenCode all read them). Only five behaviour skills are always visible.
+For anything else, open `~/.agents/skill-library/agent-skills-index/SKILL.md`, find the
+skill that fits, then read `~/.agents/skill-library/<skill>/SKILL.md`.
+Manage with `~/.agents/bin/agent-stack.sh`. Repo skills and rules always win.
