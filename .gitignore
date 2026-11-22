@@ -63,3 +63,4 @@ backups/*
 
 # Alembic — never gitignore migrations themselves
 !apps/api/migrations/versions/*.py
+.local/
