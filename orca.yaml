@@ -1,0 +1,16 @@
+# Orca worktree lifecycle for Kame Desk.
+# Sticky per-worktree web port (3700-3799) and a UI tab.
+# The API, worker, and Docker services on the primary stack are shared.
+
+scripts:
+  setup: |
+    pnpm install
+    cp -n "$ORCA_ROOT_PATH/apps/web/.env.development" apps/web/.env.development 2>/dev/null || true
+  archive: |
+    bash scripts/dev/archive-worktree-ui.sh
+
+setupAgentStartupPolicy: wait-for-setup
+
+defaultTabs:
+  - title: UI
+    command: bun run ui

@@ -11,6 +11,8 @@
     "setup:ai-tooling": "bash scripts/dev/setup-ai-tooling.sh",
     "check:ai-tooling-sync": "bash scripts/dev/check-ai-tooling-sync.sh",
     "dev": "./dev.sh",
+    "ui": "./scripts/dev/ui-web-worktree.sh",
+    "ui:port": "./scripts/dev/ui-web-worktree.sh --print-port",
     "dev:free-ports": "bash scripts/dev/free-local-ports.sh",
     "dev:web": "pnpm --filter @doctordesk/web dev",
     "dev:api": "pnpm --filter @doctordesk/api dev",
