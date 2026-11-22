@@ -15,6 +15,8 @@
 
 Home screen for clinic staff after sign-in. It answers what is happening today and what still needs follow-up (queue, balances, failed reminders, open claims). On a phone, open Dashboard from **More**.
 
+Loading mirrors the board: four number cards (Waiting and Revenue keep their hint line), the Today and Queue cards keep their fixed 240px body with 44px rows, the trend card keeps the 352px chart band, and the follow-up cards keep their row rhythm. Sections load independently, so a slow widget never blanks the rest of the board.
+
 ## Host-facing knowledge
 
 The dashboard is the morning board. Four number cards show **Today**, **Waiting**, **Completed**, and **Revenue**. Follow-up cards cover outstanding balances, failed reminders, and open claims. Walk-in, New patient, and New appointment are at the top. The assistant launcher stays in the corner.

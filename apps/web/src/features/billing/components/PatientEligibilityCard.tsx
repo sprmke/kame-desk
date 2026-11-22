@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/EmptyState";
+import { InlineError } from "@/components/ErrorState";
+import { PatientEligibilityCardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { Field } from "@/components/forms/Field";
 import { FieldLabel } from "@/components/forms/FieldLabel";
 import {
@@ -29,7 +31,7 @@ export function PatientEligibilityCard({ patientId }: { patientId: string }) {
   const [payerType, setPayerType] = useState<PayerType>("hmo");
   const [memberId, setMemberId] = useState("");
 
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["eligibility-checks", patientId],
     queryFn: () => api.listEligibilityChecks({ patient_id: patientId }),
   });
@@ -51,13 +53,20 @@ export function PatientEligibilityCard({ patientId }: { patientId: string }) {
 
   const latest = data?.items[0];
 
+  if (isLoading) return <PatientEligibilityCardSkeleton />;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>HMO / PhilHealth eligibility</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {latest ? (
+        {isError ? (
+          <InlineError
+            heading="Could not load eligibility"
+            onRetry={() => void refetch()}
+          />
+        ) : latest ? (
           <div className="flex items-center justify-between text-sm">
             <div>
               <span className="font-medium text-foreground">

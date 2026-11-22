@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ProductMark } from "@/components/brand/ProductMark";
 import { clearPatientAuth } from "@/lib/patientPortalAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -15,11 +16,13 @@ export function PatientPortalAppShell({
   slug,
   clinicName,
   patientName,
+  loading = false,
   children,
 }: {
   slug: string;
   clinicName?: string;
   patientName?: string;
+  loading?: boolean;
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
@@ -34,9 +37,13 @@ export function PatientPortalAppShell({
               <ProductMark className="size-4" />
             </span>
             <div className="leading-tight">
-              <p className="text-sm font-semibold text-foreground">
-                {clinicName ?? "Patient Portal"}
-              </p>
+              {loading ? (
+                <Skeleton className="h-4 w-32" />
+              ) : (
+                <p className="text-sm font-semibold text-foreground">
+                  {clinicName ?? "Patient Portal"}
+                </p>
+              )}
               {patientName ? (
                 <p className="text-xs text-muted-foreground">{patientName}</p>
               ) : null}

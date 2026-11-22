@@ -4,7 +4,7 @@ import { api } from "@/lib/apiClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PortalChartSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PublicReferralChartPage({ token }: { token: string }) {
   const chart = useQuery({
@@ -23,10 +23,7 @@ export function PublicReferralChartPage({ token }: { token: string }) {
       </p>
 
       {chart.isLoading ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </div>
+        <PortalChartSkeleton />
       ) : chart.isError ? (
         <SectionCard>
           <ErrorState

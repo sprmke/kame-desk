@@ -44,7 +44,23 @@ export function DashboardCalendarCard({
       />
       <CardContent className={dashboardWeekBodyClass}>
         {loading ? (
-          <Skeleton className="h-full w-full" />
+          <div className="flex h-full flex-col gap-1">
+            <div className="flex items-center justify-between px-1 pb-1">
+              <Skeleton className="size-8 rounded-md" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="size-8 rounded-md" />
+            </div>
+            <div className="grid grid-cols-7 gap-1 px-1">
+              {Array.from({ length: 7 }).map((_, index) => (
+                <Skeleton key={index} className="mx-auto h-3 w-6" />
+              ))}
+            </div>
+            <div className="grid flex-1 grid-cols-7 grid-rows-5 gap-1 px-1 pb-1">
+              {Array.from({ length: 35 }).map((_, index) => (
+                <Skeleton key={index} className="h-full min-h-6 w-full" />
+              ))}
+            </div>
+          </div>
         ) : (
           <Calendar
             mode="single"
@@ -96,12 +112,39 @@ export function UpcomingDaysStrip({
       />
       <CardContent className={cn(dashboardWeekBodyClass, "overflow-y-auto")}>
         {loading ? (
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-11 w-full" />
-            <Skeleton className="h-11 w-full" />
-            <Skeleton className="h-11 w-full" />
-            <Skeleton className="h-11 w-full" />
-          </div>
+          stacked ? (
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="min-w-0 px-2 pt-2 first:pt-0">
+                  <Skeleton className="mb-1 h-3 w-20" />
+                  <div className="flex min-h-11 items-center gap-3">
+                    <Skeleton className="h-3.5 w-16 shrink-0" />
+                    <Skeleton className="h-4 w-40 max-w-full" />
+                  </div>
+                  <div className="flex min-h-11 items-center gap-3">
+                    <Skeleton className="h-3.5 w-16 shrink-0" />
+                    <Skeleton className="h-4 w-32 max-w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="min-w-0">
+                  <Skeleton className="h-3 w-20" />
+                  <div className="mt-1 flex min-h-11 items-center justify-between gap-2 py-1">
+                    <Skeleton className="h-4 w-32 max-w-full" />
+                    <Skeleton className="h-3 w-14 shrink-0" />
+                  </div>
+                  <div className="flex min-h-11 items-center justify-between gap-2 py-1">
+                    <Skeleton className="h-4 w-28 max-w-full" />
+                    <Skeleton className="h-3 w-14 shrink-0" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : groups.length === 0 ? (
           <EmptyState
             icon={CalendarDays}

@@ -12,6 +12,7 @@
 - Owner/admin use **Import** beside **New patient** to open the CSV import sheet/dialog. The custom dropzone supports browse and drag-and-drop, validates CSV type and a 5 MB client limit, then requires Preview before Import.
 - Row click opens patient detail.
 - **Phone/tablet:** bottom tab **Patients**. Rows use press feedback (`.native-press`). Empty registry shows `EmptyState` with a New patient action, inside the same bordered card as the table.
+- Loading mirrors the active view: the table skeleton keeps the avatar/name column and 44px rows; the list skeleton keeps identity rows. Page, sort, and search changes keep the previous rows visible while fetching.
 
 ## Save paths
 

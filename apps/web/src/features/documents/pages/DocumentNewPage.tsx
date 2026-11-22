@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DocumentTemplatePickerSkeleton } from "@/components/skeletons/PageSkeletons";
 
 type Props = { patientId: string };
 
@@ -37,7 +38,7 @@ export function DocumentNewPage({ patientId }: Props) {
     queryFn: () => api.getPatient(patientId),
   });
 
-  const { data: templates } = useQuery({
+  const { data: templates, isLoading: loadingTemplates } = useQuery({
     queryKey: ["document-templates", clinicId],
     queryFn: () => api.listDocumentTemplates(clinicId!),
     enabled: Boolean(clinicId),
@@ -130,25 +131,29 @@ export function DocumentNewPage({ patientId }: Props) {
           </CardContent>
         </Card>
       ) : !draft ? (
-        <Card>
-          <CardContent className="flex flex-col gap-2 pt-5">
-            {(templates ?? [])
-              .filter((t) => t.is_active)
-              .map((t) => (
-                <Button
-                  key={t.id}
-                  type="button"
-                  variant="outline"
-                  className="justify-start"
-                  disabled={create.isPending}
-                  onClick={() => pickTemplate(t.id)}
-                >
-                  <FileText className="size-4" />
-                  {t.name}
-                </Button>
-              ))}
-          </CardContent>
-        </Card>
+        loadingTemplates ? (
+          <DocumentTemplatePickerSkeleton />
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col gap-2 pt-5">
+              {(templates ?? [])
+                .filter((t) => t.is_active)
+                .map((t) => (
+                  <Button
+                    key={t.id}
+                    type="button"
+                    variant="outline"
+                    className="justify-start"
+                    disabled={create.isPending}
+                    onClick={() => pickTemplate(t.id)}
+                  >
+                    <FileText className="size-4" />
+                    {t.name}
+                  </Button>
+                ))}
+            </CardContent>
+          </Card>
+        )
       ) : (
         <div className="flex flex-col gap-4">
           {draft.document_type === "referral_letter" && (

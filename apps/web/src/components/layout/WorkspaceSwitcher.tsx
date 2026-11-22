@@ -6,6 +6,7 @@ import { setActiveClinic } from "@/lib/auth";
 import { defaultLandingPath, ROLE_LABELS, type ClinicRole } from "@/lib/rbac";
 import { useActiveClinicId } from "@/hooks/useActiveClinicId";
 import { useSession } from "@/hooks/useSession";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -37,7 +38,7 @@ export function WorkspaceSwitcher({ collapsed }: Props) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const activeClinicId = useActiveClinicId();
-  const { clinicName, role, memberships } = useSession();
+  const { clinicName, role, memberships, isLoading } = useSession();
 
   const labelsByClinicId = useMemo(() => {
     const labels = new Map<string, string>();
@@ -48,6 +49,16 @@ export function WorkspaceSwitcher({ collapsed }: Props) {
   }, [memberships]);
 
   if (!activeClinicId) return null;
+
+  if (isLoading && memberships.length <= 1) {
+    if (collapsed) return null;
+    return (
+      <div className="border-b border-sidebar-border px-4 py-3">
+        <Skeleton className="h-4 w-36 max-w-full" />
+        <Skeleton className="mt-1.5 h-3 w-16" />
+      </div>
+    );
+  }
 
   function switchClinic(nextId: string) {
     if (nextId === activeClinicId) return;

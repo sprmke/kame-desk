@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChartSearchSkeleton } from "@/components/skeletons/PageSkeletons";
 import { EmptyState } from "@/components/EmptyState";
+import { ErrorState } from "@/components/ErrorState";
 
 export function ChartSearchPage() {
   const clinicId = getClinicId();
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
 
-  const { data, isFetching } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["chart-search", clinicId, submitted],
     queryFn: () => api.chartSearch(clinicId!, submitted),
     enabled: Boolean(clinicId && submitted.length >= 2),
@@ -48,8 +49,10 @@ export function ChartSearchPage() {
           </Button>
         </form>
 
-        {isFetching ? (
+        {isLoading ? (
           <ChartSearchSkeleton />
+        ) : isError ? (
+          <ErrorState onRetry={() => void refetch()} className="py-8" />
         ) : hasSubmitted ? (
           items.length === 0 ? (
             <EmptyState

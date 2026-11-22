@@ -12,7 +12,11 @@ import { DateRangePicker } from "@/components/ui/date-picker";
 import { Progress } from "@/components/ui/progress";
 import { SegmentedControl } from "@/components/ui/sliding-tabs";
 import { parseIsoDate, toIsoDate, todayIsoManila } from "@/lib/isoDate";
-import { ReportsSkeleton } from "@/components/skeletons/PageSkeletons";
+import {
+  ReportsSkeleton,
+  NpsReportSkeleton,
+} from "@/components/skeletons/PageSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import {
@@ -195,7 +199,18 @@ export function ReportsPage() {
         )}
       </div>
 
-      {report === "revenue" && data?.totals && (
+      {report === "revenue" && isLoading ? (
+        <div className="mb-4 grid grid-cols-3 gap-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Card key={index}>
+              <CardContent className="pt-5">
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="mt-1.5 h-5 w-24" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : report === "revenue" && data?.totals ? (
         <div className="mb-4 grid grid-cols-3 gap-3">
           {(
             [
@@ -214,13 +229,13 @@ export function ReportsPage() {
             </Card>
           ))}
         </div>
-      )}
+      ) : null}
 
       {report === "nps" ? (
         <Card>
           <CardContent className="flex flex-col gap-3 pt-5">
             {npsLoading ? (
-              <ReportsSkeleton />
+              <NpsReportSkeleton />
             ) : npsError ? (
               <ErrorState onRetry={() => refetchNps()} className="py-8" />
             ) : (npsData?.series ?? []).length === 0 ? (

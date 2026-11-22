@@ -4,8 +4,10 @@ import { RequirePermission } from "@/components/layout/RequirePermission";
 
 export function PatientsHubShell({ children }: { children: React.ReactNode }) {
   return (
-    <RequirePermission permission="patients:view">
-      <SectionHubShell hub={patientsHub}>{children}</SectionHubShell>
-    </RequirePermission>
+    <SectionHubShell hub={patientsHub}>
+      <RequirePermission permission="patients:view">
+        {children}
+      </RequirePermission>
+    </SectionHubShell>
   );
 }

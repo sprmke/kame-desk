@@ -17,11 +17,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
 import { NotificationsSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
 
 export function NotificationsSettingsPage() {
   const clinicId = getClinicId();
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["notification-preferences", clinicId],
     queryFn: () => api.getNotificationPreferences(clinicId!),
     enabled: Boolean(clinicId),
@@ -87,6 +88,15 @@ export function NotificationsSettingsPage() {
       <div className="w-full">
         <PageHeader title="Notifications" />
         <NotificationsSettingsSkeleton />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full">
+        <PageHeader title="Notifications" />
+        <ErrorState onRetry={() => void refetch()} />
       </div>
     );
   }

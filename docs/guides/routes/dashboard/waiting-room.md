@@ -15,6 +15,7 @@
 ## Behavior
 
 - Loads today's non-terminal appointments (`GET /api/v1/appointments/waiting-room`).
+- Loading mirrors the board: four column shells with 44px card rows on desktop, and the status switcher plus stacked cards below `lg`. The first paint keeps the board height close to the loaded queue so cards do not jump when the socket data arrives.
 - Dashboard home (`/dashboard`) shows a Queue card of the same live waiting-room data. When the queue is empty, the board shows a compact empty state.
 - One-tap buttons advance visit status forward only (`Arrived` → `In Consultation` → `Completed`). Idempotent re-tap on the same status succeeds silently.
 - Desktop drag-and-drop calls the same `POST visit-status` endpoint as the button. Only the next forward transition is accepted; dropping on Scheduled or skipping a step does nothing.

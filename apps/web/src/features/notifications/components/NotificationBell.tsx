@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useIsBelowLg } from "@/hooks/useMediaQuery";
+import { NotificationBellListSkeleton } from "@/components/skeletons/PageSkeletons";
 import { cn } from "@/lib/utils";
 
 export function NotificationBell() {
@@ -61,11 +62,7 @@ export function NotificationBell() {
         </Button>
       </div>
       <ul className="overflow-y-auto">
-        {isLoading ? (
-          <li className="px-3 py-6 text-center text-sm text-muted-foreground">
-            Loading…
-          </li>
-        ) : null}
+        {isLoading ? <NotificationBellListSkeleton /> : null}
         {!isLoading && (data?.items.length ?? 0) === 0 ? (
           <li className="px-3 py-6 text-center text-sm text-muted-foreground">
             No alerts

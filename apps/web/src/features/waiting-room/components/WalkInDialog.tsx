@@ -20,6 +20,7 @@ import {
   ResponsiveModalHeader,
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   open: boolean;
@@ -39,7 +40,7 @@ export function WalkInDialog({ open, onOpenChange, onDone }: Props) {
     queryFn: () => api.listDoctors(clinicId!),
     enabled: Boolean(clinicId) && open,
   });
-  const { data: searchResults } = useQuery({
+  const { data: searchResults, isFetching: searching } = useQuery({
     queryKey: ["walkin-patient-search", query],
     queryFn: () => api.listPatients({ q: query, page_size: 8 }),
     enabled: open && query.trim().length > 1,
@@ -102,7 +103,20 @@ export function WalkInDialog({ open, onOpenChange, onDone }: Props) {
                 setPatientId(null);
               }}
             />
-            {matches.length > 0 && !patientId && (
+            {searching && !patientId && query.trim().length > 1 ? (
+              <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover text-sm shadow-theme-md">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <li
+                    key={index}
+                    className="flex min-h-[44px] items-center gap-2 px-3 py-2"
+                  >
+                    <Skeleton className="size-4 shrink-0 rounded" />
+                    <Skeleton className="h-4 w-40 max-w-full" />
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {matches.length > 0 && !patientId && !searching && (
               <ul className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-border bg-popover text-sm shadow-theme-md">
                 {matches.map((p) => (
                   <li key={p.id}>
@@ -129,7 +143,7 @@ export function WalkInDialog({ open, onOpenChange, onDone }: Props) {
               onChange={(e) => setName(e.target.value)}
             />
           )}
-          {doctors && doctors.length > 1 && (
+          {doctors && doctors.length > 1 ? (
             <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -142,7 +156,7 @@ export function WalkInDialog({ open, onOpenChange, onDone }: Props) {
                 ))}
               </SelectContent>
             </Select>
-          )}
+          ) : null}
           <Input
             placeholder={FORM_PLACEHOLDERS.reasonForVisit}
             value={reason}

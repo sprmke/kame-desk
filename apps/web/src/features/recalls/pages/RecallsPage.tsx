@@ -11,6 +11,7 @@ import { RotateCcw } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { RecallsSkeleton } from "@/components/skeletons/PageSkeletons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -188,9 +189,13 @@ export function RecallsPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <RecallsSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <RecallsSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <RecallsSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>
@@ -250,13 +255,36 @@ export function RecallsPage() {
 
 export function PendingRecallsWidget() {
   const clinicId = getClinicId();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["recalls-widget", clinicId],
     queryFn: () => api.listRecalls(clinicId!),
     enabled: Boolean(clinicId),
   });
 
   const items = data?.items ?? [];
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="flex-row items-center justify-between">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-4 w-16" />
+        </CardHeader>
+        <CardContent className="flex flex-col gap-1 px-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex justify-between rounded-lg px-2 py-2"
+            >
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (items.length === 0) return null;
 
   return (

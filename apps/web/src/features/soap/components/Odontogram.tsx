@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
 import {
   Select,
@@ -176,7 +177,7 @@ export function Odontogram({
   const [invoiceAmount, setInvoiceAmount] = useState("");
   const [addedInvoiceId, setAddedInvoiceId] = useState<string | null>(null);
 
-  const { data: entries } = useQuery({
+  const { data: entries, isLoading } = useQuery({
     queryKey: ["tooth-chart", patientId],
     queryFn: () => api.listToothChart(patientId),
   });
@@ -242,6 +243,26 @@ export function Odontogram({
       `Tooth ${entry.tooth_number} — ${CONDITION_LABEL[entry.condition]}`,
     );
     setInvoiceAmount("");
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-8 w-20 rounded-md" />
+        </div>
+        <div className="flex flex-col gap-2 overflow-x-auto rounded-lg border border-border p-3">
+          {Array.from({ length: 2 }).map((_, row) => (
+            <div key={row} className="flex justify-between gap-1">
+              {Array.from({ length: 16 }).map((_, index) => (
+                <Skeleton key={index} className="size-7 shrink-0 rounded-md" />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = { appointmentId: string };
 
@@ -10,7 +11,7 @@ export function VisitSummaryPanel({ appointmentId }: Props) {
   const qc = useQueryClient();
   const [edited, setEdited] = useState("");
 
-  const { data: summary } = useQuery({
+  const { data: summary, isLoading } = useQuery({
     queryKey: ["visit-summary", appointmentId],
     queryFn: () => api.getVisitSummary(appointmentId),
   });
@@ -27,6 +28,19 @@ export function VisitSummaryPanel({ appointmentId }: Props) {
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["visit-summary", appointmentId] }),
   });
+
+  if (isLoading) {
+    return (
+      <div className="mt-2.5 rounded-lg border border-border bg-secondary/40 p-2.5">
+        <Skeleton className="mb-2 h-4 w-24" />
+        <Skeleton className="h-20 w-full rounded-md" />
+        <div className="mt-2 flex gap-2">
+          <Skeleton className="h-8 w-16 rounded-md" />
+          <Skeleton className="h-8 w-20 rounded-md" />
+        </div>
+      </div>
+    );
+  }
 
   if (
     !summary ||

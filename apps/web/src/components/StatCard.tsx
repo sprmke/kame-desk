@@ -7,7 +7,7 @@ type Props = {
   label: string;
   value: ReactNode;
   icon: LucideIcon;
-  hint?: string;
+  hint?: ReactNode;
   tone?: "brand" | "success" | "warning" | "info";
   className?: string;
 };

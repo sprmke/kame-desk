@@ -7,17 +7,18 @@ import {
   SettingsRow,
   SettingsSection,
 } from "@/components/settings/SettingsSection";
+import { PlanSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function BillingPlanPage() {
   const clinicId = getClinicId();
-  const { data: clinic } = useQuery({
+  const { data: clinic, isLoading: loadingClinic } = useQuery({
     queryKey: ["clinic", clinicId],
     queryFn: () => api.getClinic(clinicId!),
     enabled: Boolean(clinicId),
   });
 
   const orgId = clinic?.organization_id;
-  const { data: org } = useQuery({
+  const { data: org, isLoading: loadingOrg } = useQuery({
     queryKey: ["organization", orgId],
     queryFn: () => api.getOrganization(orgId!),
     enabled: Boolean(orgId),
@@ -26,6 +27,15 @@ export function BillingPlanPage() {
   const planKey = org?.subscription?.plan_key ?? clinic?.plan_key ?? "starter";
   const status =
     org?.subscription?.status ?? org?.status ?? clinic?.status ?? "trial";
+
+  if (loadingClinic || loadingOrg) {
+    return (
+      <div>
+        <PageHeader title="Billing plan" />
+        <PlanSettingsSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -17,7 +17,7 @@ type Props = {
  * Tab pages render content plus, optionally, `SectionHeaderActions`.
  */
 export function SectionHubShell({ hub, children }: Props) {
-  const { can } = useSession();
+  const { can, isLoading } = useSession();
   const [actionsSlot, setActionsSlot] = useState<HTMLDivElement | null>(null);
 
   return (
@@ -30,7 +30,13 @@ export function SectionHubShell({ hub, children }: Props) {
             className="flex flex-wrap items-center gap-2"
           />
         }
-        subNav={<SectionSubNav tabs={hub.tabs} can={can} label={hub.title} />}
+        subNav={
+          <SectionSubNav
+            tabs={hub.tabs}
+            can={isLoading ? undefined : can}
+            label={hub.title}
+          />
+        }
       />
       <SectionActionsProvider value={actionsSlot}>
         {children}

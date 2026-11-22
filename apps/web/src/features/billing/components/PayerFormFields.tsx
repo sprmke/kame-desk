@@ -7,6 +7,7 @@ import { FieldLabel } from "@/components/forms/FieldLabel";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -137,7 +138,7 @@ export function PatientField({
   field: PatientFieldState;
 }) {
   const enabled = !field.id && field.query.trim().length >= 2;
-  const { data: matches } = useQuery({
+  const { data: matches, isFetching: searching } = useQuery({
     queryKey: ["patients", field.query],
     queryFn: () => api.listPatients({ q: field.query, page_size: 8 }),
     enabled,
@@ -178,7 +179,18 @@ export function PatientField({
         placeholder={FORM_PLACEHOLDERS.searchPatients}
         autoComplete="off"
       />
-      {enabled && matches?.items.length ? (
+      {enabled && searching ? (
+        <ul className="overflow-hidden rounded-md border border-border text-sm">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li
+              key={index}
+              className="flex min-h-[44px] items-center px-3 py-2"
+            >
+              <Skeleton className="h-4 w-40 max-w-full" />
+            </li>
+          ))}
+        </ul>
+      ) : enabled && matches?.items.length ? (
         <ul className="max-h-48 overflow-y-auto rounded-md border border-border text-sm">
           {matches.items.map((patient) => (
             <li key={patient.id}>

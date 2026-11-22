@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { useListSearch } from "@/hooks/useListSearch";
 import { ListStack, ListTableShell, ManagedList } from "@/components/list";
+import { PlatformTenantsSkeleton } from "@/components/skeletons/PageSkeletons";
 import type { ListViewMode } from "@/lib/list/viewMode";
 
 const TENANT_VIEWS: ListViewMode[] = ["table", "list"];
@@ -89,9 +90,13 @@ export function PlatformTenantsPage() {
         empty={<EmptyState icon={Building2} heading="No organizations" />}
       >
         {isLoading ? (
-          <ListTableShell>
-            <div className="h-40 animate-pulse bg-muted" />
-          </ListTableShell>
+          list.view === "list" ? (
+            <PlatformTenantsSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <PlatformTenantsSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

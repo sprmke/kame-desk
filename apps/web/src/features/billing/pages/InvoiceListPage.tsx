@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
 import { api, type Invoice } from "@/lib/apiClient";
 import { getClinicId } from "@/lib/auth";
@@ -93,6 +93,7 @@ export function InvoiceListPage() {
         page_size: list.limit,
         sort: list.sort,
       }),
+    placeholderData: keepPreviousData,
   });
 
   const { data: outstanding } = useQuery({
@@ -209,9 +210,13 @@ export function InvoiceListPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <InvoiceListSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <InvoiceListSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <InvoiceListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

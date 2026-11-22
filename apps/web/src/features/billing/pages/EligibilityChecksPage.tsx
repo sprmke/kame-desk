@@ -206,9 +206,13 @@ export function EligibilityChecksPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <EligibilityListSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <EligibilityListSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <EligibilityListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

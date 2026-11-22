@@ -4,7 +4,7 @@
 
 ## Behavior
 
-Lists active refresh sessions and lets the user sign out everywhere. Owners and admins can download patient and appointment CSV. Owners can file a clinic deletion request (timestamp only; PHI is not wiped in this step). Layout is divider rows (`SettingsSection` / `SettingsRow`), not stacked cards.
+Lists active refresh sessions and lets the user sign out everywhere. Owners and admins can download patient and appointment CSV. Owners can file a clinic deletion request (timestamp only; PHI is not wiped in this step). Layout is divider rows (`SettingsSection` / `SettingsRow`), not stacked cards. The session rows load with a divider-row skeleton; the rest of the sections render immediately because they do not depend on that query.
 
 ## Save paths
 

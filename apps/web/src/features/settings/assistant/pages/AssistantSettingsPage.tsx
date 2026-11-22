@@ -8,6 +8,7 @@ import {
 } from "@/components/settings/SettingsSection";
 import { Switch } from "@/components/ui/switch";
 import { AssistantSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
 
 const TOOL_TOGGLES = [
   { key: "propose_book_appointment", label: "Book appointments" },
@@ -20,7 +21,12 @@ const TOOL_TOGGLES = [
 export function AssistantSettingsPage() {
   const clinicId = getClinicId();
   const qc = useQueryClient();
-  const { data: clinic, isLoading } = useQuery({
+  const {
+    data: clinic,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["clinic", clinicId],
     queryFn: () => api.getClinic(clinicId!),
     enabled: !!clinicId,
@@ -54,7 +60,11 @@ export function AssistantSettingsPage() {
     <div className="w-full">
       <PageHeader title="Assistant" />
       {isLoading || !clinic ? (
-        <AssistantSettingsSkeleton />
+        isError ? (
+          <ErrorState onRetry={() => void refetch()} />
+        ) : (
+          <AssistantSettingsSkeleton />
+        )
       ) : (
         <SettingsSection>
           <SettingsRow label="Enable clinic assistant">

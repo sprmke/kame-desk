@@ -28,6 +28,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SegmentedControl } from "@/components/ui/sliding-tabs";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   WaitingRoomMobileSkeleton,
   WaitingRoomSkeleton,
@@ -184,7 +185,7 @@ export function WaitingRoomPage({ connectionState }: Props) {
 }
 
 export function WaitingPatientsWidget({ connectionState }: Props) {
-  const { data } = useWaitingRoom();
+  const { data, isLoading } = useWaitingRoom();
   const active = filterActiveWaiting(data?.items ?? []).slice(0, 5);
 
   return (
@@ -202,7 +203,19 @@ export function WaitingPatientsWidget({ connectionState }: Props) {
             </Link>
           </div>
         </div>
-        {active.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col divide-y divide-border">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex justify-between py-2 first:pt-0 last:pb-0"
+              >
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        ) : active.length === 0 ? (
           <EmptyState icon={Rows3} heading="No patients waiting" size="sm" />
         ) : (
           <ul className="flex flex-col divide-y divide-border text-sm">

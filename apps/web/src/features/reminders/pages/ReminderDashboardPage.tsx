@@ -143,9 +143,13 @@ export function ReminderDashboardPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <ReminderListSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <ReminderListSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <ReminderListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

@@ -8,13 +8,14 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PlanSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function CreateClinicPage() {
   const navigate = useNavigate();
   const { clinicId, user } = useSession();
   const ownedOrg = user?.organizations?.find((o) => o.is_owner);
 
-  const { data: clinic } = useQuery({
+  const { data: clinic, isLoading } = useQuery({
     queryKey: ["clinic", clinicId],
     queryFn: () => api.getClinic(clinicId!),
     enabled: Boolean(clinicId),
@@ -30,6 +31,15 @@ export function CreateClinicPage() {
       navigate({ to: "/onboarding" });
     },
   });
+
+  if (isLoading) {
+    return (
+      <div>
+        <PageHeader title="Add clinic" />
+        <PlanSettingsSkeleton />
+      </div>
+    );
+  }
 
   if (!orgId) return null;
 

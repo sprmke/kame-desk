@@ -254,9 +254,13 @@ export function LoaRequestsPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <LoaListSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <LoaListSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <LoaListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

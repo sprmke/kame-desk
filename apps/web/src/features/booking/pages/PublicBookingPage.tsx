@@ -13,6 +13,7 @@ import { EmptyState, SectionCard } from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { todayIsoManila } from "@/lib/isoDate";
 import { PublicBookingSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
 import {
   Select,
   SelectContent,
@@ -35,7 +36,12 @@ export function PublicBookingPage({ slug }: Props) {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: clinic, isLoading } = useQuery({
+  const {
+    data: clinic,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["public-clinic", slug],
     queryFn: () => api.getPublicClinic(slug),
   });
@@ -79,7 +85,11 @@ export function PublicBookingPage({ slug }: Props) {
   if (isLoading || !clinic) {
     return (
       <AuthLayout title="Book an appointment">
-        <PublicBookingSkeleton />
+        {isError ? (
+          <ErrorState onRetry={() => void refetch()} />
+        ) : (
+          <PublicBookingSkeleton />
+        )}
       </AuthLayout>
     );
   }

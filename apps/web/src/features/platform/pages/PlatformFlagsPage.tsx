@@ -7,10 +7,11 @@ import {
   SettingsSection,
 } from "@/components/settings/SettingsSection";
 import { Switch } from "@/components/ui/switch";
+import { SettingsRowsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PlatformFlagsPage() {
   const qc = useQueryClient();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["platform-flag", "ai_assistant"],
     queryFn: () => api.getPlatformFlag("ai_assistant"),
   });
@@ -25,14 +26,18 @@ export function PlatformFlagsPage() {
     <div className={pageContainerClass("narrow")}>
       <PageHeader title="Flags" />
       <SettingsSection>
-        <SettingsRow label="AI assistant">
-          <Switch
-            id="ai-flag"
-            checked={data?.enabled ?? false}
-            onCheckedChange={(v) => save.mutate(v)}
-            disabled={save.isPending}
-          />
-        </SettingsRow>
+        {isLoading ? (
+          <SettingsRowsSkeleton count={1} />
+        ) : (
+          <SettingsRow label="AI assistant">
+            <Switch
+              id="ai-flag"
+              checked={data?.enabled ?? false}
+              onCheckedChange={(v) => save.mutate(v)}
+              disabled={save.isPending}
+            />
+          </SettingsRow>
+        )}
       </SettingsSection>
     </div>
   );

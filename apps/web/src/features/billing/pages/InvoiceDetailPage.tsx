@@ -14,14 +14,22 @@ import { Money } from "@/components/Money";
 import { PaymentStatus } from "@/components/StatusIndicator";
 import { Button } from "@/components/ui/button";
 import { InvoiceDetailSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 
 type Props = { patientId: string; invoiceId: string };
 
 export function InvoiceDetailPage({ patientId, invoiceId }: Props) {
-  const { data: invoice, refetch } = useQuery({
+  const {
+    data: invoice,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["invoice", invoiceId],
     queryFn: () => api.getInvoice(invoiceId),
   });
+  const showSkeleton = useDelayedLoading(isLoading);
   const [creditAmount, setCreditAmount] = useState("");
   const [creditReason, setCreditReason] = useState("");
   const credit = useMutation({
@@ -42,8 +50,16 @@ export function InvoiceDetailPage({ patientId, invoiceId }: Props) {
     onSuccess: () => void refetch(),
   });
 
-  if (!invoice) {
+  if (showSkeleton) {
     return <InvoiceDetailSkeleton />;
+  }
+
+  if (isError && !invoice) {
+    return <ErrorState onRetry={() => void refetch()} />;
+  }
+
+  if (!invoice) {
+    return <p className="text-sm text-muted-foreground">Invoice not found.</p>;
   }
 
   return (

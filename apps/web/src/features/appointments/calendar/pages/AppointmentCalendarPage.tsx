@@ -18,6 +18,9 @@ import {
 } from "@/features/appointments/calendar/lib/calendarEvents";
 import { SectionHeaderActions } from "@/components/layout/SectionHeaderActions";
 import { AppointmentCalendarSkeleton } from "@/components/skeletons/PageSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ErrorState";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -33,10 +36,16 @@ export function AppointmentCalendarPage() {
     queryFn: () => api.getClinic(clinicId),
   });
 
-  const { data: appointments, isLoading } = useQuery({
+  const {
+    data: appointments,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["appointments", "calendar"],
     queryFn: () => api.listAppointments(),
   });
+  const showSkeleton = useDelayedLoading(isLoading);
 
   const patchClinic = useMutation({
     mutationFn: (body: { public_booking_auto_confirm: boolean }) =>
@@ -118,34 +127,44 @@ export function AppointmentCalendarPage() {
       </SectionHeaderActions>
 
       <div className="mb-4 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card px-4 py-3 shadow-theme-xs">
-        {clinic && (
-          <Label className="flex items-center gap-2 text-sm text-foreground">
-            <Switch
-              checked={clinic.public_booking_auto_confirm}
-              onCheckedChange={(checked) =>
-                patchClinic.mutate({ public_booking_auto_confirm: checked })
-              }
-            />
-            Auto-confirm public bookings
-          </Label>
-        )}
-        {clinic?.slug && (
-          <Link
-            to="/book/$slug"
-            params={{ slug: clinic.slug }}
-            className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-            target="_blank"
-          >
-            Public link
-            <ExternalLink className="size-3.5" />
-          </Link>
+        {clinic ? (
+          <>
+            <Label className="flex items-center gap-2 text-sm text-foreground">
+              <Switch
+                checked={clinic.public_booking_auto_confirm}
+                onCheckedChange={(checked) =>
+                  patchClinic.mutate({ public_booking_auto_confirm: checked })
+                }
+              />
+              Auto-confirm public bookings
+            </Label>
+            {clinic?.slug && (
+              <Link
+                to="/book/$slug"
+                params={{ slug: clinic.slug }}
+                className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                target="_blank"
+              >
+                Public link
+                <ExternalLink className="size-3.5" />
+              </Link>
+            )}
+          </>
+        ) : (
+          <>
+            <Skeleton className="h-6 w-11 rounded-full" />
+            <Skeleton className="h-4 w-48 max-w-full" />
+            <Skeleton className="ml-auto h-4 w-20" />
+          </>
         )}
       </div>
 
       {error && <p className="mb-2 text-sm text-destructive">{error}</p>}
 
-      {isLoading ? (
+      {showSkeleton ? (
         <AppointmentCalendarSkeleton />
+      ) : isError ? (
+        <ErrorState onRetry={() => void refetch()} />
       ) : (
         <div className="dd-calendar rounded-2xl border border-border bg-card p-2 shadow-theme-xs sm:p-4">
           <FullCalendar

@@ -7,6 +7,7 @@
 - Chronological list with patient, doctor name (never a UUID), Manila-local time, status (shape plus label, not a pastel pill), reason.
 - The fixed **Schedule** title and description sit above the List / Calendar tabs; the appointment content renders below the tabs. **New appointment** is contributed to the section header by this tab. Switching tabs changes only the content, never the title or description.
 - Shared list chrome: live search, status and date-range filters, sort, per-page (25/50/100), and Table / List / Calendar views. The range picker uses one calendar: select the start, then the end, and the interval stays highlighted. Phone defaults to List. Calendar view uses the same filters and hides page numbers. Query params remain `q`, `status`, `from`, `to`, `page`, `limit`, `sort`, `view`. Empty and error states use the same bordered card as the table.
+- Loading mirrors the active view: table keeps the five column cells, list keeps the appointment row body (time, patient, status, actions), calendar keeps the toolbar and the full week grid. Page, filter, and sort changes keep the previous rows while fetching.
 - A dedicated `/dashboard/appointments/calendar` route still exists for FullCalendar drag-reschedule. The list Calendar view is a month board on this page.
 - Public bookings that still need review appear in **Public requests** when auto-confirm is off. Confirmed or staff bookings from the public link show a Public badge.
 - **Waitlist is out of this MVP** (Phase 2). The API remains.

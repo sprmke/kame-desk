@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/apiClient";
 import { clearAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { PlatformShellSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PlatformShell() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export function PlatformShell() {
   });
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading</div>;
+    return <PlatformShellSkeleton />;
   }
   if (!me?.is_platform_admin) {
     return (

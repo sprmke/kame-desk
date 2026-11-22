@@ -116,9 +116,13 @@ export function PatientListPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <PatientListSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <PatientListSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <PatientListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "list" ? (
           <ListStack>
             {patients.map((p) => (

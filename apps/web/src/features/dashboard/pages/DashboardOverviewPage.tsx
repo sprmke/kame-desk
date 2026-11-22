@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppointmentsTrendChart } from "@/components/charts/AppointmentsTrendChart";
 import { DashboardOverviewSkeleton } from "@/components/skeletons/PageSkeletons";
 import { ErrorState } from "@/components/ErrorState";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { WalkInDialog } from "@/features/waiting-room/components/WalkInDialog";
 import { useWaitingRoom } from "@/features/waiting-room/hooks/useWaitingRoom";
 import { cn } from "@/lib/utils";
@@ -151,12 +152,13 @@ export function DashboardOverviewPage() {
       }
     />
   );
+  const showSkeleton = useDelayedLoading(loadingAppointments && !appointments);
 
   if (loadingAppointments && !appointments) {
     return (
       <PageContainer>
         {header}
-        <DashboardOverviewSkeleton />
+        {showSkeleton ? <DashboardOverviewSkeleton /> : null}
         <WalkInDialog
           open={walkInOpen}
           onOpenChange={setWalkInOpen}

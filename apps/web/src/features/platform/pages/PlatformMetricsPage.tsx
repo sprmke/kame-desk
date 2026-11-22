@@ -4,9 +4,10 @@ import { pageContainerClass } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorState } from "@/components/ErrorState";
+import { PlatformMetricsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PlatformMetricsPage() {
-  const { data, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["platform-metrics"],
     queryFn: () => api.getPlatformMetrics(),
   });
@@ -14,7 +15,9 @@ export function PlatformMetricsPage() {
   return (
     <div className={pageContainerClass("narrow")}>
       <PageHeader title="Metrics" />
-      {isError ? (
+      {isLoading ? (
+        <PlatformMetricsSkeleton />
+      ) : isError ? (
         <ErrorState onRetry={() => void refetch()} />
       ) : (
         <>

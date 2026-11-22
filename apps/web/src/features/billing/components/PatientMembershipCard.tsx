@@ -5,6 +5,8 @@ import { getClinicId } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { InlineError } from "@/components/ErrorState";
+import { PatientMembershipCardSkeleton } from "@/components/skeletons/PageSkeletons";
 import {
   Select,
   SelectContent,
@@ -27,12 +29,17 @@ export function PatientMembershipCard({ patientId }: { patientId: string }) {
   const qc = useQueryClient();
   const [planId, setPlanId] = useState("");
 
-  const { data: membership } = useQuery({
+  const {
+    data: membership,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["patient-membership", patientId],
     queryFn: () => api.getPatientMembership(patientId),
   });
 
-  const { data: plans } = useQuery({
+  const { data: plans, isLoading: loadingPlans } = useQuery({
     queryKey: ["membership-plans", clinicId],
     queryFn: () => api.listMembershipPlans(clinicId),
   });
@@ -53,13 +60,22 @@ export function PatientMembershipCard({ patientId }: { patientId: string }) {
       qc.invalidateQueries({ queryKey: ["patient-membership", patientId] }),
   });
 
+  if (isLoading || (loadingPlans && !membership)) {
+    return <PatientMembershipCardSkeleton />;
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Membership</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {membership ? (
+        {isError ? (
+          <InlineError
+            heading="Could not load membership"
+            onRetry={() => void refetch()}
+          />
+        ) : membership ? (
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>

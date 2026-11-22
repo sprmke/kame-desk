@@ -337,9 +337,13 @@ export function AppointmentListPage() {
         empty={<EmptyState icon={CalendarDays} heading="No appointments" />}
       >
         {isLoading ? (
-          <ListTableShell>
-            <AppointmentListSkeleton />
-          </ListTableShell>
+          isCalendar || list.view === "list" ? (
+            <AppointmentListSkeleton view={isCalendar ? "calendar" : "list"} />
+          ) : (
+            <ListTableShell>
+              <AppointmentListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : isCalendar ? (
           <AppointmentCalendarBoard appointments={items} />
         ) : list.view === "table" ? (

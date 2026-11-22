@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
 import { api } from "@/lib/apiClient";
 import { getClinicId } from "@/lib/auth";
@@ -107,6 +107,7 @@ export function AuditLogPage() {
         to_date: toDate || undefined,
       }),
     enabled: Boolean(clinicId),
+    placeholderData: keepPreviousData,
   });
 
   const items = data?.items ?? [];
@@ -242,9 +243,13 @@ export function AuditLogPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <AuditLogSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <AuditLogSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <AuditLogSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

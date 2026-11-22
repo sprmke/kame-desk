@@ -7,6 +7,7 @@ Not the same as `/dashboard/settings/notifications` (patient email/SMS/WhatsApp 
 ## Behavior
 
 - Clinic-scoped inbox for operational events (bookings, visit flow, billing, messaging, team). The list uses the same full page width as other dashboard pages.
+- While the list loads, the page shows alert-shaped rows (36px icon, title, relative time, body) and reserves the header actions. The bell popover/sheet shows the same row skeleton instead of a loading sentence.
 - Per-user read state; marking read does not affect other staff.
 - The page header describes the purpose of alerts. Filter and "Mark all read" actions are hidden when there are no alerts. The empty state explains what will appear here.
 - Bell in the header (`AppHeader`) shows unread count (capped at 99+). Only the count query runs on page load; the list is fetched when the panel opens. Popover on `lg+`, bottom sheet below.

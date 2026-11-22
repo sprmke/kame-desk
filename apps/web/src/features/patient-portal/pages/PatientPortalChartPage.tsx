@@ -5,7 +5,7 @@ import { patientPortalApi } from "@/features/patient-portal/lib/patientPortalCli
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PortalChartSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PatientPortalChartPage({ slug }: { slug: string }) {
   const me = useQuery({
@@ -22,16 +22,14 @@ export function PatientPortalChartPage({ slug }: { slug: string }) {
       slug={slug}
       clinicName={me.data?.clinic_name}
       patientName={me.data?.full_name}
+      loading={me.isLoading}
     >
       <h1 className="mb-4 text-lg font-semibold text-foreground">
         Chart summary
       </h1>
 
       {chart.isLoading ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </div>
+        <PortalChartSkeleton />
       ) : chart.isError ? (
         <SectionCard>
           <ErrorState

@@ -16,12 +16,21 @@ import { ImageFileDropzone } from "@/components/ui/file-dropzone";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DoctorProfileSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
 
 export function DoctorProfilePage() {
   const clinicId = getClinicId()!;
   const qc = useQueryClient();
-  const { data: me } = useQuery({ queryKey: ["me"], queryFn: () => api.me() });
-  const { data: doctors } = useQuery({
+  const { data: me, isLoading: loadingMe } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.me(),
+  });
+  const {
+    data: doctors,
+    isLoading: loadingDoctors,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["doctors", clinicId],
     queryFn: () => api.listDoctors(clinicId),
   });
@@ -105,11 +114,29 @@ export function DoctorProfilePage() {
     }
   }
 
-  if (!profile && !doctors) {
+  if (loadingDoctors || loadingMe) {
     return (
       <div className="w-full">
         <PageHeader title="Doctor profile" />
         <DoctorProfileSkeleton />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full">
+        <PageHeader title="Doctor profile" />
+        <ErrorState onRetry={() => void refetch()} />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="w-full">
+        <PageHeader title="Doctor profile" />
+        <ErrorState heading="No doctor profile found" />
       </div>
     );
   }

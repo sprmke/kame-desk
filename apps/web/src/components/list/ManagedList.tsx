@@ -81,9 +81,9 @@ export function ManagedList({
   const [desktopRefineOpen, setDesktopRefineOpen] = useState(false);
   const [mobileRefineOpen, setMobileRefineOpen] = useState(false);
   const { startIdx, endIdx, pageCount } = listRange(page, limit, total);
-  const compact = total <= limit && pageCount <= 1;
+  const compact = !isLoading && total <= limit && pageCount <= 1;
   const showView = views.length > 1;
-  const showPerPage = !compact || total > 12;
+  const showPerPage = isLoading || !compact || total > 12;
   const showPagination = !hidePagination && pageCount > 1;
   const search = (
     <ListSearchField

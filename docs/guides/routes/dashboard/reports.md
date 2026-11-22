@@ -12,6 +12,7 @@
 - The report picker and date range name the current scope, and the empty state suggests changing the date range or grouping.
 - Appointment bars open `/dashboard/appointments` with `from` / `to` / `doctorId`. Revenue bars open invoices with the same date range.
 - Doctor grouping shows names, not UUIDs.
+- Loading uses `BarRow`-shaped skeleton rows (label, progress track, value) and a response-row skeleton on NPS, so the card height stays close to the loaded list. Changing report type, range, or grouping swaps in the skeleton for the new data.
 - CSV export uses the same filters and RBAC as the JSON endpoints.
 
 ## Save paths

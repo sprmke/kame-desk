@@ -1,10 +1,11 @@
 import * as React from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { api } from "@/lib/apiClient";
 import { getClinicId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Popover,
   PopoverContent,
@@ -122,10 +123,18 @@ export function PatientCombobox({
           }}
         >
           {patientsQuery.isLoading ? (
-            <li className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
-              Loading
-            </li>
+            Array.from({ length: 4 }).map((_, index) => (
+              <li
+                key={index}
+                className="flex min-h-11 items-center gap-2 px-2 py-2"
+              >
+                <Skeleton className="size-4 shrink-0 rounded" />
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="h-4 w-36 max-w-full" />
+                  <Skeleton className="mt-1 h-3 w-16" />
+                </div>
+              </li>
+            ))
           ) : patients.length === 0 ? (
             <li className="px-3 py-6 text-center text-sm text-muted-foreground">
               No patients found
@@ -170,8 +179,12 @@ export function PatientCombobox({
             })
           )}
           {patientsQuery.isFetchingNextPage ? (
-            <li className="flex items-center justify-center py-3 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
+            <li className="flex min-h-11 items-center gap-2 px-2 py-2">
+              <Skeleton className="size-4 shrink-0 rounded" />
+              <div className="min-w-0 flex-1">
+                <Skeleton className="h-4 w-32 max-w-full" />
+                <Skeleton className="mt-1 h-3 w-14" />
+              </div>
               <span className="sr-only">Loading more patients</span>
             </li>
           ) : null}

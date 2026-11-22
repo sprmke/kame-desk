@@ -8,10 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/EmptyState";
+import { DocumentSearchResultsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function DocumentGeneratePage() {
   const [q, setQ] = useState("");
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["patients", q],
     queryFn: () => api.listPatients({ q, page_size: 12 }),
     enabled: q.trim().length >= 2,
@@ -32,7 +33,9 @@ export function DocumentGeneratePage() {
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
-        {showResults && results.length === 0 ? (
+        {showResults && isLoading ? (
+          <DocumentSearchResultsSkeleton />
+        ) : showResults && results.length === 0 ? (
           <EmptyState
             icon={Search}
             heading="No patients found"

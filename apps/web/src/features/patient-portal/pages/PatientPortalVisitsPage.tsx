@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PortalVisitsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PatientPortalVisitsPage({ slug }: { slug: string }) {
   const me = useQuery({
@@ -24,16 +24,14 @@ export function PatientPortalVisitsPage({ slug }: { slug: string }) {
       slug={slug}
       clinicName={me.data?.clinic_name}
       patientName={me.data?.full_name}
+      loading={me.isLoading}
     >
       <PortalConsentNotice />
       <h1 className="mb-4 text-lg font-semibold text-foreground">
         Your visits
       </h1>
       {visits.isLoading ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
+        <PortalVisitsSkeleton />
       ) : visits.isError ? (
         <SectionCard>
           <ErrorState

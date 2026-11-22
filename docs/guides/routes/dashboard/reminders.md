@@ -5,6 +5,7 @@
 ## Behavior
 
 - Clinic-wide reminder list with status filter (pending, sent, failed, cancelled). Shared list chrome: debounced search, sort, per-page, Table / List. Search, sort, and pagination run on the API; the browser keeps only the current page. Empty and error states use the same bordered card as the table. The "No reminders" count line is hidden while the empty card is showing.
+- Loading uses the skeleton for the active Table or List view (same 44px row height, status badge, and Retry control). Filter and page changes keep the previous rows visible.
 - Each row shows its channel (`email` / `sms` / `whatsapp`) alongside type and status. No separate channel filter yet.
 - Failed rows show Retry. The dashboard home also lists failed sends with Retry.
 - The fixed **Outreach** title and description sit above the Reminders / Recalls tabs; the reminder content renders below the tabs. Switching tabs changes only the content, never the title or description.

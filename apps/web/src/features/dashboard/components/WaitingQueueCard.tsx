@@ -44,10 +44,19 @@ export function WaitingQueueCard({
         className={cn(dashboardListBodyClass, "flex flex-col gap-0.5")}
       >
         {loading ? (
-          <div className="flex flex-col gap-2 p-2">
-            <Skeleton className="h-11 w-full" />
-            <Skeleton className="h-11 w-full" />
-            <Skeleton className="h-11 w-full" />
+          <div className="flex flex-col gap-0.5 p-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-2 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="h-4 w-36 max-w-full" />
+                  <Skeleton className="mt-1 h-3 w-28 max-w-full" />
+                </div>
+                <Skeleton className="h-5 w-16 shrink-0 rounded-full" />
+              </div>
+            ))}
           </div>
         ) : active.length === 0 ? (
           <EmptyState

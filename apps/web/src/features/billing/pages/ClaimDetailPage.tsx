@@ -5,18 +5,29 @@ import { api } from "@/lib/apiClient";
 import { pageContainerClass } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClaimsPageSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
+import { ClaimDetailSkeleton } from "@/components/skeletons/PageSkeletons";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 
 export function ClaimDetailPage({ claimId }: { claimId: string }) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["claims", claimId],
     queryFn: async () => {
       const res = await api.listClaims({ page_size: 100 });
       return res.items.find((c) => c.id === claimId) ?? null;
     },
   });
+  const showSkeleton = useDelayedLoading(isLoading);
 
-  if (isLoading) return <ClaimsPageSkeleton />;
+  if (showSkeleton) return <ClaimDetailSkeleton />;
+
+  if (isError) {
+    return (
+      <div className={pageContainerClass("narrow")}>
+        <ErrorState onRetry={() => void refetch()} />
+      </div>
+    );
+  }
 
   if (!data) {
     return <p className="text-sm text-muted-foreground">Claim not found.</p>;

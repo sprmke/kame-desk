@@ -247,9 +247,13 @@ export function ClaimsListPage() {
         }
       >
         {isLoading ? (
-          <ListTableShell>
-            <ClaimsListSkeleton />
-          </ListTableShell>
+          list.view === "list" ? (
+            <ClaimsListSkeleton view="list" />
+          ) : (
+            <ListTableShell>
+              <ClaimsListSkeleton view="table" />
+            </ListTableShell>
+          )
         ) : list.view === "table" ? (
           <ListTableShell>
             <Table>

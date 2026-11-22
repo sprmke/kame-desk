@@ -3,16 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/apiClient";
 import { getClinicId } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BillingWidgetSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function RevenueWidget() {
   const clinicId = getClinicId();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["revenue-report-totals", clinicId],
     queryFn: () => api.getRevenueReport({}),
     enabled: Boolean(clinicId),
   });
 
   const totals = data?.totals;
+  if (isLoading) return <BillingWidgetSkeleton />;
   if (!totals) return null;
 
   return (
@@ -48,11 +51,35 @@ export function RevenueWidget() {
 
 export function OutstandingWidget() {
   const clinicId = getClinicId();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["outstanding-balances", clinicId],
     queryFn: () => api.getOutstandingBalances(clinicId!),
     enabled: Boolean(clinicId),
   });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-28" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="mb-2 h-4 w-32" />
+          <div className="flex flex-col divide-y divide-border">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex justify-between py-2 first:pt-0 last:pb-0"
+              >
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!data) return null;
 

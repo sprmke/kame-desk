@@ -18,6 +18,7 @@
 Owners and admins edit clinic profile, logo upload, brand color (letterhead/PDF accent), working hours, holidays, secretary SOAP access, and receipt numbering. Rooms, BIR PTU/CAS, and growth/NPS settings are Phase 2 (APIs remain).
 
 - Each view carries its own page title matching the settings nav item (Clinic details, Hours and holidays, Branding, Receipts). The settings layout renders the nav only, so there is no second "Settings" heading above it.
+- Loading shows the form skeleton for the current view: profile fields for Details, seven day rows plus the holidays textarea for Hours, the logo dropzone and color field for Branding, and the numbering fields for Receipts. The page heading and settings nav render first, so they never move.
 - **Logo:** `ImageFileDropzone` (click or drag). Uploads to R2 via presigned URL; preview uses a short-lived download URL.
 - **Brand color:** `BrandColorField` swatches + custom picker. Stored on `clinics.brand_color`. Used on issued PDFs (Rx, invoice, certificates), not a full theme override.
 - **Receipt pad width:** `NumberSlider` (1–10) instead of a plain number field.

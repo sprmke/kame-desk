@@ -16,6 +16,7 @@
 - Owner/admin can merge a duplicate chart into this one (source archived).
 - Referral documents on Documents show recipient, status, and outcome. A referral letter also gets a **Share chart summary** button (Phase 38) that creates a scoped, expiring (7-day) public link to a read-only chart-summary snapshot — no recipient account required — and a **Copy link** action once created.
 - Generate letter, new Rx, and new invoice open as nested pages (`…/documents/new`, `…/prescriptions/new`, `…/invoices/new`) so they no longer render under the chart layout.
+- Loading mirrors the active tab: overview shows the demographics/medical/vitals form skeleton, records shows charts/labs/files, billing shows the eligibility, membership, and invoice cards, and the other tabs show their own row skeletons. A tab's skeleton appears only while that tab's queries are in flight; cached tabs paint directly.
 
 ## Save paths
 

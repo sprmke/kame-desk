@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PortalDocumentsSkeleton } from "@/components/skeletons/PageSkeletons";
 
 export function PatientPortalDocumentsPage({ slug }: { slug: string }) {
   const me = useQuery({
@@ -31,14 +31,12 @@ export function PatientPortalDocumentsPage({ slug }: { slug: string }) {
       slug={slug}
       clinicName={me.data?.clinic_name}
       patientName={me.data?.full_name}
+      loading={me.isLoading}
     >
       <h1 className="mb-4 text-lg font-semibold text-foreground">Documents</h1>
 
       {documents.isLoading ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
+        <PortalDocumentsSkeleton />
       ) : documents.isError ? (
         <SectionCard>
           <ErrorState

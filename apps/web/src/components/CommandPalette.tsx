@@ -12,6 +12,7 @@ import {
   ResponsiveModalContent,
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   open: boolean;
@@ -210,9 +211,17 @@ export function CommandPalette({ open, onClose }: Props) {
             </motion.button>
           ))}
           {isFetching ? (
-            <p className="px-3 py-2 text-xs text-muted-foreground">
-              Searching…
-            </p>
+            <div aria-hidden>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5"
+                >
+                  <Skeleton className="size-4 shrink-0 rounded" />
+                  <Skeleton className="h-4 w-40 max-w-full" />
+                </div>
+              ))}
+            </div>
           ) : null}
         </div>
       </ResponsiveModalContent>

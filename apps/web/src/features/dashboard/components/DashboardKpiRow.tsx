@@ -67,7 +67,9 @@ export function DashboardKpiRow({
               (waitingCount ?? 0)
             )
           }
-          hint={waitingHint}
+          hint={
+            loadingWaiting ? <Skeleton className="h-3 w-16" /> : waitingHint
+          }
           icon={Rows3}
           tone="warning"
         />
@@ -103,9 +105,11 @@ export function DashboardKpiRow({
             )
           }
           hint={
-            todayRevenue != null && weekRevenue != null
-              ? `Today ${formatPhp(todayRevenue)} · Week ${formatPhp(weekRevenue)}`
-              : undefined
+            loadingRevenue ? (
+              <Skeleton className="h-3 w-40" />
+            ) : todayRevenue != null && weekRevenue != null ? (
+              `Today ${formatPhp(todayRevenue)} · Week ${formatPhp(weekRevenue)}`
+            ) : undefined
           }
           icon={CircleDollarSign}
           tone="info"

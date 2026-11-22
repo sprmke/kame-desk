@@ -9,6 +9,7 @@ import {
   SettingsSection,
 } from "@/components/settings/SettingsSection";
 import { Button } from "@/components/ui/button";
+import { SettingsRowsSkeleton } from "@/components/skeletons/PageSkeletons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +35,7 @@ export function AccountSettingsPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { can } = useSession();
-  const { data: sessions } = useQuery({
+  const { data: sessions, isLoading: loadingSessions } = useQuery({
     queryKey: ["sessions"],
     queryFn: () => api.listSessions(),
   });
@@ -64,13 +65,17 @@ export function AccountSettingsPage() {
       <PageHeader title="Account" />
 
       <SettingsSection title="Sessions">
-        {(sessions ?? []).map((s) => (
-          <SettingsRow
-            key={s.id}
-            label={formatWhen(s.created_at)}
-            description={`Expires ${formatWhen(s.expires_at)}`}
-          />
-        ))}
+        {loadingSessions ? (
+          <SettingsRowsSkeleton count={2} control="text" />
+        ) : (
+          (sessions ?? []).map((s) => (
+            <SettingsRow
+              key={s.id}
+              label={formatWhen(s.created_at)}
+              description={`Expires ${formatWhen(s.expires_at)}`}
+            />
+          ))
+        )}
         <SettingsRow label="All devices">
           <Button
             type="button"

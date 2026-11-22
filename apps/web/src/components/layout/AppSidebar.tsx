@@ -10,6 +10,7 @@ import {
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
 import { useSession } from "@/hooks/useSession";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -127,21 +128,39 @@ function NavLink({
 
 function SidebarBody({ collapsed }: { collapsed: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { can } = useSession();
+  const { can, isLoading } = useSession();
   const items = filterNavItems(mainNavItems, can);
 
   return (
     <nav className="flex-1 overflow-y-auto px-3 pb-4 pt-2">
-      <div className="flex flex-col gap-0.5">
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            item={item}
-            active={isActive(pathname, item.to)}
-            collapsed={collapsed}
-          />
-        ))}
-      </div>
+      {isLoading && items.length === 0 ? (
+        <div className="flex flex-col gap-0.5" aria-hidden>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className={
+                collapsed
+                  ? "flex h-9 items-center justify-center"
+                  : "flex h-9 items-center gap-3 rounded-lg px-3"
+              }
+            >
+              <Skeleton className="size-[18px] shrink-0 rounded" />
+              {collapsed ? null : <Skeleton className="h-4 w-24 max-w-full" />}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-0.5">
+          {items.map((item) => (
+            <NavLink
+              key={item.to}
+              item={item}
+              active={isActive(pathname, item.to)}
+              collapsed={collapsed}
+            />
+          ))}
+        </div>
+      )}
     </nav>
   );
 }

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ChevronLeft, Download } from "lucide-react";
+import { ChevronLeft, Download, Notebook } from "lucide-react";
 import { AssistantMark } from "@/components/brand/AssistantMark";
 import { API_BASE } from "@/lib/apiBase";
 import { api, type SoapNote } from "@/lib/apiClient";
@@ -23,6 +23,9 @@ import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
 import { pageContainerClass } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SoapNoteSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -66,7 +69,12 @@ export function SoapNotePage({ appointmentId }: Props) {
     error: draftError,
   } = useSoapDraftStream(appointmentId);
 
-  const { data: appointment, isLoading: loadingAppointment } = useQuery({
+  const {
+    data: appointment,
+    isLoading: loadingAppointment,
+    isError: appointmentError,
+    refetch: refetchAppointment,
+  } = useQuery({
     queryKey: ["appointment", appointmentId],
     queryFn: async () => {
       const list = await api.listAppointments();
@@ -75,11 +83,11 @@ export function SoapNotePage({ appointmentId }: Props) {
   });
 
   const clinicId = getClinicId();
-  const { data: templates } = useQuery({
+  const { data: templates, isLoading: loadingTemplates } = useQuery({
     queryKey: ["specialty-templates"],
     queryFn: () => api.listSpecialtyTemplates(),
   });
-  const { data: doctors } = useQuery({
+  const { data: doctors, isLoading: loadingDoctors } = useQuery({
     queryKey: ["doctors", clinicId],
     queryFn: () => api.listDoctors(clinicId!),
     enabled: Boolean(clinicId),
@@ -88,16 +96,29 @@ export function SoapNotePage({ appointmentId }: Props) {
     doctors?.find((d) => d.id === appointment?.doctor_id)?.specialty_key,
   );
 
-  const { data: soapHistory, isLoading: loadingSoap } = useQuery({
+  const {
+    data: soapHistory,
+    isLoading: loadingSoap,
+    isError: soapError,
+    refetch: refetchSoap,
+  } = useQuery({
     queryKey: ["soap-notes", appointmentId],
     queryFn: () => api.listSoapNotes(appointmentId),
   });
 
-  const { data: vitals } = useQuery({
+  const { data: vitals, isLoading: loadingVitals } = useQuery({
     queryKey: ["vitals", appointment?.patient_id],
     queryFn: () => api.listVitals(appointment!.patient_id),
     enabled: Boolean(appointment?.patient_id),
   });
+
+  const showSkeleton = useDelayedLoading(
+    loadingAppointment ||
+      loadingSoap ||
+      loadingTemplates ||
+      loadingDoctors ||
+      loadingVitals,
+  );
 
   const latestVitals = vitals?.[0];
 
@@ -236,7 +257,13 @@ export function SoapNotePage({ appointmentId }: Props) {
     window.open(url, "_blank");
   }
 
-  if (loadingAppointment || loadingSoap) {
+  if (
+    loadingAppointment ||
+    loadingSoap ||
+    loadingTemplates ||
+    loadingDoctors ||
+    loadingVitals
+  ) {
     return (
       <div className={pageContainerClass("narrow")}>
         <Link
@@ -246,7 +273,28 @@ export function SoapNotePage({ appointmentId }: Props) {
           <ChevronLeft className="size-4" />
           Appointments
         </Link>
-        <SoapNoteSkeleton />
+        {showSkeleton ? <SoapNoteSkeleton /> : null}
+      </div>
+    );
+  }
+
+  if (appointmentError || soapError) {
+    return (
+      <div className={pageContainerClass("narrow")}>
+        <ErrorState
+          onRetry={() => {
+            if (appointmentError) void refetchAppointment();
+            if (soapError) void refetchSoap();
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (!appointment) {
+    return (
+      <div className={pageContainerClass("narrow")}>
+        <EmptyState icon={Notebook} heading="Appointment not found" />
       </div>
     );
   }

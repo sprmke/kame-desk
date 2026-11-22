@@ -12,6 +12,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { ActivityTrail } from "@/features/audit-log/components/ActivityTrail";
+import { ActivityTrailSkeleton } from "@/components/skeletons/PageSkeletons";
 import { PatientEligibilityCard } from "@/features/billing/components/PatientEligibilityCard";
 import { PatientMembershipCard } from "@/features/billing/components/PatientMembershipCard";
 import { api } from "@/lib/apiClient";
@@ -25,8 +26,15 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PatientDetailSkeleton } from "@/components/skeletons/PageSkeletons";
+import {
+  PatientOverviewSkeleton,
+  PatientRecordsSkeleton,
+  PatientRowsSkeleton,
+} from "@/components/skeletons/PageSkeletons";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { Input } from "@/components/ui/input";
 import { EmptyState, SectionCard } from "@/components/EmptyState";
+import { ErrorState, InlineError } from "@/components/ErrorState";
 import { Field } from "@/components/forms/Field";
 import { FieldLabel } from "@/components/forms/FieldLabel";
 import { PatientDetailSubNav } from "@/features/patients/components/PatientDetailSubNav";
@@ -65,36 +73,42 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
   const canMerge = can("patients:merge");
   const canReadSoap = can("soap:read");
 
-  const { data: patient, isLoading } = useQuery({
+  const {
+    data: patient,
+    isLoading,
+    isError: patientError,
+    refetch: refetchPatient,
+  } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => api.getPatient(patientId),
   });
+  const showPageSkeleton = useDelayedLoading(isLoading);
 
-  const { data: medical } = useQuery({
+  const { data: medical, isLoading: loadingMedical } = useQuery({
     queryKey: ["medical-info", patientId],
     queryFn: () => api.getMedicalInfo(patientId),
     enabled: Boolean(patient),
   });
 
-  const { data: vitals } = useQuery({
+  const { data: vitals, isLoading: loadingVitals } = useQuery({
     queryKey: ["vitals", patientId],
     queryFn: () => api.listVitals(patientId),
     enabled: Boolean(patient),
   });
 
-  const { data: files } = useQuery({
+  const { data: files, isLoading: loadingFiles } = useQuery({
     queryKey: ["patient-files", patientId],
     queryFn: () => api.listPatientFiles(patientId),
     enabled: Boolean(patient) && section === "records",
   });
 
-  const { data: prescriptions } = useQuery({
+  const { data: prescriptions, isLoading: loadingPrescriptions } = useQuery({
     queryKey: ["prescriptions", patientId],
     queryFn: () => api.listPrescriptions(patientId),
     enabled: Boolean(patient),
   });
 
-  const { data: invoices } = useQuery({
+  const { data: invoices, isLoading: loadingInvoices } = useQuery({
     queryKey: ["invoices", patientId],
     queryFn: () => api.listInvoices(patientId),
     enabled: Boolean(patient),
@@ -106,19 +120,19 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
     enabled: Boolean(patient),
   });
 
-  const { data: documents } = useQuery({
+  const { data: documents, isLoading: loadingDocuments } = useQuery({
     queryKey: ["patient-documents", patientId],
     queryFn: () => api.listPatientDocuments(patientId),
     enabled: Boolean(patient),
   });
 
-  const { data: orders } = useQuery({
+  const { data: orders, isLoading: loadingOrders } = useQuery({
     queryKey: ["clinical-orders", patientId],
     queryFn: () => api.listClinicalOrders(patientId),
     enabled: Boolean(patient) && section === "records",
   });
 
-  const { data: charts } = useQuery({
+  const { data: charts, isLoading: loadingCharts } = useQuery({
     queryKey: ["patient-charts", patientId],
     queryFn: () => api.listPatientCharts(patientId),
     enabled: Boolean(patient) && section === "records" && canReadSoap,
@@ -226,8 +240,31 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
     setMemberId(patient.insurance_info?.member_id ?? "");
   }, [patient]);
 
-  if (isLoading || !patient) {
-    return <PatientDetailSkeleton />;
+  if (isLoading) {
+    return showPageSkeleton ? (
+      <PatientDetailSkeleton section={section} />
+    ) : (
+      <div className="min-h-[60vh]" aria-hidden />
+    );
+  }
+
+  if (patientError || !patient) {
+    return (
+      <div className={pageContainerClass()}>
+        <Link
+          to="/dashboard/patients"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-4" />
+          Patients
+        </Link>
+        {patientError ? (
+          <ErrorState onRetry={() => void refetchPatient()} />
+        ) : (
+          <EmptyState icon={Inbox} heading="Patient not found" />
+        )}
+      </div>
+    );
   }
 
   const hasBalance = balance && Number(balance.outstanding_balance) > 0;
@@ -324,603 +361,634 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
       />
 
       {section === "records" ? (
-        <div className="flex flex-col gap-8">
-          <section>
-            <h2 className="mb-2 text-sm font-semibold text-foreground">
-              Charts
-            </h2>
-            <PatientChartList
-              charts={canReadSoap ? (charts?.items ?? []) : []}
-              canReadSoap={canReadSoap}
-            />
-          </section>
-          <section>
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Labs</h2>
-            <div className="flex flex-col gap-4">
-              <form
-                className="flex flex-col gap-2 sm:flex-row sm:items-end"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!orderName.trim()) return;
-                  createOrder.mutate();
-                }}
-              >
-                <Field className="min-w-0 flex-1">
-                  <FieldLabel htmlFor="order-name" label="Order" />
-                  <Input
-                    id="order-name"
-                    value={orderName}
-                    onChange={(e) => setOrderName(e.target.value)}
-                    placeholder={FORM_PLACEHOLDERS.orderName}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="order-type" label="Type" />
-                  <Select
-                    value={orderType}
-                    onValueChange={(v) => setOrderType(v as "lab" | "imaging")}
-                  >
-                    <SelectTrigger id="order-type" className="w-full sm:w-36">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="lab">Lab</SelectItem>
-                      <SelectItem value="imaging">Imaging</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Button
-                  type="submit"
-                  disabled={createOrder.isPending || !orderName.trim()}
+        loadingOrders || loadingFiles || (canReadSoap && loadingCharts) ? (
+          <PatientRecordsSkeleton />
+        ) : (
+          <div className="flex flex-col gap-8">
+            <section>
+              <h2 className="mb-2 text-sm font-semibold text-foreground">
+                Charts
+              </h2>
+              <PatientChartList
+                charts={canReadSoap ? (charts?.items ?? []) : []}
+                canReadSoap={canReadSoap}
+              />
+            </section>
+            <section>
+              <h2 className="mb-2 text-sm font-semibold text-foreground">
+                Labs
+              </h2>
+              <div className="flex flex-col gap-4">
+                <form
+                  className="flex flex-col gap-2 sm:flex-row sm:items-end"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!orderName.trim()) return;
+                    createOrder.mutate();
+                  }}
                 >
-                  Add
-                </Button>
-              </form>
-              {(orders ?? []).length === 0 ? (
-                <SectionCard>
-                  <EmptyState icon={Inbox} heading="No labs yet" size="sm" />
-                </SectionCard>
-              ) : (
-                <SectionCard>
-                  <ul className="flex flex-col divide-y divide-border text-sm">
-                    {orders?.map((order) => (
-                      <li
-                        key={order.id}
-                        className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div>
-                            <span className="font-medium text-foreground">
-                              {order.name}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {" "}
-                              · {order.order_type}
-                            </span>
+                  <Field className="min-w-0 flex-1">
+                    <FieldLabel htmlFor="order-name" label="Order" />
+                    <Input
+                      id="order-name"
+                      value={orderName}
+                      onChange={(e) => setOrderName(e.target.value)}
+                      placeholder={FORM_PLACEHOLDERS.orderName}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="order-type" label="Type" />
+                    <Select
+                      value={orderType}
+                      onValueChange={(v) =>
+                        setOrderType(v as "lab" | "imaging")
+                      }
+                    >
+                      <SelectTrigger id="order-type" className="w-full sm:w-36">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="lab">Lab</SelectItem>
+                        <SelectItem value="imaging">Imaging</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Button
+                    type="submit"
+                    disabled={createOrder.isPending || !orderName.trim()}
+                  >
+                    Add
+                  </Button>
+                </form>
+                {(orders ?? []).length === 0 ? (
+                  <SectionCard>
+                    <EmptyState icon={Inbox} heading="No labs yet" size="sm" />
+                  </SectionCard>
+                ) : (
+                  <SectionCard>
+                    <ul className="flex flex-col divide-y divide-border text-sm">
+                      {orders?.map((order) => (
+                        <li
+                          key={order.id}
+                          className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <span className="font-medium text-foreground">
+                                {order.name}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {" "}
+                                · {order.order_type}
+                              </span>
+                            </div>
+                            <Select
+                              value={order.status}
+                              onValueChange={(status) =>
+                                patchOrder.mutate({
+                                  orderId: order.id,
+                                  status,
+                                })
+                              }
+                            >
+                              <SelectTrigger
+                                size="sm"
+                                className="w-[140px]"
+                                aria-label={`Status for ${order.name}`}
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ordered">Ordered</SelectItem>
+                                <SelectItem value="in_progress">
+                                  In progress
+                                </SelectItem>
+                                <SelectItem value="resulted">
+                                  Resulted
+                                </SelectItem>
+                                <SelectItem value="cancelled">
+                                  Cancelled
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <Select
-                            value={order.status}
-                            onValueChange={(status) =>
+                          <Input
+                            defaultValue={order.result_summary ?? ""}
+                            placeholder="Result"
+                            aria-label={`Result for ${order.name}`}
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (value === (order.result_summary ?? ""))
+                                return;
                               patchOrder.mutate({
                                 orderId: order.id,
-                                status,
-                              })
-                            }
+                                result_summary: value,
+                              });
+                            }}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </SectionCard>
+                )}
+              </div>
+            </section>
+            <section>
+              <h2 className="mb-2 text-sm font-semibold text-foreground">
+                Files
+              </h2>
+              <SectionCard>
+                {(files ?? []).length === 0 ? (
+                  <EmptyState
+                    icon={FileText}
+                    heading="No files yet"
+                    size="sm"
+                  />
+                ) : (
+                  <ul className="flex flex-col divide-y divide-border text-sm">
+                    {files?.map((f) => (
+                      <li
+                        key={f.id}
+                        className="flex min-h-11 items-center justify-between py-2 first:pt-0 last:pb-0"
+                      >
+                        <span className="text-foreground">{f.file_type}</span>
+                        {f.download_url && (
+                          <a
+                            className="font-medium text-primary hover:underline"
+                            href={f.download_url}
+                            target="_blank"
+                            rel="noreferrer"
                           >
-                            <SelectTrigger
-                              size="sm"
-                              className="w-[140px]"
-                              aria-label={`Status for ${order.name}`}
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ordered">Ordered</SelectItem>
-                              <SelectItem value="in_progress">
-                                In progress
-                              </SelectItem>
-                              <SelectItem value="resulted">Resulted</SelectItem>
-                              <SelectItem value="cancelled">
-                                Cancelled
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Input
-                          defaultValue={order.result_summary ?? ""}
-                          placeholder="Result"
-                          aria-label={`Result for ${order.name}`}
-                          onBlur={(e) => {
-                            const value = e.target.value.trim();
-                            if (value === (order.result_summary ?? "")) return;
-                            patchOrder.mutate({
-                              orderId: order.id,
-                              result_summary: value,
-                            });
-                          }}
-                        />
+                            Open
+                          </a>
+                        )}
                       </li>
                     ))}
                   </ul>
-                </SectionCard>
-              )}
-            </div>
-          </section>
-          <section>
-            <h2 className="mb-2 text-sm font-semibold text-foreground">
-              Files
-            </h2>
-            <SectionCard>
-              {(files ?? []).length === 0 ? (
-                <EmptyState icon={FileText} heading="No files yet" size="sm" />
-              ) : (
-                <ul className="flex flex-col divide-y divide-border text-sm">
-                  {files?.map((f) => (
-                    <li
-                      key={f.id}
-                      className="flex min-h-11 items-center justify-between py-2 first:pt-0 last:pb-0"
-                    >
-                      <span className="text-foreground">{f.file_type}</span>
-                      {f.download_url && (
-                        <a
-                          className="font-medium text-primary hover:underline"
-                          href={f.download_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </SectionCard>
-          </section>
-        </div>
+                )}
+              </SectionCard>
+            </section>
+          </div>
+        )
       ) : null}
 
       {section === "overview" ? (
-        <div className="flex flex-col gap-4">
-          <section className="mb-8">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">
-              Demographics
-            </h2>
-            <div>
-              <form
-                className="grid gap-3 sm:grid-cols-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  saveDemo.mutate();
-                }}
-              >
-                <Field>
-                  <FieldLabel htmlFor="demo-contact" label="Contact" />
-                  <Input
-                    id="demo-contact"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                    placeholder={FORM_PLACEHOLDERS.phone}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="demo-email" label="Email" />
-                  <Input id="demo-email" value={patient.email ?? ""} disabled />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="demo-hmo" label="HMO" />
-                  <Input
-                    id="demo-hmo"
-                    value={hmo}
-                    onChange={(e) => setHmo(e.target.value)}
-                    placeholder={FORM_PLACEHOLDERS.hmo}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="demo-member" label="Member ID" />
-                  <Input
-                    id="demo-member"
-                    value={memberId}
-                    onChange={(e) => setMemberId(e.target.value)}
-                    placeholder={FORM_PLACEHOLDERS.memberId}
-                  />
-                </Field>
-                <label className="col-span-full flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={remindersOptedOut}
-                    onCheckedChange={(v) => setRemindersOptedOut(v === true)}
-                  />
-                  Opt out of reminders
-                </label>
-                <Button
-                  type="submit"
-                  variant="outline"
-                  size="sm"
-                  className="w-fit"
-                  disabled={saveDemo.isPending}
-                >
-                  {saveDemo.isPending ? "Saving…" : "Save"}
-                </Button>
-              </form>
-            </div>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">
-              Medical info
-            </h2>
-            <div>
-              <form
-                className="flex flex-col gap-3"
-                onSubmit={medForm.handleSubmit((v) => saveMedical.mutate(v))}
-              >
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <Checkbox
-                    checked={medForm.watch("allergies_reviewed")}
-                    onCheckedChange={(checked) =>
-                      medForm.setValue("allergies_reviewed", checked === true)
-                    }
-                  />
-                  Allergies reviewed
-                </label>
-                <div className="flex flex-col gap-1.5">
-                  <FieldLabel label="Allergies" />
-                  <div className="flex flex-wrap gap-1">
-                    {medForm.watch("allergies").map((a, i) => (
-                      <Button
-                        key={`${a.substance}-${i}`}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          medForm.setValue(
-                            "allergies",
-                            medForm
-                              .getValues("allergies")
-                              .filter((_, idx) => idx !== i),
-                          )
-                        }
-                      >
-                        {a.substance}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={allergy}
-                      onChange={(e) => setAllergy(e.target.value)}
-                      placeholder="Substance"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!allergy.trim()) return;
-                        medForm.setValue("allergies", [
-                          ...medForm.getValues("allergies"),
-                          { substance: allergy.trim() },
-                        ]);
-                        setAllergy("");
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <FieldLabel label="Medications" />
-                  <div className="flex flex-wrap gap-1">
-                    {medForm.watch("current_medications").map((m, i) => (
-                      <Button
-                        key={`${m.name}-${i}`}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          medForm.setValue(
-                            "current_medications",
-                            medForm
-                              .getValues("current_medications")
-                              .filter((_, idx) => idx !== i),
-                          )
-                        }
-                      >
-                        {m.name}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={medication}
-                      onChange={(e) => setMedication(e.target.value)}
-                      placeholder={FORM_PLACEHOLDERS.drugName}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!medication.trim()) return;
-                        medForm.setValue("current_medications", [
-                          ...medForm.getValues("current_medications"),
-                          { name: medication.trim() },
-                        ]);
-                        setMedication("");
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <FieldLabel label="Conditions" />
-                  <div className="flex flex-wrap gap-1">
-                    {medForm.watch("chronic_conditions").map((c) => (
-                      <Button
-                        key={c}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          medForm.setValue(
-                            "chronic_conditions",
-                            medForm
-                              .getValues("chronic_conditions")
-                              .filter((x) => x !== c),
-                          )
-                        }
-                      >
-                        {c}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={condition}
-                      onChange={(e) => setCondition(e.target.value)}
-                      placeholder={FORM_PLACEHOLDERS.condition}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!condition.trim()) return;
-                        medForm.setValue("chronic_conditions", [
-                          ...medForm.getValues("chronic_conditions"),
-                          condition.trim(),
-                        ]);
-                        setCondition("");
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <FieldLabel label="Vaccines" />
-                  <div className="flex flex-wrap gap-1">
-                    {medForm.watch("vaccination_history").map((v) => (
-                      <Button
-                        key={v}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          medForm.setValue(
-                            "vaccination_history",
-                            medForm
-                              .getValues("vaccination_history")
-                              .filter((x) => x !== v),
-                          )
-                        }
-                      >
-                        {v}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={vaccine}
-                      onChange={(e) => setVaccine(e.target.value)}
-                      placeholder={FORM_PLACEHOLDERS.vaccine}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!vaccine.trim()) return;
-                        medForm.setValue("vaccination_history", [
-                          ...medForm.getValues("vaccination_history"),
-                          vaccine.trim(),
-                        ]);
-                        setVaccine("");
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  variant="outline"
-                  size="sm"
-                  className="w-fit"
-                  disabled={saveMedical.isPending}
-                >
-                  {saveMedical.isPending ? "Saving…" : "Save medical info"}
-                </Button>
-              </form>
-            </div>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">
-              Vitals
-            </h2>
-            <SectionCard>
-              {(vitals ?? []).length === 0 ? (
-                <EmptyState
-                  icon={HeartPulse}
-                  heading="No vitals recorded"
-                  size="sm"
-                />
-              ) : (
-                <ul className="flex flex-col divide-y divide-border text-sm">
-                  {vitals?.map((v) => (
-                    <li key={v.id} className="py-2 first:pt-0 last:pb-0">
-                      {new Date(v.recorded_at).toLocaleString("en-PH", {
-                        timeZone: "Asia/Manila",
-                      })}
-                      {v.blood_pressure ? ` · BP ${v.blood_pressure}` : ""}
-                      {v.weight_kg ? ` · ${v.weight_kg} kg` : ""}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </SectionCard>
-          </section>
-
-          {canMerge && (
+        loadingMedical || loadingVitals ? (
+          <PatientOverviewSkeleton />
+        ) : (
+          <div className="flex flex-col gap-4">
             <section className="mb-8">
               <h2 className="mb-2 text-sm font-semibold text-foreground">
-                Merge duplicate
+                Demographics
               </h2>
-              <div className="flex flex-col gap-3">
-                <Field>
-                  <FieldLabel
-                    htmlFor="merge-source"
-                    label="Source patient ID"
-                  />
-                  <Input
-                    id="merge-source"
-                    value={mergeSource}
-                    onChange={(e) => setMergeSource(e.target.value)}
-                    placeholder={FORM_PLACEHOLDERS.mergePatientId}
-                  />
-                </Field>
-                {merge.isError && (
-                  <p className="text-sm text-destructive">
-                    {merge.error.message}
-                  </p>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-fit"
-                  disabled={!mergeSource || merge.isPending}
-                  onClick={() => merge.mutate()}
+              <div>
+                <form
+                  className="grid gap-3 sm:grid-cols-2"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    saveDemo.mutate();
+                  }}
                 >
-                  {merge.isPending ? "Merging…" : "Merge into this chart"}
-                </Button>
+                  <Field>
+                    <FieldLabel htmlFor="demo-contact" label="Contact" />
+                    <Input
+                      id="demo-contact"
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                      placeholder={FORM_PLACEHOLDERS.phone}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="demo-email" label="Email" />
+                    <Input
+                      id="demo-email"
+                      value={patient.email ?? ""}
+                      disabled
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="demo-hmo" label="HMO" />
+                    <Input
+                      id="demo-hmo"
+                      value={hmo}
+                      onChange={(e) => setHmo(e.target.value)}
+                      placeholder={FORM_PLACEHOLDERS.hmo}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="demo-member" label="Member ID" />
+                    <Input
+                      id="demo-member"
+                      value={memberId}
+                      onChange={(e) => setMemberId(e.target.value)}
+                      placeholder={FORM_PLACEHOLDERS.memberId}
+                    />
+                  </Field>
+                  <label className="col-span-full flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={remindersOptedOut}
+                      onCheckedChange={(v) => setRemindersOptedOut(v === true)}
+                    />
+                    Opt out of reminders
+                  </label>
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    disabled={saveDemo.isPending}
+                  >
+                    {saveDemo.isPending ? "Saving…" : "Save"}
+                  </Button>
+                </form>
               </div>
             </section>
-          )}
-        </div>
+
+            <section className="mb-8">
+              <h2 className="mb-2 text-sm font-semibold text-foreground">
+                Medical info
+              </h2>
+              <div>
+                <form
+                  className="flex flex-col gap-3"
+                  onSubmit={medForm.handleSubmit((v) => saveMedical.mutate(v))}
+                >
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <Checkbox
+                      checked={medForm.watch("allergies_reviewed")}
+                      onCheckedChange={(checked) =>
+                        medForm.setValue("allergies_reviewed", checked === true)
+                      }
+                    />
+                    Allergies reviewed
+                  </label>
+                  <div className="flex flex-col gap-1.5">
+                    <FieldLabel label="Allergies" />
+                    <div className="flex flex-wrap gap-1">
+                      {medForm.watch("allergies").map((a, i) => (
+                        <Button
+                          key={`${a.substance}-${i}`}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            medForm.setValue(
+                              "allergies",
+                              medForm
+                                .getValues("allergies")
+                                .filter((_, idx) => idx !== i),
+                            )
+                          }
+                        >
+                          {a.substance}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={allergy}
+                        onChange={(e) => setAllergy(e.target.value)}
+                        placeholder="Substance"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (!allergy.trim()) return;
+                          medForm.setValue("allergies", [
+                            ...medForm.getValues("allergies"),
+                            { substance: allergy.trim() },
+                          ]);
+                          setAllergy("");
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <FieldLabel label="Medications" />
+                    <div className="flex flex-wrap gap-1">
+                      {medForm.watch("current_medications").map((m, i) => (
+                        <Button
+                          key={`${m.name}-${i}`}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            medForm.setValue(
+                              "current_medications",
+                              medForm
+                                .getValues("current_medications")
+                                .filter((_, idx) => idx !== i),
+                            )
+                          }
+                        >
+                          {m.name}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={medication}
+                        onChange={(e) => setMedication(e.target.value)}
+                        placeholder={FORM_PLACEHOLDERS.drugName}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (!medication.trim()) return;
+                          medForm.setValue("current_medications", [
+                            ...medForm.getValues("current_medications"),
+                            { name: medication.trim() },
+                          ]);
+                          setMedication("");
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <FieldLabel label="Conditions" />
+                    <div className="flex flex-wrap gap-1">
+                      {medForm.watch("chronic_conditions").map((c) => (
+                        <Button
+                          key={c}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            medForm.setValue(
+                              "chronic_conditions",
+                              medForm
+                                .getValues("chronic_conditions")
+                                .filter((x) => x !== c),
+                            )
+                          }
+                        >
+                          {c}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={condition}
+                        onChange={(e) => setCondition(e.target.value)}
+                        placeholder={FORM_PLACEHOLDERS.condition}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (!condition.trim()) return;
+                          medForm.setValue("chronic_conditions", [
+                            ...medForm.getValues("chronic_conditions"),
+                            condition.trim(),
+                          ]);
+                          setCondition("");
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <FieldLabel label="Vaccines" />
+                    <div className="flex flex-wrap gap-1">
+                      {medForm.watch("vaccination_history").map((v) => (
+                        <Button
+                          key={v}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            medForm.setValue(
+                              "vaccination_history",
+                              medForm
+                                .getValues("vaccination_history")
+                                .filter((x) => x !== v),
+                            )
+                          }
+                        >
+                          {v}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={vaccine}
+                        onChange={(e) => setVaccine(e.target.value)}
+                        placeholder={FORM_PLACEHOLDERS.vaccine}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (!vaccine.trim()) return;
+                          medForm.setValue("vaccination_history", [
+                            ...medForm.getValues("vaccination_history"),
+                            vaccine.trim(),
+                          ]);
+                          setVaccine("");
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    disabled={saveMedical.isPending}
+                  >
+                    {saveMedical.isPending ? "Saving…" : "Save medical info"}
+                  </Button>
+                </form>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="mb-2 text-sm font-semibold text-foreground">
+                Vitals
+              </h2>
+              <SectionCard>
+                {(vitals ?? []).length === 0 ? (
+                  <EmptyState
+                    icon={HeartPulse}
+                    heading="No vitals recorded"
+                    size="sm"
+                  />
+                ) : (
+                  <ul className="flex flex-col divide-y divide-border text-sm">
+                    {vitals?.map((v) => (
+                      <li key={v.id} className="py-2 first:pt-0 last:pb-0">
+                        {new Date(v.recorded_at).toLocaleString("en-PH", {
+                          timeZone: "Asia/Manila",
+                        })}
+                        {v.blood_pressure ? ` · BP ${v.blood_pressure}` : ""}
+                        {v.weight_kg ? ` · ${v.weight_kg} kg` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </SectionCard>
+            </section>
+
+            {canMerge && (
+              <section className="mb-8">
+                <h2 className="mb-2 text-sm font-semibold text-foreground">
+                  Merge duplicate
+                </h2>
+                <div className="flex flex-col gap-3">
+                  <Field>
+                    <FieldLabel
+                      htmlFor="merge-source"
+                      label="Source patient ID"
+                    />
+                    <Input
+                      id="merge-source"
+                      value={mergeSource}
+                      onChange={(e) => setMergeSource(e.target.value)}
+                      placeholder={FORM_PLACEHOLDERS.mergePatientId}
+                    />
+                  </Field>
+                  {merge.isError && (
+                    <p className="text-sm text-destructive">
+                      {merge.error.message}
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    disabled={!mergeSource || merge.isPending}
+                    onClick={() => merge.mutate()}
+                  >
+                    {merge.isPending ? "Merging…" : "Merge into this chart"}
+                  </Button>
+                </div>
+              </section>
+            )}
+          </div>
+        )
       ) : null}
 
       {section === "timeline" ? (
-        <SectionCard>
-          {timeline.length === 0 ? (
-            <EmptyState icon={History} heading="No events yet" size="sm" />
-          ) : (
-            <ul className="flex flex-col divide-y divide-border text-sm">
-              {timeline.map((event) => (
-                <li
-                  key={event.id}
-                  className="flex flex-wrap justify-between gap-2 py-2 first:pt-0 last:pb-0"
-                >
-                  <span className="text-foreground">{event.label}</span>
-                  <span className="text-muted-foreground">
-                    {new Date(event.at).toLocaleString("en-PH", {
-                      timeZone: "Asia/Manila",
-                    })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
-      ) : null}
-
-      {section === "prescriptions" ? (
-        <section className="mb-8">
-          <h2 className="mb-2 text-sm font-semibold text-foreground">
-            Prescriptions
-          </h2>
+        loadingPrescriptions || loadingInvoices || loadingDocuments ? (
+          <PatientRowsSkeleton count={4} />
+        ) : (
           <SectionCard>
-            {(prescriptions?.items ?? []).length === 0 ? (
-              <EmptyState
-                icon={Pill}
-                heading="No prescriptions yet"
-                size="sm"
-                action={
-                  <Button asChild size="sm">
-                    <Link
-                      to="/dashboard/patients/$patientId/prescriptions/new"
-                      params={{ patientId }}
-                    >
-                      New Rx
-                    </Link>
-                  </Button>
-                }
-              />
+            {timeline.length === 0 ? (
+              <EmptyState icon={History} heading="No events yet" size="sm" />
             ) : (
               <ul className="flex flex-col divide-y divide-border text-sm">
-                {prescriptions?.items.map((rx) => (
+                {timeline.map((event) => (
                   <li
-                    key={rx.id}
-                    className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
+                    key={event.id}
+                    className="flex flex-wrap justify-between gap-2 py-2 first:pt-0 last:pb-0"
                   >
-                    <div>
-                      <span className="font-medium text-foreground capitalize">
-                        {rx.status}
-                      </span>
-                      {rx.doctor_name ? ` · ${rx.doctor_name}` : ""}
-                      <div className="text-muted-foreground">
-                        {rx.items.map((i) => i.drug_name).join(", ")}
-                      </div>
-                      {rx.override_reason && (
-                        <div className="text-xs text-warning">
-                          Override: {rx.override_reason}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-3">
-                      {rx.pdf_download_url && (
-                        <a
-                          className="text-sm font-medium text-primary hover:underline"
-                          href={rx.pdf_download_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          PDF
-                        </a>
-                      )}
-                      <Link
-                        to="/dashboard/patients/$patientId/prescriptions/new"
-                        params={{ patientId }}
-                        search={{
-                          template: JSON.stringify(
-                            rx.items.map((i) => ({
-                              drug_name: i.drug_name,
-                              dosage: i.dosage,
-                              frequency: i.frequency,
-                              duration: i.duration,
-                              quantity: i.quantity,
-                            })),
-                          ),
-                        }}
-                        className="text-sm font-medium text-primary hover:underline"
-                      >
-                        Use as template
-                      </Link>
-                    </div>
+                    <span className="text-foreground">{event.label}</span>
+                    <span className="text-muted-foreground">
+                      {new Date(event.at).toLocaleString("en-PH", {
+                        timeZone: "Asia/Manila",
+                      })}
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
           </SectionCard>
-        </section>
+        )
+      ) : null}
+
+      {section === "prescriptions" ? (
+        loadingPrescriptions ? (
+          <PatientRowsSkeleton count={3} columns={3} tall />
+        ) : (
+          <section className="mb-8">
+            <h2 className="mb-2 text-sm font-semibold text-foreground">
+              Prescriptions
+            </h2>
+            <SectionCard>
+              {(prescriptions?.items ?? []).length === 0 ? (
+                <EmptyState
+                  icon={Pill}
+                  heading="No prescriptions yet"
+                  size="sm"
+                  action={
+                    <Button asChild size="sm">
+                      <Link
+                        to="/dashboard/patients/$patientId/prescriptions/new"
+                        params={{ patientId }}
+                      >
+                        New Rx
+                      </Link>
+                    </Button>
+                  }
+                />
+              ) : (
+                <ul className="flex flex-col divide-y divide-border text-sm">
+                  {prescriptions?.items.map((rx) => (
+                    <li
+                      key={rx.id}
+                      className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
+                    >
+                      <div>
+                        <span className="font-medium text-foreground capitalize">
+                          {rx.status}
+                        </span>
+                        {rx.doctor_name ? ` · ${rx.doctor_name}` : ""}
+                        <div className="text-muted-foreground">
+                          {rx.items.map((i) => i.drug_name).join(", ")}
+                        </div>
+                        {rx.override_reason && (
+                          <div className="text-xs text-warning">
+                            Override: {rx.override_reason}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-3">
+                        {rx.pdf_download_url && (
+                          <a
+                            className="text-sm font-medium text-primary hover:underline"
+                            href={rx.pdf_download_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            PDF
+                          </a>
+                        )}
+                        <Link
+                          to="/dashboard/patients/$patientId/prescriptions/new"
+                          params={{ patientId }}
+                          search={{
+                            template: JSON.stringify(
+                              rx.items.map((i) => ({
+                                drug_name: i.drug_name,
+                                dosage: i.dosage,
+                                frequency: i.frequency,
+                                duration: i.duration,
+                                quantity: i.quantity,
+                              })),
+                            ),
+                          }}
+                          className="text-sm font-medium text-primary hover:underline"
+                        >
+                          Use as template
+                        </Link>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </SectionCard>
+          </section>
+        )
       ) : null}
 
       {section === "billing" ? (
@@ -932,7 +1000,9 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
               Invoices
             </h2>
             <SectionCard>
-              {(invoices?.items ?? []).length === 0 ? (
+              {loadingInvoices ? (
+                <ActivityTrailSkeleton count={2} />
+              ) : (invoices?.items ?? []).length === 0 ? (
                 <EmptyState
                   icon={Receipt}
                   heading="No invoices yet"
@@ -988,7 +1058,9 @@ export function PatientDetailPage({ patientId, section = "overview" }: Props) {
             Certificates
           </h2>
           <SectionCard>
-            {certificateDocs.length === 0 ? (
+            {loadingDocuments ? (
+              <ActivityTrailSkeleton count={2} />
+            ) : certificateDocs.length === 0 ? (
               <EmptyState
                 icon={FileText}
                 heading="No certificates yet"

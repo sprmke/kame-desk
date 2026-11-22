@@ -6,6 +6,8 @@ import { DAYS, defaultHours } from "@/features/onboarding/lib/schemas";
 import { FORM_PLACEHOLDERS } from "@/lib/formPlaceholders";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ClinicSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
+import { ErrorState } from "@/components/ErrorState";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,10 +52,16 @@ export function ClinicSettingsPage({
 }) {
   const clinicId = getClinicId()!;
   const qc = useQueryClient();
-  const { data: clinic, isLoading } = useQuery({
+  const {
+    data: clinic,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["clinic", clinicId],
     queryFn: () => api.getClinic(clinicId),
   });
+  const showSkeleton = useDelayedLoading(isLoading);
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -154,7 +162,16 @@ export function ClinicSettingsPage({
     return (
       <div className="w-full">
         <PageHeader title={VIEW_TITLE[view]} />
-        <ClinicSettingsSkeleton />
+        {showSkeleton ? <ClinicSettingsSkeleton view={view} /> : null}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full">
+        <PageHeader title={VIEW_TITLE[view]} />
+        <ErrorState onRetry={() => void refetch()} />
       </div>
     );
   }

@@ -14,12 +14,21 @@ import {
 } from "../lib/dashboardLayout";
 import { DashboardCardHeader } from "./DashboardCardHeader";
 
-function RowSkeleton() {
+function RowSkeleton({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="flex flex-col gap-2 p-1">
-      <Skeleton className="h-9 w-full" />
-      <Skeleton className="h-9 w-full" />
-      <Skeleton className="h-9 w-full" />
+    <div className="flex flex-col gap-0.5 p-1">
+      {Array.from({ length: rows }).map((_, index) => (
+        <div
+          key={index}
+          className="flex min-h-11 items-center justify-between gap-2 px-1 py-2"
+        >
+          <div className="min-w-0 flex-1">
+            <Skeleton className="h-4 w-36 max-w-full" />
+            <Skeleton className="mt-1 h-3 w-24 max-w-full" />
+          </div>
+          <Skeleton className="h-4 w-16 shrink-0" />
+        </div>
+      ))}
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { DocumentFileDropzone } from "@/components/ui/file-dropzone";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   patientId: string;
@@ -54,7 +55,7 @@ export function InvoiceNewPage({ patientId, appointmentId }: Props) {
     queryFn: () => api.getPatient(patientId),
   });
 
-  const { data: fees } = useQuery({
+  const { data: fees, isLoading: loadingFees } = useQuery({
     queryKey: ["service-fees", clinicId],
     queryFn: () => api.listServiceFees(clinicId!),
     enabled: Boolean(clinicId),
@@ -226,7 +227,13 @@ export function InvoiceNewPage({ patientId, appointmentId }: Props) {
         </CardContent>
       </Card>
 
-      {(fees ?? []).length > 0 && (
+      {loadingFees ? (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="h-8 w-28 rounded-md" />
+          ))}
+        </div>
+      ) : (fees ?? []).length > 0 ? (
         <div className="mb-4 flex flex-wrap gap-2">
           {fees?.map((f) => (
             <Button
@@ -240,7 +247,7 @@ export function InvoiceNewPage({ patientId, appointmentId }: Props) {
             </Button>
           ))}
         </div>
-      )}
+      ) : null}
 
       <Card>
         <CardContent className="flex flex-col gap-3 pt-5">

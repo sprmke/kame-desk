@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PatientEligibilityCard } from "@/features/billing/components/PatientEligibilityCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useOnlineStatus } from "@/lib/onlineStatus";
 
 type Props = { prefillPatientId?: string };
@@ -68,7 +69,7 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
     },
   });
 
-  const { data: patients } = useQuery({
+  const { data: patients, isLoading: loadingPatients } = useQuery({
     queryKey: ["patients", "all"],
     queryFn: () => api.listPatients({ page_size: 100 }),
   });
@@ -217,21 +218,27 @@ export function AppointmentNewPage({ prefillPatientId }: Props) {
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="patient_id" label="Patient" required />
-                <Select
-                  value={form.watch("patient_id")}
-                  onValueChange={(value) => form.setValue("patient_id", value)}
-                >
-                  <SelectTrigger id="patient_id" className="w-full">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {patients?.items.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.full_name} (#{p.patient_number})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {loadingPatients ? (
+                  <Skeleton className="h-10 w-full rounded-md" />
+                ) : (
+                  <Select
+                    value={form.watch("patient_id")}
+                    onValueChange={(value) =>
+                      form.setValue("patient_id", value)
+                    }
+                  >
+                    <SelectTrigger id="patient_id" className="w-full">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {patients?.items.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.full_name} (#{p.patient_number})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <FieldError>
                   {form.formState.errors.patient_id?.message}
                 </FieldError>

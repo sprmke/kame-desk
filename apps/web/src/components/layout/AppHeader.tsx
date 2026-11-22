@@ -12,6 +12,7 @@ import { api } from "@/lib/apiClient";
 import { clearAuth, getRefreshToken } from "@/lib/auth";
 import { ROLE_LABELS } from "@/lib/rbac";
 import { useSession } from "@/hooks/useSession";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -49,7 +50,8 @@ function initials(name: string) {
 export function AppHeader({ onOpenSearch }: { onOpenSearch: () => void }) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { user, role, clinicName, isPlatformAdmin, canAny } = useSession();
+  const { user, role, clinicName, isPlatformAdmin, isLoading, canAny } =
+    useSession();
   const hasSettings = canAny([
     "settings:account",
     "settings:doctor",
@@ -99,7 +101,11 @@ export function AppHeader({ onOpenSearch }: { onOpenSearch: () => void }) {
             >
               <Avatar>
                 <AvatarFallback>
-                  {initials(user?.full_name ?? "?")}
+                  {isLoading ? (
+                    <Skeleton className="size-9 rounded-full" />
+                  ) : (
+                    initials(user?.full_name ?? "?")
+                  )}
                 </AvatarFallback>
               </Avatar>
             </button>

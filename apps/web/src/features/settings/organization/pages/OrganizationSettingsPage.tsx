@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Building2 } from "lucide-react";
 import { api } from "@/lib/apiClient";
 import { useSession } from "@/hooks/useSession";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -8,17 +9,19 @@ import {
   SettingsRow,
   SettingsSection,
 } from "@/components/settings/SettingsSection";
+import { PlanSettingsSkeleton } from "@/components/skeletons/PageSkeletons";
+import { EmptyState } from "@/components/EmptyState";
 
 export function OrganizationSettingsPage() {
   const { clinicId, user } = useSession();
-  const { data: clinic } = useQuery({
+  const { data: clinic, isLoading: loadingClinic } = useQuery({
     queryKey: ["clinic", clinicId],
     queryFn: () => api.getClinic(clinicId!),
     enabled: Boolean(clinicId),
   });
 
   const orgId = clinic?.organization_id;
-  const { data: org } = useQuery({
+  const { data: org, isLoading: loadingOrg } = useQuery({
     queryKey: ["organization", orgId],
     queryFn: () => api.getOrganization(orgId!),
     enabled: Boolean(orgId),
@@ -26,8 +29,22 @@ export function OrganizationSettingsPage() {
 
   const ownedOrg = user?.organizations?.find((o) => o.is_owner);
 
+  if (loadingClinic || loadingOrg) {
+    return (
+      <div>
+        <PageHeader title="Organization" />
+        <PlanSettingsSkeleton />
+      </div>
+    );
+  }
+
   if (!ownedOrg && !org) {
-    return null;
+    return (
+      <div>
+        <PageHeader title="Organization" />
+        <EmptyState icon={Building2} heading="No organization" size="sm" />
+      </div>
+    );
   }
 
   const displayOrg =
